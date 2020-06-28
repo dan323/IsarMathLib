@@ -85,28 +85,28 @@ proof-
         fix H
         assume HNeig:"H\<in>\<N>\<^sub>0"
         with t have "y\<in>x\<ltr>H" by auto
-        then obtain n where "y=x\<ra>n" and "n\<in>H" unfolding ltrans_def grop_def LeftTranslation_def by auto
+        then obtain n where "y=x\<ra>n" and "n\<in>H" unfolding ltrans_def LeftTranslation_def by auto
         with HNeig have nG:"n\<in>G" unfolding zerohoods_def by auto
-        from \<open>y=x\<ra>n\<close> and \<open>n\<in>H\<close> have "(\<rm>x)\<ra>y\<in>H" using group0.group0_2_L18(2) group0_valid_in_tgroup xG nG yG unfolding grinv_def grop_def
+        from \<open>y=x\<ra>n\<close> and \<open>n\<in>H\<close> have "(\<rm>x)\<ra>y\<in>H" using group0_2_L18(2) xG nG yG
           by auto
       }
       then have el:"(\<rm>x)\<ra>y\<in>(\<Inter>\<N>\<^sub>0)" using zneigh_not_empty by auto
-      have "cl({\<zero>})=(\<Inter>H\<in>\<N>\<^sub>0. \<zero>\<ltr>H)" using cl_point zero_in_tgroup by auto
+      have "cl({\<zero>})=(\<Inter>H\<in>\<N>\<^sub>0. \<zero>\<ltr>H)" using cl_point group0_2_L2 by auto
       moreover
       {
         fix H  assume "H\<in>\<N>\<^sub>0"
         then have "H\<subseteq>G" unfolding zerohoods_def by auto
-        then have "\<zero>\<ltr>H=H" using image_id_same  group0.trans_neutral(2) group0_valid_in_tgroup unfolding gzero_def ltrans_def
+        then have "\<zero>\<ltr>H=H" using image_id_same trans_neutral(2)
           by auto
         with \<open>H\<in>\<N>\<^sub>0\<close> have "\<zero>\<ltr>H\<in>\<N>\<^sub>0" "H\<in>{\<zero>\<ltr>H. H\<in>\<N>\<^sub>0}" by auto
       }
       then have "{\<zero>\<ltr>H. H\<in>\<N>\<^sub>0}=\<N>\<^sub>0" by blast
       ultimately have "cl({\<zero>})=(\<Inter>\<N>\<^sub>0)" by auto
       with el have "(\<rm>x)\<ra>y\<in>cl({\<zero>})" by auto
-      then have "(\<rm>x)\<ra>y\<in>{\<zero>}" using assms Top_3_L8 G_def zero_in_tgroup by auto
+      then have "(\<rm>x)\<ra>y\<in>{\<zero>}" using assms Top_3_L8 G_def group0_2_L2 by auto
       then have "(\<rm>x)\<ra>y=\<zero>" by auto
-      then have "y=\<rm>(\<rm>x)" using group0.group0_2_L9(2) group0_valid_in_tgroup neg_in_tgroup xG yG unfolding grop_def grinv_def by auto
-      then have "y=x" using group0.group_inv_of_inv group0_valid_in_tgroup xG unfolding grinv_def by auto
+      then have "y=\<rm>(\<rm>x)" using group0_2_L9(2) inverse_in_group xG yG by auto
+      then have "y=x" using group_inv_of_inv xG by auto
     }
     then have "cl({x})\<subseteq>{x}" by auto
     then have "cl({x})={x}" using xG cl_contains_set G_def by blast
@@ -124,30 +124,30 @@ theorem (in topgroup) T0_imp_neu_closed:
 proof-
   {
     fix x assume "x\<in>cl({\<zero>})" and "x\<noteq>\<zero>"
-    have "cl({\<zero>})=(\<Inter>H\<in>\<N>\<^sub>0. \<zero>\<ltr>H)" using cl_point zero_in_tgroup by auto
+    have "cl({\<zero>})=(\<Inter>H\<in>\<N>\<^sub>0. \<zero>\<ltr>H)" using cl_point group0_2_L2 by auto
     moreover
     {
       fix H  assume "H\<in>\<N>\<^sub>0"
       then have "H\<subseteq>G" unfolding zerohoods_def by auto
-      then have "\<zero>\<ltr>H=H" using image_id_same  group0.trans_neutral(2) group0_valid_in_tgroup unfolding gzero_def ltrans_def
+      then have "\<zero>\<ltr>H=H" using image_id_same trans_neutral(2)
         by auto
       with \<open>H\<in>\<N>\<^sub>0\<close> have "\<zero>\<ltr>H\<in>\<N>\<^sub>0" "H\<in>{\<zero>\<ltr>H. H\<in>\<N>\<^sub>0}" by auto
     }
     then have "{\<zero>\<ltr>H. H\<in>\<N>\<^sub>0}=\<N>\<^sub>0" by blast
     ultimately have "cl({\<zero>})=(\<Inter>\<N>\<^sub>0)" by auto
     from \<open>x\<noteq>\<zero>\<close> and \<open>x\<in>cl({\<zero>})\<close> obtain U where "U\<in>T" and "(x\<notin>U\<and>\<zero>\<in>U)\<or>(\<zero>\<notin>U\<and>x\<in>U)" using assms Top_3_L11(1)
-      zero_in_tgroup unfolding isT0_def G_def by blast moreover
+      group0_2_L2 unfolding isT0_def G_def by blast moreover
     {
       assume "\<zero>\<in>U"
       with \<open>U\<in>T\<close> have "U\<in>\<N>\<^sub>0" using zerohoods_def G_def Top_2_L3 by auto
       with \<open>x\<in>cl({\<zero>})\<close> and \<open>cl({\<zero>})=(\<Inter>\<N>\<^sub>0)\<close> have "x\<in>U" by auto
     }
     ultimately have "\<zero>\<notin>U" and "x\<in>U" by auto
-    with \<open>U\<in>T\<close> \<open>x\<in>cl({\<zero>})\<close> have "False" using cl_inter_neigh zero_in_tgroup unfolding G_def by blast
+    with \<open>U\<in>T\<close> \<open>x\<in>cl({\<zero>})\<close> have "False" using cl_inter_neigh group0_2_L2 unfolding G_def by blast
   }
   then have "cl({\<zero>})\<subseteq>{\<zero>}" by auto
-  then have "cl({\<zero>})={\<zero>}" using zero_in_tgroup cl_contains_set G_def by blast
-  then show ?thesis using Top_3_L8 zero_in_tgroup unfolding G_def by auto
+  then have "cl({\<zero>})={\<zero>}" using group0_2_L2 cl_contains_set unfolding G_def by blast
+  then show ?thesis using Top_3_L8 group0_2_L2 unfolding G_def by auto
 qed
 
 subsection\<open>Existence of nice neighbourhoods.\<close>
@@ -160,10 +160,10 @@ proof
   have "U\<subseteq>G" using assms unfolding zerohoods_def by auto
   then have "?V\<subseteq>G" by auto
   have invg:" GroupInv(G, f) \<in> G \<rightarrow> G" using group0_2_T2 Ggroup by auto
-  have invb:"GroupInv(G, f) \<in>bij(G,G)" using group0.group_inv_bij(2) group0_valid_in_tgroup by auto
-  have "(\<sm>?V)=GroupInv(G,f)-``?V" unfolding setninv_def using group0.inv_image_vimage group0_valid_in_tgroup by auto
+  have invb:"GroupInv(G, f) \<in>bij(G,G)" using group_inv_bij(2) by auto
+  have "(\<sm>?V)=GroupInv(G,f)-``?V" unfolding setninv_def using inv_image_vimage by auto
   also have "\<dots>=(GroupInv(G,f)-``U)\<inter>(GroupInv(G,f)-``(\<sm>U))" using invim_inter_inter_invim invg by auto
-  also have "\<dots>=(\<sm>U)\<inter>(GroupInv(G,f)-``(GroupInv(G,f)``U))" unfolding setninv_def using group0.inv_image_vimage group0_valid_in_tgroup by auto
+  also have "\<dots>=(\<sm>U)\<inter>(GroupInv(G,f)-``(GroupInv(G,f)``U))" unfolding setninv_def using inv_image_vimage by auto
   also with \<open>U\<subseteq>G\<close> have "\<dots>=(\<sm>U)\<inter>U" using inj_vimage_image invb unfolding bij_def
     by auto
   finally have "(\<sm>?V)=?V" by auto
@@ -186,27 +186,26 @@ proof-
   have "int(U)\<in>T" using Top_2_L2 by auto
   then have "f-``(int(U))\<in>\<tau>" using fcon IsContinuous_def by auto
   moreover 
-  have fne:"f ` \<langle>\<zero>, \<zero>\<rangle> = \<zero>" using group0.group0_2_L2 group0_valid_in_tgroup by auto
+  have fne:"f ` \<langle>\<zero>, \<zero>\<rangle> = \<zero>" using group0_2_L2 by auto
   have "\<zero>\<in>int(U)" using assms unfolding zerohoods_def by auto
   then have "f -`` {\<zero>}\<subseteq>f-``(int(U))" using func1_1_L8 vimage_def by auto
-  then have "GroupInv(G,f)\<subseteq>f-``(int(U))" using group0.group0_2_T3 group0_valid_in_tgroup by auto
-  then have "\<langle>\<zero>,\<zero>\<rangle>\<in>f-``(int(U))" using fne zero_in_tgroup unfolding GroupInv_def
+  then have "GroupInv(G,f)\<subseteq>f-``(int(U))" using group0_2_T3 by auto
+  then have "\<langle>\<zero>,\<zero>\<rangle>\<in>f-``(int(U))" using fne group0_2_L2 unfolding GroupInv_def
     by auto
   ultimately obtain W V where wop:"W\<in>T" and vop:"V\<in>T" and cartsub:"W\<times>V\<subseteq>f-``(int(U))" and zerhood:"\<langle>\<zero>,\<zero>\<rangle>\<in>W\<times>V" using prod_top_point_neighb topSpaceAssum
     unfolding prodtop_def by force
   then have "\<zero>\<in>W" and "\<zero>\<in>V" by auto
   then have "\<zero>\<in>W\<inter>V" by auto
   have sub:"W\<inter>V\<subseteq>G" using wop vop G_def by auto
-  have assoc:"f\<in>G\<times>G\<rightarrow>G" using group0.group_oper_assocA group0_valid_in_tgroup by auto
   {
     fix t s assume "t\<in>W\<inter>V" and "s\<in>W\<inter>V"
     then have "t\<in>W" and "s\<in>V" by auto
     then have "\<langle>t,s\<rangle>\<in>W\<times>V" by auto
     then have "\<langle>t,s\<rangle>\<in>f-``(int(U))" using cartsub by auto
-    then have "f`\<langle>t,s\<rangle>\<in>int(U)" using func1_1_L15 assoc by auto
+    then have "f`\<langle>t,s\<rangle>\<in>int(U)" using func1_1_L15 group_oper_assocA by auto
   }
   then have "{f`\<langle>t,s\<rangle>. \<langle>t,s\<rangle>\<in>(W\<inter>V)\<times>(W\<inter>V)}\<subseteq>int(U)" by auto
-  then have "(W\<inter>V)\<sad>(W\<inter>V)\<subseteq>int(U)" unfolding setadd_def using lift_subsets_explained(4) assoc sub
+  then have "(W\<inter>V)\<sad>(W\<inter>V)\<subseteq>int(U)" unfolding setadd_def using lift_subsets_explained(4) group_oper_assocA sub
     by auto
   then have "(W\<inter>V)\<sad>(W\<inter>V)\<subseteq>U" using Top_2_L1 by auto
   from topSpaceAssum have "W\<inter>V\<in>T" using vop wop unfolding IsATopology_def by auto
@@ -219,8 +218,8 @@ proof-
   with \<open>(W\<inter>V)\<sad>(W\<inter>V)\<subseteq>U\<close> have "Q\<sad>Q\<subseteq>U" by auto
   from \<open>Q\<in>\<N>\<^sub>0\<close> have "\<zero>\<in>Q" unfolding zerohoods_def using Top_2_L1 by auto
   with \<open>Q\<sad>Q\<subseteq>U\<close> \<open>Q\<subseteq>G\<close> have "\<zero>\<ltr>Q\<subseteq>U" using interval_add(3) by auto
-  with \<open>Q\<subseteq>G\<close> have "Q\<subseteq>U" unfolding ltrans_def using group0.trans_neutral(2) group0_valid_in_tgroup
-    unfolding gzero_def using image_id_same by auto
+  with \<open>Q\<subseteq>G\<close> have "Q\<subseteq>U" unfolding ltrans_def using trans_neutral(2)
+    image_id_same by auto
   with \<open>Q\<in>\<N>\<^sub>0\<close> \<open>Q\<sad>Q\<subseteq>U\<close> \<open>(\<sm>Q)=Q\<close> show ?thesis by auto
 qed
 
@@ -231,7 +230,6 @@ lemma (in topgroup) exist_basehoods_closed:
 proof-
   from assms obtain V where "V\<in>\<N>\<^sub>0" "V\<subseteq>U" "(V\<sad>V)\<subseteq>U" "(\<sm>V)=V" using exists_procls_zerohood by blast
   have inv_fun:"GroupInv(G,f)\<in>G\<rightarrow>G" using group0_2_T2 Ggroup by auto
-  have f_fun:"f\<in>G\<times>G\<rightarrow>G" using group0.group_oper_assocA group0_valid_in_tgroup by auto
   {
     fix x assume "x\<in>cl(V)"
     with \<open>V\<in>\<N>\<^sub>0\<close> have "x\<in>\<Union>T" "V\<subseteq>\<Union>T" using Top_3_L11(1) unfolding zerohoods_def G_def by blast+
@@ -239,15 +237,14 @@ proof-
     with \<open>V\<subseteq>\<Union>T\<close>\<open>x\<in>cl(V)\<close> have "int(x\<ltr>V)\<inter>V\<noteq>0" using cl_inter_neigh Top_2_L2 by blast
     then have "(x\<ltr>V)\<inter>V\<noteq>0" using Top_2_L1 by blast
     then obtain q where "q\<in>(x\<ltr>V)" and "q\<in>V" by blast
-    with \<open>V\<subseteq>\<Union>T\<close>\<open>x\<in>\<Union>T\<close> obtain v where "q=x\<ra>v" "v\<in>V" unfolding ltrans_def grop_def using group0.ltrans_image
-      group0_valid_in_tgroup unfolding G_def by auto
+    with \<open>V\<subseteq>\<Union>T\<close>\<open>x\<in>\<Union>T\<close> obtain v where "q=x\<ra>v" "v\<in>V" using ltrans_image by auto
     from \<open>V\<subseteq>\<Union>T\<close> \<open>v\<in>V\<close>\<open>q\<in>V\<close> have "v\<in>\<Union>T" "q\<in>\<Union>T" by auto
-    with \<open>q=x\<ra>v\<close>\<open>x\<in>\<Union>T\<close> have "q\<rs>v=x" using group0.group0_2_L18(1) group0_valid_in_tgroup unfolding G_def
+    with \<open>q=x\<ra>v\<close>\<open>x\<in>\<Union>T\<close> have "q\<rs>v=x" using group0_2_L18(1) unfolding G_def
         unfolding grsub_def grinv_def grop_def by auto moreover
     from \<open>v\<in>V\<close> have "(\<rm>v)\<in>(\<sm>V)" unfolding setninv_def grinv_def using func_imagedef inv_fun \<open>V\<subseteq>\<Union>T\<close> G_def by auto
     then have "(\<rm>v)\<in>V" using \<open>(\<sm>V)=V\<close> by auto
     with \<open>q\<in>V\<close> have "\<langle>q,\<rm>v\<rangle>\<in>V\<times>V" by auto
-    then have "f`\<langle>q,\<rm>v\<rangle>\<in>V\<sad>V" using lift_subset_suff f_fun \<open>V\<subseteq>\<Union>T\<close> unfolding setadd_def by auto
+    then have "f`\<langle>q,\<rm>v\<rangle>\<in>V\<sad>V" using lift_subset_suff group_oper_assocA \<open>V\<subseteq>\<Union>T\<close> by auto
     with \<open>V\<sad>V\<subseteq>U\<close> have "q\<rs>v\<in>U" unfolding grsub_def grop_def by auto
     with \<open>q\<rs>v=x\<close> have "x\<in>U" by auto
   }
@@ -265,15 +262,15 @@ proof-
     fix x y assume ass:"x\<in>\<Union>T" "y\<in>\<Union>T" "x\<noteq>y"
     {
       assume "(\<rm>y)\<ra>x=\<zero>"
-      with ass(1,2) have "y=x" using group0.group0_2_L11[where a="y" and b="x"] group0_valid_in_tgroup by auto (*cannot be erased.*)
+      with ass(1,2) have "y=x" using group0_2_L11 by auto
       with ass(3) have "False" by auto
     }
     then have "(\<rm>y)\<ra>x\<noteq>\<zero>" by auto
     then have "\<zero>\<noteq>(\<rm>y)\<ra>x" by auto
-    from \<open>y\<in>\<Union>T\<close> have "(\<rm>y)\<in>\<Union>T" using neg_in_tgroup G_def by auto
-    with \<open>x\<in>\<Union>T\<close> have "(\<rm>y)\<ra>x\<in>\<Union>T" using group0.group_op_closed[where a="\<rm>y" and b="x"] group0_valid_in_tgroup unfolding (*cannot be erased.*)
-      G_def by auto
-    with assms \<open>\<zero>\<noteq>(\<rm>y)\<ra>x\<close> obtain U where "U\<in>T" and "(\<rm>y)\<ra>x\<notin>U" and "\<zero>\<in>U" unfolding isT1_def using zero_in_tgroup
+    have "\<zero>:G" using group0_2_L2 by auto
+    from \<open>y\<in>\<Union>T\<close> have "(\<rm>y)\<in>\<Union>T" using inverse_in_group G_def by auto
+    with \<open>x\<in>\<Union>T\<close> have "(\<rm>y)\<ra>x\<in>\<Union>T" using group_op_closed by auto
+    with assms \<open>\<zero>:G\<close> \<open>\<zero>\<noteq>(\<rm>y)\<ra>x\<close> obtain U where "U\<in>T" and "(\<rm>y)\<ra>x\<notin>U" and "\<zero>\<in>U" unfolding isT1_def G_def
       by auto
     then have "U\<in>\<N>\<^sub>0" unfolding zerohoods_def G_def using Top_2_L3 by auto
     then obtain Q where "Q\<in>\<N>\<^sub>0" "Q\<subseteq>U" "(Q\<sad>Q)\<subseteq>U" "(\<sm>Q)=Q" using exists_procls_zerohood by blast
@@ -281,24 +278,20 @@ proof-
     from \<open>Q\<in>\<N>\<^sub>0\<close> have "Q\<subseteq>G" unfolding zerohoods_def by auto
     {
       assume "x\<in>y\<ltr>Q"
-      with \<open>Q\<subseteq>G\<close> \<open>y\<in>\<Union>T\<close> obtain u where "u\<in>Q" and "x=y\<ra>u" unfolding ltrans_def grop_def using group0.ltrans_image group0_valid_in_tgroup
-        unfolding G_def by auto
+      with \<open>Q\<subseteq>G\<close> \<open>y\<in>\<Union>T\<close> obtain u where "u\<in>Q" and "x=y\<ra>u" using ltrans_image by auto
       with \<open>Q\<subseteq>G\<close> have "u\<in>\<Union>T" unfolding G_def by auto
-      with \<open>x=y\<ra>u\<close> \<open>y\<in>\<Union>T\<close> \<open>x\<in>\<Union>T\<close> \<open>Q\<subseteq>G\<close> have "(\<rm>y)\<ra>x=u" using group0.group0_2_L18(2) group0_valid_in_tgroup unfolding G_def
-        unfolding grsub_def grinv_def grop_def by auto
+      with \<open>x=y\<ra>u\<close> \<open>y\<in>\<Union>T\<close> \<open>x\<in>\<Union>T\<close> \<open>Q\<subseteq>G\<close> have "(\<rm>y)\<ra>x=u" using group0_2_L18(2) by auto
       with \<open>u\<in>Q\<close> have "(\<rm>y)\<ra>x\<in>Q" by auto
       then have "False" using \<open>(\<rm>y)\<ra>x\<notin>Q\<close> by auto
     }
     then have "x\<notin>y\<ltr>Q" by auto moreover
     {
       assume "y\<in>x\<ltr>Q"
-      with \<open>Q\<subseteq>G\<close> \<open>x\<in>\<Union>T\<close> obtain u where "u\<in>Q" and "y=x\<ra>u" unfolding ltrans_def grop_def using group0.ltrans_image group0_valid_in_tgroup
-        unfolding G_def by auto
+      with \<open>Q\<subseteq>G\<close> \<open>x\<in>\<Union>T\<close> obtain u where "u\<in>Q" and "y=x\<ra>u" using ltrans_image by auto
       with \<open>Q\<subseteq>G\<close> have "u\<in>\<Union>T" unfolding G_def by auto
-      with \<open>y=x\<ra>u\<close> \<open>y\<in>\<Union>T\<close> \<open>x\<in>\<Union>T\<close> \<open>Q\<subseteq>G\<close> have "(\<rm>x)\<ra>y=u" using group0.group0_2_L18(2) group0_valid_in_tgroup unfolding G_def
-        unfolding grsub_def grinv_def grop_def by auto
-      with \<open>u\<in>Q\<close> have "(\<rm>y)\<ra>x=\<rm>u" using group0.group_inv_of_two[OF group0_valid_in_tgroup group0.inverse_in_group[OF group0_valid_in_tgroup,of x],of y] (*From here no checked*)
-        using \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close> using group0.group_inv_of_inv[OF group0_valid_in_tgroup] unfolding G_def grinv_def grop_def by auto
+      with \<open>y=x\<ra>u\<close> \<open>y\<in>\<Union>T\<close> \<open>x\<in>\<Union>T\<close> \<open>Q\<subseteq>G\<close> have "(\<rm>x)\<ra>y=u" using group0_2_L18(2) by auto
+      with \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close> have "(\<rm>y)\<ra>x=\<rm>u" using group_inv_of_two[OF inverse_in_group, of x y]
+        group_inv_of_inv by auto
       moreover from \<open>u\<in>Q\<close> have "(\<rm>u)\<in>(\<sm>Q)" unfolding setninv_def grinv_def using func_imagedef[OF group0_2_T2[OF Ggroup] \<open>Q\<subseteq>G\<close>] by auto
       ultimately have "(\<rm>y)\<ra>x\<in>Q" using \<open>(\<rm>y)\<ra>x\<notin>Q\<close> \<open>(\<sm>Q)=Q\<close> unfolding setninv_def grinv_def by auto
       then have "False" using \<open>(\<rm>y)\<ra>x\<notin>Q\<close> by auto
@@ -308,24 +301,20 @@ proof-
       fix t
       assume "t\<in>(x\<ltr>Q)\<inter>(y\<ltr>Q)"
       then have "t\<in>(x\<ltr>Q)" "t\<in>(y\<ltr>Q)" by auto
-      with \<open>Q\<subseteq>G\<close> \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close> obtain u v where "u\<in>Q" "v\<in>Q" and "t=x\<ra>u" "t=y\<ra>v" unfolding ltrans_def grop_def using group0.ltrans_image[OF group0_valid_in_tgroup]
-        unfolding G_def by auto
+      with \<open>Q\<subseteq>G\<close> \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close> obtain u v where "u\<in>Q" "v\<in>Q" and "t=x\<ra>u" "t=y\<ra>v" using ltrans_image by auto
       then have "x\<ra>u=y\<ra>v" by auto
       moreover from \<open>u\<in>Q\<close> \<open>v\<in>Q\<close> \<open>Q\<subseteq>G\<close> have "u\<in>\<Union>T" "v\<in>\<Union>T" unfolding G_def by auto
       moreover note \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close>
-      ultimately have "(\<rm>y)\<ra>(x\<ra>u)=v" using group0.group0_2_L18(2)[OF group0_valid_in_tgroup, of y v "x\<ra>u"] group0.group_op_closed[OF group0_valid_in_tgroup, of x u] unfolding G_def
-        unfolding grsub_def grinv_def grop_def by auto
-      then have "((\<rm>y)\<ra>x)\<ra>u=v" using group0.group_oper_assoc[OF group0_valid_in_tgroup]
-        unfolding grop_def using \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close> \<open>u\<in>\<Union>T\<close> using group0.inverse_in_group[OF group0_valid_in_tgroup] unfolding G_def
+      ultimately have "(\<rm>y)\<ra>(x\<ra>u)=v" using group0_2_L18(2) group_op_closed by auto
+      with \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close> \<open>u\<in>\<Union>T\<close> have "((\<rm>y)\<ra>x)\<ra>u=v" using group_oper_assoc inverse_in_group
         by auto
-      then have "((\<rm>y)\<ra>x)=v\<rs>u" using group0.group0_2_L18(1)[OF group0_valid_in_tgroup,of "(\<rm>y)\<ra>x" u v]
-        using \<open>(\<rm>y)\<ra>x\<in>\<Union>T\<close> \<open>u\<in>\<Union>T\<close> \<open>v\<in>\<Union>T\<close> unfolding G_def grsub_def grinv_def grop_def by force
+      with \<open>(\<rm>y)\<ra>x\<in>\<Union>T\<close> \<open>u\<in>\<Union>T\<close> \<open>v\<in>\<Union>T\<close> have "((\<rm>y)\<ra>x)=v\<rs>u" using group0_2_L18(1)[of "(\<rm>y)\<ra>x" u v] by auto
       moreover 
-      from \<open>u\<in>Q\<close> have "(\<rm>u)\<in>(\<sm>Q)" unfolding setninv_def grinv_def using func_imagedef[OF group0_2_T2[OF Ggroup] \<open>Q\<subseteq>G\<close>] by auto
+      from \<open>u\<in>Q\<close> \<open>Q\<subseteq>G\<close> have "(\<rm>u)\<in>(\<sm>Q)" using func_imagedef group0_2_T2[OF Ggroup] by auto
       then have "(\<rm>u)\<in>Q" using \<open>(\<sm>Q)=Q\<close> by auto
       with \<open>v\<in>Q\<close> have "\<langle>v,\<rm>u\<rangle>\<in>Q\<times>Q" by auto
-      then have "f`\<langle>v,\<rm>u\<rangle>\<in>Q\<sad>Q" using lift_subset_suff[OF group0.group_oper_assocA[OF group0_valid_in_tgroup] \<open>Q\<subseteq>G\<close> \<open>Q\<subseteq>G\<close>]
-        unfolding setadd_def by auto
+      with  \<open>Q\<subseteq>G\<close> have "f`\<langle>v,\<rm>u\<rangle>\<in>Q\<sad>Q" using lift_subset_suff group_oper_assocA
+        by auto
       with \<open>Q\<sad>Q\<subseteq>U\<close> have "v\<rs>u\<in>U" unfolding grsub_def grop_def by auto
       ultimately have "(\<rm>y)\<ra>x\<in>U" by auto
       with \<open>(\<rm>y)\<ra>x\<notin>U\<close> have "False" by auto
@@ -348,12 +337,12 @@ lemma (in topgroup) trans_closure:
   assumes "x\<in>G" "A\<subseteq>G"
   shows "cl(x\<ltr>A)=x\<ltr>cl(A)"
 proof-
-  have "\<Union>T-(\<Union>T-(x\<ltr>A))=(x\<ltr>A)" unfolding ltrans_def using group0.group0_5_L1(2)[OF group0_valid_in_tgroup assms(1)]
+  from assms(1) have "\<Union>T-(\<Union>T-(x\<ltr>A))=(x\<ltr>A)" using group0_5_L1(2)[of x]
     unfolding image_def range_def domain_def converse_def Pi_def by auto
   then have "cl(x\<ltr>A)=\<Union>T-int(\<Union>T-(x\<ltr>A))" using Top_3_L11(2)[of "\<Union>T-(x\<ltr>A)"] by auto moreover
-  have "x\<ltr>G=G" using surj_image_eq group0.trans_bij(2)[OF group0_valid_in_tgroup assms(1)] bij_def by auto
-  then have "\<Union>T-(x\<ltr>A)=x\<ltr>(\<Union>T-A)" using inj_image_dif[of "LeftTranslation(G, f, x)""G""G", OF _ assms(2)]
-    unfolding ltrans_def G_def using group0.trans_bij(2)[OF group0_valid_in_tgroup assms(1)] bij_def by auto
+  from assms(1) have "x\<ltr>G=G" using surj_image_eq trans_bij(2)[of x] bij_def by auto
+  with assms have "\<Union>T-(x\<ltr>A)=x\<ltr>(\<Union>T-A)" using inj_image_dif[of "LeftTranslation(G, f, x)" G G]
+    unfolding ltrans_def G_def using trans_bij(2) bij_def by auto
   then have "int(\<Union>T-(x\<ltr>A))=int(x\<ltr>(\<Union>T-A))" by auto
   then have "int(\<Union>T-(x\<ltr>A))=x\<ltr>int(\<Union>T-A)" using trans_interior[OF assms(1),of "\<Union>T-A"] unfolding G_def by force
   have "\<Union>T-int(\<Union>T-A)=cl(\<Union>T-(\<Union>T-A))" using Top_3_L11(2)[of "\<Union>T-A"] by force
@@ -362,11 +351,10 @@ proof-
   have "\<Union>T-(\<Union>T-int(\<Union>T-A))=int(\<Union>T-A)" using Top_2_L2 by auto
   with \<open>\<Union>T-int(\<Union>T-A)=cl(A)\<close> have "int(\<Union>T-A)=\<Union>T-cl(A)" by auto
   with \<open>int(\<Union>T-(x\<ltr>A))=x\<ltr>int(\<Union>T-A)\<close> have "int(\<Union>T-(x\<ltr>A))=x\<ltr>(\<Union>T-cl(A))" by auto
-  with \<open>x\<ltr>G=G\<close> have "int(\<Union>T-(x\<ltr>A))=\<Union>T-(x\<ltr>cl(A))" using inj_image_dif[of "LeftTranslation(G, f, x)""G""G""cl(A)"]
-    unfolding ltrans_def using group0.trans_bij(2)[OF group0_valid_in_tgroup assms(1)] Top_3_L11(1) assms(2) unfolding bij_def G_def
-    by auto
+  with \<open>x\<ltr>G=G\<close> assms have "int(\<Union>T-(x\<ltr>A))=\<Union>T-(x\<ltr>cl(A))" using inj_image_dif[of "LeftTranslation(G, f, x)" G G "cl(A)"]
+    using trans_bij(2) Top_3_L11(1) unfolding bij_def by auto
   then have "\<Union>T-int(\<Union>T-(x\<ltr>A))=\<Union>T-(\<Union>T-(x\<ltr>cl(A)))" by auto
-  then have "\<Union>T-int(\<Union>T-(x\<ltr>A))=x\<ltr>cl(A)" unfolding ltrans_def using group0.group0_5_L1(2)[OF group0_valid_in_tgroup assms(1)]
+  with assms(1) have "\<Union>T-int(\<Union>T-(x\<ltr>A))=x\<ltr>cl(A)" using group0_5_L1(2)[of x]
     unfolding image_def range_def domain_def converse_def Pi_def by auto
   with \<open>cl(x\<ltr>A)=\<Union>T-int(\<Union>T-(x\<ltr>A))\<close> show ?thesis by auto
 qed
@@ -383,25 +371,24 @@ lemma (in topgroup) trans_closure2:
   assumes "x\<in>G" "A\<subseteq>G"
   shows "cl(A\<rtr>x)=cl(A)\<rtr>x"
 proof-
-  have "\<Union>T-(\<Union>T-(A\<rtr>x))=(A\<rtr>x)" unfolding ltrans_def using group0.group0_5_L1(1)[OF group0_valid_in_tgroup assms(1)]
+  from assms(1) have "\<Union>T-(\<Union>T-(A\<rtr>x))=(A\<rtr>x)" unfolding ltrans_def using group0_5_L1(1)[of x]
     unfolding image_def range_def domain_def converse_def Pi_def by auto
   then have "cl(A\<rtr>x)=\<Union>T-int(\<Union>T-(A\<rtr>x))" using Top_3_L11(2)[of "\<Union>T-(A\<rtr>x)"] by auto moreover
-  have "G\<rtr>x=G" using surj_image_eq group0.trans_bij(1)[OF group0_valid_in_tgroup assms(1)] bij_def by auto
-  then have "\<Union>T-(A\<rtr>x)=(\<Union>T-A)\<rtr>x" using inj_image_dif[of "RightTranslation(G, f, x)""G""G", OF _ assms(2)]
-    unfolding rtrans_def G_def using group0.trans_bij(1)[OF group0_valid_in_tgroup assms(1)] bij_def by auto
+  from assms(1) have "G\<rtr>x=G" using surj_image_eq trans_bij(1)[of x] bij_def by auto
+  with assms have "\<Union>T-(A\<rtr>x)=(\<Union>T-A)\<rtr>x" using inj_image_dif[of "RightTranslation(G, f, x)" G G]
+    using trans_bij(1)[of x] bij_def by auto
   then have "int(\<Union>T-(A\<rtr>x))=int((\<Union>T-A)\<rtr>x)" by auto
-  then have "int(\<Union>T-(A\<rtr>x))=int(\<Union>T-A)\<rtr>x" using trans_interior2[OF assms(1),of "\<Union>T-A"] unfolding G_def by force
+  with assms(1) have "int(\<Union>T-(A\<rtr>x))=int(\<Union>T-A)\<rtr>x" using trans_interior2[of x "\<Union>T-A"] by force
   have "\<Union>T-int(\<Union>T-A)=cl(\<Union>T-(\<Union>T-A))" using Top_3_L11(2)[of "\<Union>T-A"] by force
   have "\<Union>T-(\<Union>T-A)=A" using assms(2) G_def by auto
   with \<open>\<Union>T-int(\<Union>T-A)=cl(\<Union>T-(\<Union>T-A))\<close> have "\<Union>T-int(\<Union>T-A)=cl(A)" by auto
   have "\<Union>T-(\<Union>T-int(\<Union>T-A))=int(\<Union>T-A)" using Top_2_L2 by auto
   with \<open>\<Union>T-int(\<Union>T-A)=cl(A)\<close> have "int(\<Union>T-A)=\<Union>T-cl(A)" by auto
   with \<open>int(\<Union>T-(A\<rtr>x))=int(\<Union>T-A)\<rtr>x\<close> have "int(\<Union>T-(A\<rtr>x))=(\<Union>T-cl(A))\<rtr>x" by auto
-  with \<open>G\<rtr>x=G\<close> have "int(\<Union>T-(A\<rtr>x))=\<Union>T-(cl(A)\<rtr>x)" using inj_image_dif[of "RightTranslation(G, f, x)""G""G""cl(A)"]
-    unfolding rtrans_def using group0.trans_bij(1)[OF group0_valid_in_tgroup assms(1)] Top_3_L11(1) assms(2) unfolding bij_def G_def
-    by auto
+  with \<open>G\<rtr>x=G\<close> assms have "int(\<Union>T-(A\<rtr>x))=\<Union>T-(cl(A)\<rtr>x)" using inj_image_dif[of "RightTranslation(G, f, x)" G G "cl(A)"]
+    trans_bij(1)[of x] Top_3_L11(1) unfolding bij_def by auto
   then have "\<Union>T-int(\<Union>T-(A\<rtr>x))=\<Union>T-(\<Union>T-(cl(A)\<rtr>x))" by auto
-  then have "\<Union>T-int(\<Union>T-(A\<rtr>x))=cl(A)\<rtr>x" unfolding ltrans_def using group0.group0_5_L1(1)[OF group0_valid_in_tgroup assms(1)]
+  with assms(1) have "\<Union>T-int(\<Union>T-(A\<rtr>x))=cl(A)\<rtr>x" using group0_5_L1(1)[of x]
     unfolding image_def range_def domain_def converse_def Pi_def by auto
   with \<open>cl(A\<rtr>x)=\<Union>T-int(\<Union>T-(A\<rtr>x))\<close> show ?thesis by auto
 qed
@@ -412,27 +399,23 @@ lemma (in topgroup) trans_subset:
 proof-
   {
    fix t assume "t\<in>x\<ltr>A"
-    with \<open>x\<in>G\<close> \<open>A\<subseteq>G\<close> obtain u where "u\<in>A" "t=x\<ra>u" unfolding ltrans_def grop_def using group0.ltrans_image[OF group0_valid_in_tgroup]
-      unfolding G_def by auto
-    with \<open>x\<in>G\<close> \<open>A\<subseteq>G\<close> \<open>u\<in>A\<close> have "(\<rm>x)\<ra>t=u" using group0.group0_2_L18(2)[OF group0_valid_in_tgroup, of "x""u""t"]
-      group0.group_op_closed[OF group0_valid_in_tgroup,of x u] unfolding grop_def grinv_def by auto
+    with \<open>x\<in>G\<close> \<open>A\<subseteq>G\<close> obtain u where "u\<in>A" "t=x\<ra>u" using ltrans_image by auto
+    with \<open>x\<in>G\<close> \<open>A\<subseteq>G\<close> \<open>u\<in>A\<close> have "(\<rm>x)\<ra>t=u" using group0_2_L18(2)[of "x""u""t"]
+      group_op_closed[of x u] by auto
     with \<open>u\<in>A\<close> have "(\<rm>x)\<ra>t\<in>A" by auto
     with \<open>A\<subseteq>(\<rm>x)\<ltr>B\<close> have "(\<rm>x)\<ra>t\<in>(\<rm>x)\<ltr>B" by auto
-    with \<open>B\<subseteq>G\<close> obtain v where "(\<rm>x)\<ra>t=(\<rm>x)\<ra>v" "v\<in>B" unfolding ltrans_def grop_def using neg_in_tgroup[OF \<open>x\<in>G\<close>] group0.ltrans_image[OF group0_valid_in_tgroup]
-      unfolding G_def by auto
-    have "LeftTranslation(G,f,\<rm>x)\<in>inj(G,G)" using group0.trans_bij(2)[OF group0_valid_in_tgroup neg_in_tgroup[OF \<open>x\<in>G\<close>]] bij_def by auto
+    with \<open>B\<subseteq>G\<close> \<open>x\<in>G\<close> obtain v where "(\<rm>x)\<ra>t=(\<rm>x)\<ra>v" "v\<in>B" using inverse_in_group ltrans_image by auto
+    from \<open>x:G\<close> have "LeftTranslation(G,f,\<rm>x)\<in>inj(G,G)" using trans_bij(2) inverse_in_group unfolding bij_def by auto
     then have eq:"\<forall>A\<in>G. \<forall>B\<in>G. LeftTranslation(G,f,\<rm>x)`A=LeftTranslation(G,f,\<rm>x)`B \<longrightarrow> A=B" unfolding inj_def by auto
     {
       fix A B assume "A\<in>G""B\<in>G"
       assume "f`\<langle>\<rm>x,A\<rangle>=f`\<langle>\<rm>x,B\<rangle>"
-      then have "LeftTranslation(G,f,\<rm>x)`A=LeftTranslation(G,f,\<rm>x)`B" using group0.group0_5_L2(2)[OF group0_valid_in_tgroup neg_in_tgroup[OF \<open>x\<in>G\<close>]]
-        \<open>A\<in>G\<close>\<open>B\<in>G\<close> by auto
+      with \<open>x\<in>G\<close>\<open>A\<in>G\<close>\<open>B\<in>G\<close> have "LeftTranslation(G,f,\<rm>x)`A=LeftTranslation(G,f,\<rm>x)`B" using group0_5_L2(2) inverse_in_group by auto
       with eq \<open>A\<in>G\<close>\<open>B\<in>G\<close> have "A=B" by auto
     }
     then have eq1:"\<forall>A\<in>G. \<forall>B\<in>G. f`\<langle>\<rm>x,A\<rangle>=f`\<langle>\<rm>x,B\<rangle> \<longrightarrow> A=B" by auto
     from \<open>A\<subseteq>G\<close> \<open>u\<in>A\<close> have "u\<in>G" by auto
-    with \<open>v\<in>B\<close> \<open>B\<subseteq>G\<close> \<open>t=x\<ra>u\<close> have "t\<in>G" "v\<in>G" using group0.group_op_closed[OF group0_valid_in_tgroup \<open>x\<in>G\<close>,of u] unfolding grop_def
-      by auto
+    with \<open>v\<in>B\<close> \<open>B\<subseteq>G\<close> \<open>t=x\<ra>u\<close> \<open>x\<in>G\<close> have "t\<in>G" "v\<in>G" using group_op_closed[of x u] by auto
     with eq1 \<open>(\<rm>x)\<ra>t=(\<rm>x)\<ra>v\<close> have "t=v" unfolding grop_def by auto
     with \<open>v\<in>B\<close> have "t\<in>B" by auto
   }
@@ -454,7 +437,7 @@ lemma (in topgroup) local_iff_neutral:
 proof-
   {
     fix x U assume "x\<in>\<Union>T""U\<in>T""x\<in>U"
-    then have "(\<rm>x)\<ltr>U\<in>T\<inter>\<N>\<^sub>0" using open_tr_open(1) open_trans_neigh neg_in_tgroup unfolding G_def
+    then have "(\<rm>x)\<ltr>U\<in>T\<inter>\<N>\<^sub>0" using open_tr_open(1) open_trans_neigh inverse_in_group
       by auto
     with assms(1) obtain N where "N\<subseteq>((\<rm>x)\<ltr>U)""P(N,T)""N\<in>\<N>\<^sub>0" by auto
     note \<open>x\<in>\<Union>T\<close>\<open>N\<subseteq>((\<rm>x)\<ltr>U)\<close> moreover
@@ -475,9 +458,9 @@ proof-
   from assms(1) have "cl(A)=A" using Top_3_L8 unfolding IsClosed_def by auto
   then have "x\<ltr>cl(A)=x\<ltr>A" by auto
   then have "cl(x\<ltr>A)=x\<ltr>A" using trans_closure assms unfolding IsClosed_def by auto
-  moreover have "x\<ltr>A\<subseteq>G" unfolding ltrans_def using group0.group0_5_L1(2)[OF group0_valid_in_tgroup \<open>x\<in>G\<close>]
+  moreover from \<open>x\<in>G\<close> have "x\<ltr>A\<subseteq>G" using group0_5_L1(2)
       unfolding image_def range_def domain_def converse_def Pi_def by auto
-  ultimately show ?thesis using Top_3_L8 unfolding G_def by auto
+  ultimately show ?thesis using Top_3_L8 by auto
 qed
 
 text\<open>As it is written in the previous section, every topological group is regular.\<close>
