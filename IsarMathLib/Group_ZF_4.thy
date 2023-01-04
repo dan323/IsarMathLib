@@ -41,8 +41,7 @@ subsection\<open>Conjugation of subgroups\<close>
 
 text\<open>The conjugate of a subgroup is a subgroup.\<close>
 
-theorem(in group0) semigr0:
-  shows "semigr0(G,P)"
+sublocale group0 < semigroup:semigr0 G P groper "\<lambda>x. Fold1(P,x)" Append Concat  
   unfolding semigr0_def using groupAssum IsAgroup_def IsAmonoid_def by auto
 
 theorem (in group0) conj_group_is_group:
@@ -977,6 +976,28 @@ proof-
     have "P`\<langle>converse(f)`h1,converse(f)`h2\<rangle>=converse(f)`(F`\<langle>h1,h2\<rangle>)" by auto
   }
   then show ?thesis using assms(2,3) Homomor_def by auto
+qed
+
+text\<open>A very important homomorphism is given by taken every element
+to its class in a group quotient\<close>
+
+lemma (in group0) quotient_map:
+  assumes "IsAnormalSubgroup(G,P,H)"
+  defines "r \<equiv> QuotientGroupRel(G,P,H)" and "q \<equiv> \<lambda>x\<in>G. QuotientGroupRel(G,P,H)``{x}"
+  shows "Homomor(q,G,P,G//r,QuotientGroupOp(G,P,H))"
+  unfolding r_def Homomor_def[OF groupAssum Group_ZF_2_4_T1[OF groupAssum assms(1)]]
+proof(safe)
+  fix x y assume as:"x\<in>G" "y\<in>G"
+  then have "x\<cdot>y\<in>G" using group_op_closed by auto
+  then have "q`(x\<cdot>y) = r``{x\<cdot>y}" unfolding q_def
+    using lam_funtype lamE unfolding r_def by auto
+  then have "q`(x\<cdot>y) = QuotientGroupOp(G,P,H)`\<langle>r``{x},r``{y}\<rangle>"
+    using EquivClass_1_L10[OF Group_ZF_2_4_L3 _ as]
+    Group_ZF_2_4_L5A[OF groupAssum assms(1)] assms(1)
+    unfolding IsAnormalSubgroup_def QuotientGroupOp_def
+    r_def by auto
+  then show "q`(P`\<langle>x,y\<rangle>) = QuotientGroupOp(G, P, H) ` \<langle>q ` x, q ` y\<rangle>"
+    unfolding q_def r_def using lam_funtype lamE as by auto
 qed
 
 end
