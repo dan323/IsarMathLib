@@ -136,8 +136,8 @@ theorem (in group0) norm_group_cont_conj:
 proof-
   {
     fix r assume "r\<in>{g\<cdot>(h\<cdot>g\<inverse>). h\<in>H}"
-    then obtain h where "r=g\<cdot>(h\<cdot>g\<inverse>)" "h\<in>H" by auto moreover
-    then have "h\<in>G" using group0_3_L2 assms(1) unfolding IsAnormalSubgroup_def by auto moreover
+    then obtain h where h:"r=g\<cdot>(h\<cdot>g\<inverse>)" "h\<in>H" by auto moreover
+    from h(2) have "h\<in>G" using group0_3_L2 assms(1) unfolding IsAnormalSubgroup_def by auto moreover
     from assms(2) have "g\<inverse>\<in>G" using inverse_in_group by auto
     ultimately have "r=g\<cdot>h\<cdot>g\<inverse>" "h\<in>H" using group_oper_assoc assms(2) by auto
     then have "r\<in>H" using assms unfolding IsAnormalSubgroup_def by auto
@@ -154,8 +154,8 @@ proof-
   {
     fix h g assume "h\<in>H" "g\<in>G"
     with assms(2) have "g\<cdot>(h\<cdot>g\<inverse>)\<in>H" by auto
-    moreover have "h\<in>G""g\<inverse>\<in>G" using group0_3_L2 assms(1) \<open>g\<in>G\<close>\<open>h\<in>H\<close> inverse_in_group by auto
-    ultimately have "g\<cdot>h\<cdot>g\<inverse>\<in>H" using group_oper_assoc \<open>g\<in>G\<close> by auto
+    moreover from \<open>g\<in>G\<close>\<open>h\<in>H\<close> have "h\<in>G" "g\<inverse>\<in>G" "g\<in>G" using group0_3_L2 assms(1) inverse_in_group by auto
+    ultimately have "g\<cdot>h\<cdot>g\<inverse>\<in>H" using group_oper_assoc by auto
   }
   then show ?thesis using assms(1) unfolding IsAnormalSubgroup_def by auto
 qed
