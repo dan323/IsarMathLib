@@ -59,9 +59,9 @@ proof-
     ultimately have "r\<inverse>=(h\<cdot>(g\<inverse>))\<inverse>\<cdot>(g)\<inverse>" using group_inv_of_two assms(2) by auto
     moreover
     from \<open>h\<in>G\<close> \<open>g\<inverse>\<in>G\<close> have "(h\<cdot>(g\<inverse>))\<inverse>=(g\<inverse>)\<inverse>\<cdot>h\<inverse>" using group_inv_of_two by auto
-    moreover have "(g\<inverse>)\<inverse>=g" using group_inv_of_inv[OF assms(2)] by auto
+    moreover have "(g\<inverse>)\<inverse>=g" using group_inv_of_inv assms(2) by auto
     ultimately have "r\<inverse>=(g\<cdot>(h\<inverse>))\<cdot>(g)\<inverse>" by auto
-    then have "r\<inverse>=g\<cdot>((h\<inverse>)\<cdot>(g)\<inverse>)" using group_oper_assoc assms(2) \<open>h\<inverse>\<in>G\<close>\<open>g\<inverse>\<in>G\<close> by auto 
+    with \<open>h\<inverse>\<in>G\<close>\<open>g\<inverse>\<in>G\<close> have "r\<inverse>=g\<cdot>((h\<inverse>)\<cdot>(g)\<inverse>)" using group_oper_assoc assms(2) by auto 
     moreover from s assms(2) h(2) have "r\<in>G" using group_op_closed by auto 
     moreover note \<open>h\<inverse>\<in>H\<close> ultimately have "r\<inverse>\<in>{g\<cdot>(h\<cdot>g\<inverse>). h\<in>H}" "r\<in>G" by auto
   }
@@ -74,15 +74,21 @@ proof-
     then have "(g\<cdot>hs)\<inverse>\<in>G" using inverse_in_group by auto
     from ht(1) have "ht\<in>G" using sub by auto
     with \<open>g\<inverse>:G\<close> have "ht\<cdot>(g\<inverse>)\<in>G" using group_op_closed by auto
-    from hs(2) ht(2) have "s\<cdot>t=(g\<cdot>(hs\<cdot>(g\<inverse>)))\<cdot>(g\<cdot>(ht\<cdot>(g\<inverse>)))" by auto moreover
-    have "g\<cdot>(hs\<cdot>(g\<inverse>))=g\<cdot>hs\<cdot>(g\<inverse>)" using group_oper_assoc assms(2) \<open>hs\<in>G\<close> \<open>g\<inverse>\<in>G\<close> by auto
-    then have "(g\<cdot>(hs\<cdot>(g\<inverse>)))\<cdot>(g\<cdot>(ht\<cdot>(g\<inverse>)))=(g\<cdot>hs\<cdot>(g\<inverse>))\<cdot>(g\<cdot>(ht\<cdot>(g\<inverse>)))" by auto
-    then have "(g\<cdot>(hs\<cdot>(g\<inverse>)))\<cdot>(g\<cdot>(ht\<cdot>(g\<inverse>)))=(g\<cdot>hs\<cdot>(g\<inverse>))\<cdot>(g\<inverse>\<inverse>\<cdot>(ht\<cdot>(g\<inverse>)))" using group_inv_of_inv[OF assms(2)] by auto
-    also have "\<dots>=g\<cdot>hs\<cdot>(ht\<cdot>(g\<inverse>))" using group0_2_L14A(2) \<open>(g\<cdot>hs)\<inverse>\<in>G\<close> \<open>g\<inverse>\<in>G\<close>\<open>ht\<cdot>(g\<inverse>)\<in>G\<close> group_inv_of_inv[OF \<open>(g\<cdot>hs)\<in>G\<close>]
-      by auto
-    ultimately have "s\<cdot>t=g\<cdot>hs\<cdot>(ht\<cdot>(g\<inverse>))" by auto moreover
-    have "hs\<cdot>(ht\<cdot>(g\<inverse>))=(hs\<cdot>ht)\<cdot>(g\<inverse>)" using group_oper_assoc[OF \<open>hs\<in>G\<close>\<open>ht\<in>G\<close>\<open>g\<inverse>\<in>G\<close>] by auto moreover 
-    have "g\<cdot>hs\<cdot>(ht\<cdot>(g\<inverse>))=g\<cdot>(hs\<cdot>(ht\<cdot>(g\<inverse>)))" using group_oper_assoc[OF \<open>g\<in>G\<close>\<open>hs\<in>G\<close>\<open>(ht\<cdot>g\<inverse>)\<in>G\<close>] by auto
+    from hs(2) ht(2) have "s\<cdot>t=(g\<cdot>(hs\<cdot>(g\<inverse>)))\<cdot>(g\<cdot>(ht\<cdot>(g\<inverse>)))" by auto
+    moreover from \<open>hs\<in>G\<close> have "hs\<cdot>ht = hs\<cdot>\<one>\<cdot>ht" using group0_2_L2 by auto
+    then have "hs\<cdot>ht = hs\<cdot>(g\<inverse>\<cdot>g)\<cdot>ht" using group0_2_L6 assms(2) by auto
+    then have "g\<cdot>(hs\<cdot>ht) = g\<cdot>(hs\<cdot>(g\<inverse>\<cdot>g)\<cdot>ht)" by auto
+    with \<open>hs\<in>G\<close> have "g\<cdot>(hs\<cdot>ht) = g\<cdot>((hs\<cdot>g\<inverse>\<cdot>g)\<cdot>ht)" using group_oper_assoc
+      assms(2) inverse_in_group by auto
+    with \<open>hs\<in>G\<close> \<open>ht\<in>G\<close> have "g\<cdot>(hs\<cdot>ht) = g\<cdot>(hs\<cdot>g\<inverse>\<cdot>(g\<cdot>ht))" using group_oper_assoc
+      assms(2) inverse_in_group group_op_closed by auto
+    with \<open>hs\<in>G\<close> \<open>ht\<in>G\<close> have "g\<cdot>(hs\<cdot>ht) = g\<cdot>(hs\<cdot>g\<inverse>)\<cdot>(g\<cdot>ht)" using group_oper_assoc
+      assms(2) inverse_in_group group_op_closed by auto
+    then have "g\<cdot>(hs\<cdot>ht)\<cdot>g\<inverse> = g\<cdot>(hs\<cdot>g\<inverse>)\<cdot>(g\<cdot>ht)\<cdot>g\<inverse>" by auto
+    with \<open>hs\<in>G\<close> \<open>ht\<in>G\<close> have "g\<cdot>((hs\<cdot>ht)\<cdot>g\<inverse>) = g\<cdot>(hs\<cdot>g\<inverse>)\<cdot>(g\<cdot>ht)\<cdot>g\<inverse>" using group_oper_assoc
+      inverse_in_group assms(2) group_op_closed by auto
+    with \<open>hs\<in>G\<close> \<open>ht\<in>G\<close> have "g\<cdot>((hs\<cdot>ht)\<cdot>g\<inverse>) = (g\<cdot>(hs\<cdot>g\<inverse>))\<cdot>(g\<cdot>(ht\<cdot>g\<inverse>))" using group_oper_assoc
+      inverse_in_group assms(2) group_op_closed by auto
     ultimately have "s\<cdot>t=g\<cdot>((hs\<cdot>ht)\<cdot>(g\<inverse>))" by auto moreover
     from hs(1) ht(1) have "hs\<cdot>ht\<in>H" using assms(1) group0_3_L6 by auto
     ultimately have "s\<cdot>t\<in>{g\<cdot>(h\<cdot>g\<inverse>). h\<in>H}" by auto
