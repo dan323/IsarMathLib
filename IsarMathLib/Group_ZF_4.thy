@@ -162,7 +162,7 @@ qed
 
 text\<open>If a group has only one subgroup of a given order, then this subgroup is normal.\<close>
 
-corollary(in group0) only_one_equipoll_sub:
+corollary (in group0) only_one_equipoll_sub:
   assumes "IsAsubgroup(H,P)" "\<forall>M. IsAsubgroup(M,P)\<and> H\<approx>M \<longrightarrow> M=H"
   shows "IsAnormalSubgroup(G,P,H)"
 proof-
@@ -179,7 +179,7 @@ qed
 
 text\<open>The trivial subgroup is then a normal subgroup.\<close>
 
-corollary(in group0) trivial_normal_subgroup:
+corollary (in group0) trivial_normal_subgroup:
   shows "IsAnormalSubgroup(G,P,{\<one>})"
 proof-
   have "{\<one>}\<subseteq>G" using group0_2_L2 by auto
