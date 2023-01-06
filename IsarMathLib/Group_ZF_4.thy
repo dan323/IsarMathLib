@@ -56,7 +56,7 @@ proof-
     with \<open>g\<inverse>\<in>G\<close> have "((h\<inverse>)\<cdot>(g)\<inverse>)\<in>G" using group_op_closed by auto
     from h(2) have "r\<inverse>=(g\<cdot>(h\<cdot>(g\<inverse>)))\<inverse>" by auto moreover
     from \<open>h\<in>G\<close> \<open>g\<inverse>\<in>G\<close> have s:"h\<cdot>(g\<inverse>)\<in>G" using group_op_closed by blast
-    ultimately have "r\<inverse>=(h\<cdot>(g\<inverse>))\<inverse>\<cdot>(g)\<inverse>" using group_inv_of_two[OF assms(2)] by auto
+    ultimately have "r\<inverse>=(h\<cdot>(g\<inverse>))\<inverse>\<cdot>(g)\<inverse>" using group_inv_of_two assms(2) by auto
     moreover
     from s assms(2) h(2) have r:"r\<in>G" using group_op_closed by auto
     have "(h\<cdot>(g\<inverse>))\<inverse>=(g\<inverse>)\<inverse>\<cdot>h\<inverse>" using group_inv_of_two[OF \<open>h\<in>G\<close>\<open>g\<inverse>\<in>G\<close>] by auto
