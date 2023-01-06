@@ -292,6 +292,8 @@ qed
 
 subsection\<open>Finite groups\<close>
 
+text\<open>This subsection deals with finite groups and their structure\<close>
+
 text\<open>The subgroup of a finite group is finite.\<close>
 
 lemma (in group0) finite_subgroup:
@@ -400,7 +402,8 @@ text\<open>The order of a subgroup multiplied by the order of the space of coset
 the group. We only prove the theorem for finite groups.\<close>
 
 theorem (in group0) Lagrange:
-  assumes "Finite(G)" "IsAsubgroup(H,P)" "r=QuotientGroupRel(G,P,H)"
+  assumes "Finite(G)" "IsAsubgroup(H,P)" 
+  defines "r \<equiv> QuotientGroupRel(G,P,H)"
   shows "|G|=|H| #* |G//r|"
 proof-
   have "Finite(G//r)" using assms finite_cosets by auto moreover
@@ -416,7 +419,7 @@ proof-
   {
     fix c assume "c\<in>(G//r)"
     then obtain g where "g\<in>G" "c=r``{g}" unfolding quotient_def by auto
-    then have "c\<approx>r``{\<one>}" using cosets_equipoll[OF assms(2,3)] group0_2_L2 by auto
+    then have "c\<approx>r``{\<one>}" using cosets_equipoll[OF assms(2)] r_def group0_2_L2 by auto
     then have "|c|=|H|" using H cardinal_cong by auto
   }
   then have "\<forall>c\<in>(G//r). |c|=|H|" by auto ultimately
