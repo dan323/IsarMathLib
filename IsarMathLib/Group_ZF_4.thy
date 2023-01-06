@@ -28,8 +28,7 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 section \<open>Groups 4\<close>
 
-theory Group_ZF_4 imports Group_ZF_1 Group_ZF_2 Finite_ZF Ring_ZF
-  Cardinal_ZF Semigroup_ZF
+theory Group_ZF_4 imports Group_ZF_1 Group_ZF_2 Finite_ZF Ring_ZF Cardinal_ZF Semigroup_ZF
 
 begin
 
