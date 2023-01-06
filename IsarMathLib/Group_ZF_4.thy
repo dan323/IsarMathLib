@@ -40,9 +40,6 @@ subsection\<open>Conjugation of subgroups\<close>
 
 text\<open>The conjugate of a subgroup is a subgroup.\<close>
 
-sublocale group0 < semigroup:semigr0 G P groper "\<lambda>x. Fold1(P,x)" Append Concat  
-  unfolding semigr0_def using groupAssum IsAgroup_def IsAmonoid_def by auto
-
 theorem (in group0) conj_group_is_group:
   assumes "IsAsubgroup(H,P)" "g\<in>G"
   shows "IsAsubgroup({g\<cdot>(h\<cdot>g\<inverse>). h\<in>H},P)"
@@ -95,6 +92,11 @@ proof-
   then have "{g\<cdot>(h\<cdot>g\<inverse>). h\<in>H}\<noteq>0" by auto ultimately
   show ?thesis using group0_3_T3 by auto
 qed
+
+text\<open>In the context of \<open>group0\<close>, we may use all results of \<open>semigr0\<close>.\<close>
+
+sublocale group0 < semigroup:semigr0 G P groper "\<lambda>x. Fold1(P,x)" Append Concat  
+  unfolding semigr0_def using groupAssum IsAgroup_def IsAmonoid_def by auto
 
 text\<open>Every set is equipollent with its conjugates.\<close>
 
