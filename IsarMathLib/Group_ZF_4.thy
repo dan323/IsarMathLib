@@ -225,14 +225,13 @@ text\<open>The whole group is normal as a subgroup\<close>
 lemma (in group0) whole_normal_subgroup:
   shows "IsAnormalSubgroup(G,P,G)"
 proof-
-  have "IsAsubgroup(G,P)" 
-  proof (rule group0_3_T3)
-    show "G\<subseteq>G" by auto
-    show "\<forall>x\<in>G. x\<inverse>\<in>G" using inverse_in_group by auto
-    show "G\<noteq>0" using group0_2_L2 by auto
-    show "G{is closed under}P" using group_op_closed
-      unfolding IsOpClosed_def by auto
-  qed moreover
+  have "G\<subseteq>G" by auto moreover
+  have "\<forall>x\<in>G. x\<inverse>\<in>G" using inverse_in_group by auto moreover
+  have "G\<noteq>0" using group0_2_L2 by auto moreover
+  have "G{is closed under}P" using group_op_closed
+    unfolding IsOpClosed_def by auto ultimately
+  have "IsAsubgroup(G,P)" using group0_3_T3 by auto
+  moreover
   {
     fix n g assume ng:"n\<in>G" "g\<in>G"
     then have "P ` \<langle>P ` \<langle>g, n\<rangle>, GroupInv(G, P) ` g\<rangle> \<in> G"
