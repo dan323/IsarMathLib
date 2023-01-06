@@ -110,9 +110,9 @@ proof-
   {
     fix h1 h2 assume "h1\<in>H""h2\<in>H""{\<langle>h,g\<cdot>(h\<cdot>g\<inverse>)\<rangle>. h\<in>H}`h1={\<langle>h,g\<cdot>(h\<cdot>g\<inverse>)\<rangle>. h\<in>H}`h2"
     with fun have "g\<cdot>(h1\<cdot>g\<inverse>)=g\<cdot>(h2\<cdot>g\<inverse>)""h1\<cdot>g\<inverse>\<in>G""h2\<cdot>g\<inverse>\<in>G""h1\<in>G""h2\<in>G" using apply_equality assms(1)
-      group_op_closed[OF _ inverse_in_group[OF assms(2)]] by auto
-    then have "h1\<cdot>g\<inverse>=h2\<cdot>g\<inverse>" using group0_2_L19(2)[OF \<open>h1\<cdot>g\<inverse>\<in>G\<close> \<open>h2\<cdot>g\<inverse>\<in>G\<close> assms(2)] by auto
-    then have "h1=h2" using group0_2_L19(1)[OF \<open>h1\<in>G\<close>\<open>h2\<in>G\<close> inverse_in_group[OF assms(2)]] by auto
+      group_op_closed inverse_in_group assms(2) by auto
+    then have "h1\<cdot>g\<inverse>=h2\<cdot>g\<inverse>" using group0_2_L19(2) assms(2) by auto
+    with \<open>h1\<in>G\<close> \<open>h2\<in>G\<close> have "h1=h2" using group0_2_L19(1) inverse_in_group assms(2) by auto
   }
   then have "\<forall>h1\<in>H. \<forall>h2\<in>H. {\<langle>h,g\<cdot>(h\<cdot>g\<inverse>)\<rangle>. h\<in>H}`h1={\<langle>h,g\<cdot>(h\<cdot>g\<inverse>)\<rangle>. h\<in>H}`h2 \<longrightarrow> h1=h2" by auto
   with fun have "{\<langle>h,g\<cdot>(h\<cdot>g\<inverse>)\<rangle>. h\<in>H}\<in>inj(H,{g\<cdot>(h\<cdot>g\<inverse>). h\<in>H})" unfolding inj_def by auto moreover
