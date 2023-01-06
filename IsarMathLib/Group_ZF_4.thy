@@ -215,7 +215,7 @@ proof-
       moreover from fun one(1) have "f`\<one>\<in>{\<one>}" by (rule apply_type)
       ultimately have "False" by auto
     }
-    then have "M={\<one>}" using \<open>\<one>\<in>M\<close> by auto
+    with \<open>\<one>\<in>M\<close> have "M={\<one>}" by auto
   }
   ultimately show ?thesis using only_one_equipoll_sub by auto
 qed
