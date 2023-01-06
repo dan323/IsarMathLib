@@ -204,14 +204,16 @@ proof-
   have "IsAsubgroup({\<one>},P)" using group0_3_T3 by auto moreover
   {
     fix M assume M:"IsAsubgroup(M,P)" "{\<one>}\<approx>M"
-    then have "\<one>\<in>M" "M\<approx>{\<one>}" using eqpoll_sym group0_3_L5 by auto
+    then have one:"\<one>\<in>M" "M\<approx>{\<one>}" using eqpoll_sym group0_3_L5 by auto
     then obtain f where "f\<in>bij(M,{\<one>})" unfolding eqpoll_def by auto
     then have inj:"f\<in>inj(M,{\<one>})" unfolding bij_def by auto
     then have fun:"f:M\<rightarrow>{\<one>}" unfolding inj_def by auto
     {
-      fix b assume "b\<in>M""b\<noteq>\<one>"
-      then have "f`b\<noteq>f`\<one>" using inj \<open>\<one>\<in>M\<close> unfolding inj_def by auto
-      then have "False" using \<open>b\<in>M\<close> \<open>\<one>\<in>M\<close> apply_type[OF fun] by auto
+      fix b assume b:"b\<in>M" "b\<noteq>\<one>"
+      with \<open>\<one>\<in>M\<close> have "f`b\<noteq>f`\<one>" using inj unfolding inj_def by auto
+      moreover from fun b(1) have "f`b\<in>{\<one>}" by (rule apply_type)
+      moreover from fun one(1) have "f`\<one>\<in>{\<one>}" by (rule apply_type)
+      ultimately have "False" by auto
     }
     then have "M={\<one>}" using \<open>\<one>\<in>M\<close> by auto
   }
@@ -221,9 +223,19 @@ qed
 lemma (in group0) whole_normal_subgroup:
   shows "IsAnormalSubgroup(G,P,G)"
   unfolding IsAnormalSubgroup_def
-  using group_op_closed inverse_in_group
-  using group0_2_L2 group0_3_T3[of "G"] unfolding IsOpClosed_def
-    by auto
+proof(safe)
+  show "IsAsubgroup(G,P)" 
+  proof (rule group0_3_T3)
+    show "G\<subseteq>G" by auto
+    show "\<forall>x\<in>G. x\<inverse>\<in>G" using inverse_in_group by auto
+    show "G\<noteq>0" using group0_2_L2 by auto
+    show "G{is closed under}P" using group_op_closed
+      unfolding IsOpClosed_def by auto
+  qed
+  fix n g assume ng:"n\<in>G" "g\<in>G"
+  then show "P ` \<langle>P ` \<langle>g, n\<rangle>, GroupInv(G, P) ` g\<rangle> \<in> G"
+    using group_op_closed inverse_in_group by auto
+qed
 
 subsection\<open>Simple groups\<close>
 
@@ -232,7 +244,7 @@ it is natural to define simplicity of groups in the following way:\<close>
 
 definition
   IsSimple ("[_,_]{is a simple group}" 89)
-  where "[G,f]{is a simple group} \<equiv> IsAgroup(G,f)\<and>(\<forall>M. IsAnormalSubgroup(G,f,M) \<longrightarrow> M=G\<or>M={TheNeutralElement(G,f)})"
+  where "[G,f]{is a simple group} \<equiv> IsAgroup(G,f) \<and> (\<forall>M. IsAnormalSubgroup(G,f,M) \<longrightarrow> M=G\<or>M={TheNeutralElement(G,f)})"
 
 text\<open>From the definition follows that if a group has no subgroups,
 then it is simple.\<close>
