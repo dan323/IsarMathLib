@@ -259,7 +259,7 @@ corollary (in group0) noSubgroup_imp_simple:
   assumes "\<forall>H. IsAsubgroup(H,P)\<longrightarrow> H=G\<or>H={\<one>}"
   shows "[G,P]{is a simple group}"
 proof-
-  have "IsAgroup(G,P)" using groupAssum. moreover
+  have "IsAgroup(G,P)" using groupAssum by auto moreover
   {
     fix M assume "IsAnormalSubgroup(G,P,M)"
     then have "IsAsubgroup(M,P)" unfolding IsAnormalSubgroup_def by auto
