@@ -220,6 +220,8 @@ proof-
   ultimately show ?thesis using only_one_equipoll_sub by auto
 qed
 
+text\<open>The whole group is normal as a subgroup\<close>
+
 lemma (in group0) whole_normal_subgroup:
   shows "IsAnormalSubgroup(G,P,G)"
   unfolding IsAnormalSubgroup_def
@@ -238,6 +240,9 @@ proof(safe)
 qed
 
 subsection\<open>Simple groups\<close>
+
+text\<open>In this subsection we study the groups that build the rest of
+the groups: the simple groups.\<close>
 
 text\<open>Since the whole group and the trivial subgroup are always normal,
 it is natural to define simplicity of groups in the following way:\<close>
