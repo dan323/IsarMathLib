@@ -224,7 +224,7 @@ text\<open>The whole group is normal as a subgroup\<close>
 
 lemma (in group0) whole_normal_subgroup:
   shows "IsAnormalSubgroup(G,P,G)"
-proof(unfold IsAnormalSubgroup_def)
+proof-
   have "IsAsubgroup(G,P)" 
   proof (rule group0_3_T3)
     show "G\<subseteq>G" by auto
@@ -237,7 +237,8 @@ proof(unfold IsAnormalSubgroup_def)
     fix n g assume ng:"n\<in>G" "g\<in>G"
     then have "P ` \<langle>P ` \<langle>g, n\<rangle>, GroupInv(G, P) ` g\<rangle> \<in> G"
       using group_op_closed inverse_in_group by auto
-  } ultimately show "IsAsubgroup(G, P) \<and> (\<forall>n\<in>G. \<forall>g\<in>G. P ` \<langle>P ` \<langle>g, n\<rangle>, GroupInv(G, P) ` g\<rangle> \<in> G)" by auto
+  } ultimately have "IsAsubgroup(G, P) \<and> (\<forall>n\<in>G. \<forall>g\<in>G. P ` \<langle>P ` \<langle>g, n\<rangle>, GroupInv(G, P) ` g\<rangle> \<in> G)" by auto
+  then show ?thesis unfolding IsAnormalSubgroup_def.
 qed
 
 subsection\<open>Simple groups\<close>
