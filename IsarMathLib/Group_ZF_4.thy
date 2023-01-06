@@ -304,16 +304,19 @@ lemma (in group0) finite_subgroup:
 text\<open>The space of cosets is also finite. In particular, quotient groups.\<close>
 
 lemma (in group0) finite_cosets:
-  assumes "Finite(G)" "IsAsubgroup(H,P)" "r=QuotientGroupRel(G,P,H)"
+  assumes "Finite(G)" "IsAsubgroup(H,P)"
+  defines "r \<equiv> QuotientGroupRel(G,P,H)"
   shows "Finite(G//r)"
 proof- 
   have fun:"{\<langle>g,r``{g}\<rangle>. g\<in>G}:G\<rightarrow>(G//r)" unfolding Pi_def function_def domain_def by auto
   {
     fix C assume C:"C\<in>G//r"
-    then obtain c where c:"c\<in>C" using EquivClass_1_L5[OF Group_ZF_2_4_L1[OF assms(2)]] assms(3) by auto
-    with C have "r``{c}=C" using EquivClass_1_L2[OF Group_ZF_2_4_L3] assms(2,3) by auto
-    with c C have "\<langle>c,C\<rangle>\<in>{\<langle>g,r``{g}\<rangle>. g\<in>G}" using EquivClass_1_L1[OF Group_ZF_2_4_L3] assms(2,3)
-      by auto
+    have equiv:"equiv(G,r)" using Group_ZF_2_4_L3 assms(2) unfolding r_def by auto
+    then have "refl(G,r)" unfolding equiv_def by auto
+    with C have "C\<noteq>0" using EquivClass_1_L5 by auto
+    then obtain c where c:"c\<in>C" by auto
+    with C have "r``{c}=C" using EquivClass_1_L2 equiv by auto
+    with c C have "\<langle>c,C\<rangle>\<in>{\<langle>g,r``{g}\<rangle>. g\<in>G}" using EquivClass_1_L1 equiv by auto
     then have "{\<langle>g,r``{g}\<rangle>. g\<in>G}`c=C" "c\<in>G" using apply_equality fun by auto
     then have "\<exists>c\<in>G. {\<langle>g,r``{g}\<rangle>. g\<in>G}`c=C" by auto
   }
@@ -322,19 +325,24 @@ proof-
   then have G:"G\<lesssim>n" "Ord(n)" using eqpoll_imp_lepoll by auto
   then have "G//r\<lesssim>G" using surj_fun_inv_2 surj by auto
   with G(1) have "G//r\<lesssim>n" using lepoll_trans by blast
-  then show "Finite(G//r)" using lepoll_nat_imp_Finite \<open>n\<in>nat\<close> by auto
+  with \<open>n\<in>nat\<close> show "Finite(G//r)" using lepoll_nat_imp_Finite by auto
 qed
 
 text\<open>All the cosets are equipollent.\<close>
 
 lemma (in group0) cosets_equipoll:
-  assumes "IsAsubgroup(H,P)" "r=QuotientGroupRel(G,P,H)" "g1\<in>G""g2\<in>G"
-  shows "r``{g1}\<approx>r``{g2}"
+  assumes "IsAsubgroup(H,P)" "g1\<in>G""g2\<in>G"
+  defines "r \<equiv> QuotientGroupRel(G,P,H)"
+  shows "r``{g1} \<approx> r``{g2}"
 proof-
-  from assms(3,4) have GG:"(g1\<inverse>)\<cdot>g2\<in>G" using inverse_in_group group_op_closed by auto
+  have equiv:"equiv(G,r)" using Group_ZF_2_4_L3 assms(1) unfolding r_def by auto
+  from assms(3,2) have GG:"(g1\<inverse>)\<cdot>g2\<in>G" using inverse_in_group group_op_closed by auto
   then have "RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)\<in>bij(G,G)" using trans_bij(1) by auto moreover
-  have sub2:"r``{g2}\<subseteq>G" using EquivClass_1_L1[OF Group_ZF_2_4_L3[OF assms(1)]] assms(2,4) unfolding quotient_def by auto
-  have sub:"r``{g1}\<subseteq>G" using EquivClass_1_L1[OF Group_ZF_2_4_L3[OF assms(1)]] assms(2,3) unfolding quotient_def by auto
+  have "r``{g2}\<in>G//r" using assms(3) unfolding quotient_def by auto
+  then have sub2:"r``{g2}\<subseteq>G" using EquivClass_1_L1 equiv
+      assms(3) by blast
+  have "r``{g1}\<in>G//r" using assms(2) unfolding quotient_def by auto
+  then have sub:"r``{g1}\<subseteq>G" using EquivClass_1_L1 equiv assms(2) by blast
   ultimately have "restrict(RightTranslation(G,P,(g1\<inverse>)\<cdot>g2),r``{g1})\<in>bij(r``{g1},RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)``(r``{g1}))"
     using restrict_bij unfolding bij_def by auto
   then have "r``{g1}\<approx>RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)``(r``{g1})" unfolding eqpoll_def by auto
