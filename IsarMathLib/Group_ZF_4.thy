@@ -280,11 +280,14 @@ do not have subgroups.\<close>
 corollary (in abelian_group) abelian_simple_noSubgroups:
   assumes "[G,P]{is a simple group}"
   shows "\<forall>H. IsAsubgroup(H,P)\<longrightarrow> H=G\<or>H={\<one>}"
-proof(safe)
-  fix H assume A:"IsAsubgroup(H,P)""H \<noteq> {\<one>}"
-  then have "IsAnormalSubgroup(G,P,H)" using Group_ZF_2_4_L6(1) groupAssum isAbelian
-    by auto
-  with assms(1) A show "H=G" unfolding IsSimple_def by auto
+proof-
+  {
+    fix H assume A:"IsAsubgroup(H,P)""H \<noteq> {\<one>}"
+    then have "IsAnormalSubgroup(G,P,H)" using Group_ZF_2_4_L6(1) groupAssum isAbelian
+      by auto
+    with assms(1) A have "H=G" unfolding IsSimple_def by auto
+  }
+  then show ?thesis by auto
 qed
 
 subsection\<open>Finite groups\<close>
