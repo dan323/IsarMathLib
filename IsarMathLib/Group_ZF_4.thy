@@ -37,6 +37,8 @@ forms a ring with unity and we also prove the first isomorphism theorem.\<close>
 
 subsection\<open>Conjugation of subgroups\<close>
 
+text\<open>First we show some properties of conjugation\<close>
+
 text\<open>The conjugate of a subgroup is a subgroup.\<close>
 
 theorem (in group0) conj_group_is_group:
@@ -91,11 +93,6 @@ proof-
   then have "{g\<cdot>(h\<cdot>g\<inverse>). h\<in>H}\<noteq>0" by auto ultimately
   show ?thesis using group0_3_T3 by auto
 qed
-
-text\<open>In the context of \<open>group0\<close>, we may use all results of \<open>semigr0\<close>.\<close>
-
-sublocale group0 < semigroup:semigr0 G P groper "\<lambda>x. Fold1(P,x)" Append Concat  
-  unfolding semigr0_def using groupAssum IsAgroup_def IsAmonoid_def by auto
 
 text\<open>Every set is equipollent with its conjugates.\<close>
 
@@ -222,7 +219,9 @@ lemma(in group0) whole_normal_subgroup:
   using group0_2_L2 group0_3_T3[of "G"] unfolding IsOpClosed_def
     by auto
 
-text\<open>Since the whole group and the trivial subgroup are normal,
+subsection\<open>Simple groups\<close>
+
+text\<open>Since the whole group and the trivial subgroup are always normal,
 it is natural to define simplicity of groups in the following way:\<close>
 
 definition
@@ -999,5 +998,10 @@ proof(safe)
   then show "q`(P`\<langle>x,y\<rangle>) = QuotientGroupOp(G, P, H) ` \<langle>q ` x, q ` y\<rangle>"
     unfolding q_def r_def using lam_funtype lamE as by auto
 qed
+
+text\<open>In the context of \<open>group0\<close>, we may use all results of \<open>semigr0\<close>.\<close>
+
+sublocale group0 < semigroup:semigr0 G P groper "\<lambda>x. Fold1(P,x)" Append Concat  
+  unfolding semigr0_def using groupAssum IsAgroup_def IsAmonoid_def by auto
 
 end
