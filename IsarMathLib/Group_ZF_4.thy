@@ -59,7 +59,7 @@ proof-
     ultimately have "r\<inverse>=(h\<cdot>(g\<inverse>))\<inverse>\<cdot>(g)\<inverse>" using group_inv_of_two assms(2) by auto
     moreover
     from s assms(2) h(2) have r:"r\<in>G" using group_op_closed by auto
-    have "(h\<cdot>(g\<inverse>))\<inverse>=(g\<inverse>)\<inverse>\<cdot>h\<inverse>" using group_inv_of_two[OF \<open>h\<in>G\<close>\<open>g\<inverse>\<in>G\<close>] by auto
+    have "(h\<cdot>(g\<inverse>))\<inverse>=(g\<inverse>)\<inverse>\<cdot>h\<inverse>" using group_inv_of_two \<open>h\<in>G\<close> \<open>g\<inverse>\<in>G\<close> by auto
     moreover have "(g\<inverse>)\<inverse>=g" using group_inv_of_inv[OF assms(2)] by auto
     ultimately have "r\<inverse>=(g\<cdot>(h\<inverse>))\<cdot>(g)\<inverse>" by auto
     then have "r\<inverse>=g\<cdot>((h\<inverse>)\<cdot>(g)\<inverse>)" using group_oper_assoc[OF assms(2) \<open>h\<inverse>\<in>G\<close>\<open>g\<inverse>\<in>G\<close>] by auto
