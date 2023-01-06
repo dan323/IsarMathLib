@@ -236,8 +236,8 @@ proof-
     fix n g assume ng:"n\<in>G" "g\<in>G"
     then have "P ` \<langle>P ` \<langle>g, n\<rangle>, GroupInv(G, P) ` g\<rangle> \<in> G"
       using group_op_closed inverse_in_group by auto
-  } ultimately have "IsAsubgroup(G, P) \<and> (\<forall>n\<in>G. \<forall>g\<in>G. P ` \<langle>P ` \<langle>g, n\<rangle>, GroupInv(G, P) ` g\<rangle> \<in> G)" by auto
-  then show ?thesis unfolding IsAnormalSubgroup_def.
+  } 
+  ultimately show ?thesis unfolding IsAnormalSubgroup_def by auto
 qed
 
 subsection\<open>Simple groups\<close>
