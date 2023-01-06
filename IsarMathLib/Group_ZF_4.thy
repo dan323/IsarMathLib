@@ -268,6 +268,8 @@ proof-
   ultimately show ?thesis unfolding IsSimple_def by auto
 qed
 
+text\<open>We add a context for an abelian group\<close>
+
 locale abelian_group = group0 +
   assumes isAbelian: "P {is commutative on} G"
 
