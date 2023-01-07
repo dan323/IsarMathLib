@@ -380,7 +380,7 @@ proof-
         assms(2) inverse_in_group by auto
     with G have "g1\<cdot>(g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>))=g2\<cdot>t\<inverse>" using group0_2_L6 assms(2) group0_2_L2 by auto
     with H have HH:"g1\<cdot>(g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>))\<in>H" by auto
-    have GGG:"t\<cdot>g2\<inverse>\<in>G" using \<open>t\<in>G\<close> inverse_in_group assms(3) group_op_closed by auto
+    from \<open>t\<in>G\<close> have GGG:"t\<cdot>g2\<inverse>\<in>G" using inverse_in_group assms(3) group_op_closed by auto
     from \<open>t\<in>G\<close> have "(t\<cdot>g2\<inverse>)\<inverse>=g2\<inverse>\<inverse>\<cdot>t\<inverse>" using group_inv_of_two inverse_in_group assms(3) by auto
     also have "\<dots>=g2\<cdot>t\<inverse>" using group_inv_of_inv assms(3) by auto
     ultimately have "(t\<cdot>g2\<inverse>)\<inverse>=g2\<cdot>t\<inverse>" by auto
@@ -390,9 +390,9 @@ proof-
     have "(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G" using assms(2) \<open>t\<in>G\<close> inverse_in_group assms(3) group_op_closed by auto
     with HHH have "\<langle>g1,(t\<cdot>g2\<inverse>)\<cdot>g1\<rangle>\<in>r" using assms(2) unfolding r_def QuotientGroupRel_def by auto
     then have rg1:"t\<cdot>g2\<inverse>\<cdot>g1\<in>r``{g1}" using image_iff by auto
-    have "t\<cdot>g2\<inverse>\<cdot>g1\<cdot>((g1\<inverse>)\<cdot>g2)=t\<cdot>(g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2)" using group_oper_assoc[OF \<open>t\<in>G\<close> inverse_in_group[OF assms(3)] assms(2)]
+    from \<open>t\<in>G\<close> have "t\<cdot>g2\<inverse>\<cdot>g1\<cdot>((g1\<inverse>)\<cdot>g2)=t\<cdot>(g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2)" using group_oper_assoc inverse_in_group assms(3) assms(2)
       by auto
-    also have "\<dots>=t\<cdot>((g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2))" using group_oper_assoc[OF \<open>t\<in>G\<close> group_op_closed[OF inverse_in_group[OF assms(3)] assms(2)] GG]
+    also from \<open>t\<in>G\<close> have "\<dots>=t\<cdot>((g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2))" using group_oper_assoc group_op_closed inverse_in_group assms(3) assms(2) GG
       by auto
     also have "\<dots>=t\<cdot>(g2\<inverse>\<cdot>(g1\<cdot>((g1\<inverse>)\<cdot>g2)))" using group_oper_assoc[OF inverse_in_group[OF assms(3)] assms(2) GG] by auto
     also have "\<dots>=t\<cdot>(g2\<inverse>\<cdot>(g1\<cdot>(g1\<inverse>)\<cdot>g2))" using group_oper_assoc[OF assms(2) inverse_in_group[OF assms(2)] assms(3)] by auto
