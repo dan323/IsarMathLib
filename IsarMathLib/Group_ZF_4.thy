@@ -387,7 +387,7 @@ proof-
     then have "g1\<inverse>\<cdot>(t\<cdot>g2\<inverse>)\<inverse>=g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>)" by auto
     then have "((t\<cdot>g2\<inverse>)\<cdot>g1)\<inverse>=g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>)" using group_inv_of_two GGG assms(2) by auto
     then have HHH:"g1\<cdot>((t\<cdot>g2\<inverse>)\<cdot>g1)\<inverse>\<in>H" using HH by auto
-    have "(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G" using assms(2) \<open>t\<in>G\<close> inverse_in_group assms(3) group_op_closed by auto
+    from \<open>t\<in>G\<close> have "(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G" using assms(2) inverse_in_group assms(3) group_op_closed by auto
     with HHH have "\<langle>g1,(t\<cdot>g2\<inverse>)\<cdot>g1\<rangle>\<in>r" using assms(2) unfolding r_def QuotientGroupRel_def by auto
     then have rg1:"t\<cdot>g2\<inverse>\<cdot>g1\<in>r``{g1}" using image_iff by auto
     from assms(3) have "g2\<inverse>:G" using inverse_in_group by auto
