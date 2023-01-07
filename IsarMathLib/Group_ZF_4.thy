@@ -416,20 +416,22 @@ theorem (in group0) Lagrange:
   defines "r \<equiv> QuotientGroupRel(G,P,H)"
   shows "|G|=|H| #* |G//r|"
 proof-
+  have equiv:"equiv(G,r)" using Group_ZF_2_4_L3 assms(2) unfolding r_def by auto
+  have "r``{\<one>} \<subseteq>G" unfolding r_def QuotientGroupRel_def by auto
   have "Finite(G//r)" using assms finite_cosets by auto moreover
   have un:"\<Union>(G//r)=G" using Union_quotient Group_ZF_2_4_L3 assms(2,3) by auto
   then have "Finite(\<Union>(G//r))" using assms(1) by auto moreover
-  have "\<forall>c1\<in>(G//r). \<forall>c2\<in>(G//r). c1\<noteq>c2 \<longrightarrow> c1\<inter>c2=0" using quotient_disj[OF Group_ZF_2_4_L3[OF assms(2)]]
-    assms(3) by auto moreover
-  have "\<forall>aa\<in>G. aa\<in>H \<longleftrightarrow> \<langle>aa,\<one>\<rangle>\<in>r" using Group_ZF_2_4_L5C assms(3) by auto
-  then have "\<forall>aa\<in>G. aa\<in>H \<longleftrightarrow> \<langle>\<one>,aa\<rangle>\<in>r" using Group_ZF_2_4_L2 assms(2,3) unfolding sym_def
+  have "\<forall>c1\<in>(G//r). \<forall>c2\<in>(G//r). c1\<noteq>c2 \<longrightarrow> c1\<inter>c2=0" using quotient_disj
+      equiv by blast moreover
+  have "\<forall>aa\<in>G. aa\<in>H \<longleftrightarrow> \<langle>aa,\<one>\<rangle>\<in>r" using Group_ZF_2_4_L5C unfolding r_def by auto
+  then have "\<forall>aa\<in>G. aa\<in>H \<longleftrightarrow> \<langle>\<one>,aa\<rangle>\<in>r" using equiv unfolding sym_def equiv_def
     by auto
   then have "\<forall>aa\<in>G. aa\<in>H \<longleftrightarrow> aa\<in>r``{\<one>}" using image_iff by auto
-  then have H:"H=r``{\<one>}" using group0_3_L2[OF assms(2)] assms(3) unfolding QuotientGroupRel_def by auto
+  with \<open>r``{\<one>} \<subseteq>G\<close> have H:"H=r``{\<one>}" using group0_3_L2 assms(2) by blast
   {
     fix c assume "c\<in>(G//r)"
     then obtain g where "g\<in>G" "c=r``{g}" unfolding quotient_def by auto
-    then have "c\<approx>r``{\<one>}" using cosets_equipoll[OF assms(2)] r_def group0_2_L2 by auto
+    then have "c\<approx>r``{\<one>}" using cosets_equipoll assms(2) group0_2_L2 unfolding r_def by auto
     then have "|c|=|H|" using H cardinal_cong by auto
   }
   then have "\<forall>c\<in>(G//r). |c|=|H|" by auto ultimately
@@ -454,6 +456,26 @@ proof-
   with assms have "G\<in>{H\<in>Pow(G). X\<subseteq>H \<and> IsAsubgroup(H,P)}" by auto
   then have "{H\<in>Pow(G). X\<subseteq>H \<and> IsAsubgroup(H,P)}\<noteq>0" by auto
   then show ?thesis using subgroup_inter SubgroupGenerated_def assms by auto
+qed
+
+theorem(in group0) subgroupGen_contains_set:
+  assumes "X\<subseteq>G"
+  shows "X \<subseteq> \<langle>X\<rangle>\<^sub>G"
+proof-
+  have "restrict(P,G\<times>G)=P" using group_oper_fun restrict_idem unfolding Pi_def by auto
+  then have "IsAsubgroup(G,P)" unfolding IsAsubgroup_def using groupAssum by auto
+  with assms have "G\<in>{H\<in>Pow(G). X\<subseteq>H \<and> IsAsubgroup(H,P)}" by auto
+  then have "{H\<in>Pow(G). X\<subseteq>H \<and> IsAsubgroup(H,P)}\<noteq>0" by auto
+  then show ?thesis using subgroup_inter SubgroupGenerated_def assms by auto
+qed
+
+theorem(in group0) subgroupGen_minimal:
+  assumes "IsAsubgroup(H,P)" "X\<subseteq>H"
+  shows "\<langle>X\<rangle>\<^sub>G \<subseteq> H"
+proof-
+  from assms have sub:"X\<subseteq>G" using group0_3_L2 by auto
+  from assms have "H\<in>{H\<in>Pow(G). X\<subseteq>H \<and> IsAsubgroup(H,P)}" using group0_3_L2 by auto
+  then show ?thesis using sub subgroup_inter SubgroupGenerated_def assms by auto
 qed
 
 subsection\<open>Homomorphisms\<close>
