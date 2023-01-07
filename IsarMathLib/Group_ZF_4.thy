@@ -383,22 +383,24 @@ proof-
     from \<open>t\<in>G\<close> have GGG:"t\<cdot>g2\<inverse>\<in>G" using inverse_in_group assms(3) group_op_closed by auto
     from \<open>t\<in>G\<close> have "(t\<cdot>g2\<inverse>)\<inverse>=g2\<inverse>\<inverse>\<cdot>t\<inverse>" using group_inv_of_two inverse_in_group assms(3) by auto
     also have "\<dots>=g2\<cdot>t\<inverse>" using group_inv_of_inv assms(3) by auto
-    ultimately have "(t\<cdot>g2\<inverse>)\<inverse>=g2\<cdot>t\<inverse>" by auto
+    finally have "(t\<cdot>g2\<inverse>)\<inverse>=g2\<cdot>t\<inverse>" by auto
     then have "g1\<inverse>\<cdot>(t\<cdot>g2\<inverse>)\<inverse>=g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>)" by auto
     then have "((t\<cdot>g2\<inverse>)\<cdot>g1)\<inverse>=g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>)" using group_inv_of_two GGG assms(2) by auto
     then have HHH:"g1\<cdot>((t\<cdot>g2\<inverse>)\<cdot>g1)\<inverse>\<in>H" using HH by auto
     have "(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G" using assms(2) \<open>t\<in>G\<close> inverse_in_group assms(3) group_op_closed by auto
     with HHH have "\<langle>g1,(t\<cdot>g2\<inverse>)\<cdot>g1\<rangle>\<in>r" using assms(2) unfolding r_def QuotientGroupRel_def by auto
     then have rg1:"t\<cdot>g2\<inverse>\<cdot>g1\<in>r``{g1}" using image_iff by auto
+    from assms(3) have "g2\<inverse>:G" using inverse_in_group by auto
     from \<open>t\<in>G\<close> have "t\<cdot>g2\<inverse>\<cdot>g1\<cdot>((g1\<inverse>)\<cdot>g2)=t\<cdot>(g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2)" using group_oper_assoc inverse_in_group assms(3) assms(2)
       by auto
-    also from \<open>t\<in>G\<close> have "\<dots>=t\<cdot>((g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2))" using group_oper_assoc group_op_closed inverse_in_group assms(3) assms(2) GG
+    also from \<open>t\<in>G\<close> have "\<dots>=t\<cdot>((g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2))" using group_oper_assoc group_op_closed inverse_in_group assms(3) assms(2)
       by auto
-    also have "\<dots>=t\<cdot>(g2\<inverse>\<cdot>(g1\<cdot>((g1\<inverse>)\<cdot>g2)))" using group_oper_assoc[OF inverse_in_group[OF assms(3)] assms(2) GG] by auto
-    also have "\<dots>=t\<cdot>(g2\<inverse>\<cdot>(g1\<cdot>(g1\<inverse>)\<cdot>g2))" using group_oper_assoc[OF assms(2) inverse_in_group[OF assms(2)] assms(3)] by auto
-    also have "\<dots>=t" using group0_2_L6[OF assms(3)] group0_2_L6[OF assms(2)] group0_2_L2 \<open>t\<in>G\<close> assms(3) by auto
-    ultimately have "t\<cdot>g2\<inverse>\<cdot>g1\<cdot>((g1\<inverse>)\<cdot>g2)=t" by auto
-    then have "RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`(t\<cdot>g2\<inverse>\<cdot>g1)=t" using group0_5_L2(1)[OF GG] \<open>(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G\<close> by auto
+    also from GG \<open>g2\<inverse>:G\<close> have "\<dots>=t\<cdot>(g2\<inverse>\<cdot>(g1\<cdot>((g1\<inverse>)\<cdot>g2)))" using group_oper_assoc 
+      assms(2) by auto
+    also have "\<dots>=t\<cdot>(g2\<inverse>\<cdot>(g1\<cdot>(g1\<inverse>)\<cdot>g2))" using group_oper_assoc assms(2) inverse_in_group assms(3) by auto
+    also from \<open>t\<in>G\<close> have "\<dots>=t" using group0_2_L6 assms(3) group0_2_L6 assms(2) group0_2_L2 assms(3) by auto
+    finally have "t\<cdot>g2\<inverse>\<cdot>g1\<cdot>((g1\<inverse>)\<cdot>g2)=t" by auto
+    with \<open>(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G\<close> GG have "RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`(t\<cdot>g2\<inverse>\<cdot>g1)=t" using group0_5_L2(1) by auto
     then have "t\<in>{RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`t. t\<in>r``{g1}}" using rg1 by force
   }
   then have "r``{g2}\<subseteq>{RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`t. t\<in>r``{g1}}" by blast
