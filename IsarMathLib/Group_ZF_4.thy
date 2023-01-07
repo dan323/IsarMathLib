@@ -359,15 +359,15 @@ proof-
     then have "g2\<cdot>t\<inverse>=g2\<cdot>(((g2\<inverse>)\<cdot>g1\<inverse>\<inverse>)\<cdot>q\<inverse>)" using group_inv_of_two inverse_in_group assms(2)
       assms(3) by auto
     then have "g2\<cdot>t\<inverse>=g2\<cdot>(((g2\<inverse>)\<cdot>g1)\<cdot>q\<inverse>)" using group_inv_of_inv assms(2) by auto moreover
-    from t \<open>q\<in>G\<close> \<open>g2\<in>G\<close> have "t\<in>G" using inverse_in_group assms(2) group_op_closed by auto
     have "(g2\<inverse>)\<cdot>g1\<in>G" using assms(2) inverse_in_group assms(3) group_op_closed by auto
     with assms(3) \<open>q\<inverse>\<in>G\<close> have "g2\<cdot>(((g2\<inverse>)\<cdot>g1)\<cdot>q\<inverse>)=g2\<cdot>((g2\<inverse>)\<cdot>g1)\<cdot>q\<inverse>" using group_oper_assoc by auto
     moreover have "g2\<cdot>((g2\<inverse>)\<cdot>g1)=g2\<cdot>(g2\<inverse>)\<cdot>g1" using assms(2) inverse_in_group assms(3)
       group_oper_assoc by auto
     then have "g2\<cdot>((g2\<inverse>)\<cdot>g1)=g1" using group0_2_L6 assms(3) group0_2_L2 assms(2) by auto ultimately
     have "g2\<cdot>t\<inverse>=g1\<cdot>q\<inverse>" by auto
-    with \<open>g1\<cdot>(q\<inverse>)\<in>H\<close> have "g2\<cdot>t\<inverse>\<in>H" by auto
-    with \<open>t\<in>G\<close> have "\<langle>g2,t\<rangle>\<in>r" unfolding QuotientGroupRel_def r_def using assms(3) by auto
+    with \<open>g1\<cdot>(q\<inverse>)\<in>H\<close> have "g2\<cdot>t\<inverse>\<in>H" by auto moreover
+    from t \<open>q\<in>G\<close> \<open>g2\<in>G\<close> have "t\<in>G" using inverse_in_group assms(2) group_op_closed by auto
+    ultimately have "\<langle>g2,t\<rangle>\<in>r" unfolding QuotientGroupRel_def r_def using assms(3) by auto
     then have "t\<in>r``{g2}" using image_iff assms(4) by auto
   }
   then have A1:"{RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`t. t\<in>r``{g1}}\<subseteq>r``{g2}" by auto
@@ -382,12 +382,12 @@ proof-
     with H have HH:"g1\<cdot>(g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>))\<in>H" by auto
     have GGG:"t\<cdot>g2\<inverse>\<in>G" using \<open>t\<in>G\<close> inverse_in_group assms(3) group_op_closed by auto
     from \<open>t\<in>G\<close> have "(t\<cdot>g2\<inverse>)\<inverse>=g2\<inverse>\<inverse>\<cdot>t\<inverse>" using group_inv_of_two inverse_in_group assms(3) by auto
-    also have "\<dots>=g2\<cdot>t\<inverse>" using group_inv_of_inv[OF assms(3)] by auto
+    also have "\<dots>=g2\<cdot>t\<inverse>" using group_inv_of_inv assms(3) by auto
     ultimately have "(t\<cdot>g2\<inverse>)\<inverse>=g2\<cdot>t\<inverse>" by auto
     then have "g1\<inverse>\<cdot>(t\<cdot>g2\<inverse>)\<inverse>=g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>)" by auto
-    then have "((t\<cdot>g2\<inverse>)\<cdot>g1)\<inverse>=g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>)" using group_inv_of_two[OF GGG assms(2)] by auto
+    then have "((t\<cdot>g2\<inverse>)\<cdot>g1)\<inverse>=g1\<inverse>\<cdot>(g2\<cdot>t\<inverse>)" using group_inv_of_two GGG assms(2) by auto
     then have HHH:"g1\<cdot>((t\<cdot>g2\<inverse>)\<cdot>g1)\<inverse>\<in>H" using HH by auto
-    have "(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G" using assms(2) \<open>t\<in>G\<close> inverse_in_group[OF assms(3)] group_op_closed by auto
+    have "(t\<cdot>g2\<inverse>)\<cdot>g1\<in>G" using assms(2) \<open>t\<in>G\<close> inverse_in_group assms(3) group_op_closed by auto
     with HHH have "\<langle>g1,(t\<cdot>g2\<inverse>)\<cdot>g1\<rangle>\<in>r" using assms(2) unfolding r_def QuotientGroupRel_def by auto
     then have rg1:"t\<cdot>g2\<inverse>\<cdot>g1\<in>r``{g1}" using image_iff by auto
     have "t\<cdot>g2\<inverse>\<cdot>g1\<cdot>((g1\<inverse>)\<cdot>g2)=t\<cdot>(g2\<inverse>\<cdot>g1)\<cdot>((g1\<inverse>)\<cdot>g2)" using group_oper_assoc[OF \<open>t\<in>G\<close> inverse_in_group[OF assms(3)] assms(2)]
