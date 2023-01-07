@@ -346,28 +346,28 @@ proof-
   with bij have "restrict(RightTranslation(G,P,(g1\<inverse>)\<cdot>g2),r``{g1})\<in>bij(r``{g1},RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)``(r``{g1}))"
     using restrict_bij unfolding bij_def by auto
   then have "r``{g1}\<approx>RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)``(r``{g1})" unfolding eqpoll_def by auto
-  then have A0:"r``{g1}\<approx>{RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`t. t\<in>r``{g1}}"
-    using func_imagedef[OF group0_5_L1(1)[OF GG] sub] by auto
+  with GG sub have A0:"r``{g1}\<approx>{RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`t. t\<in>r``{g1}}"
+    using func_imagedef group0_5_L1(1) by force
   {
     fix t assume "t\<in>{RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`t. t\<in>r``{g1}}"
     then obtain q where q:"t=RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`q" "q\<in>r``{g1}" by auto
     then have "\<langle>g1,q\<rangle>\<in>r" "q\<in>G" using image_iff sub by auto
     then have "g1\<cdot>(q\<inverse>)\<in>H" "q\<inverse>\<in>G" using inverse_in_group unfolding r_def QuotientGroupRel_def by auto
-    from q(1) have t:"t=q\<cdot>((g1\<inverse>)\<cdot>g2)" using group0_5_L2(1)[OF GG] q(2) sub by auto
+    from GG q sub have t:"t=q\<cdot>((g1\<inverse>)\<cdot>g2)" using group0_5_L2(1) by auto
     then have "g2\<cdot>t\<inverse>=g2\<cdot>(q\<cdot>((g1\<inverse>)\<cdot>g2))\<inverse>" by auto
-    then have "g2\<cdot>t\<inverse>=g2\<cdot>(((g1\<inverse>)\<cdot>g2)\<inverse>\<cdot>q\<inverse>)" using group_inv_of_two[OF \<open>q\<in>G\<close> GG] by auto
-    then have "g2\<cdot>t\<inverse>=g2\<cdot>(((g2\<inverse>)\<cdot>g1\<inverse>\<inverse>)\<cdot>q\<inverse>)" using group_inv_of_two[OF inverse_in_group[OF assms(2)] 
-      assms(3)] by auto
+    with \<open>q\<in>G\<close> GG have "g2\<cdot>t\<inverse>=g2\<cdot>(((g1\<inverse>)\<cdot>g2)\<inverse>\<cdot>q\<inverse>)" using group_inv_of_two by auto
+    then have "g2\<cdot>t\<inverse>=g2\<cdot>(((g2\<inverse>)\<cdot>g1\<inverse>\<inverse>)\<cdot>q\<inverse>)" using group_inv_of_two inverse_in_group assms(2)
+      assms(3) by auto
     then have "g2\<cdot>t\<inverse>=g2\<cdot>(((g2\<inverse>)\<cdot>g1)\<cdot>q\<inverse>)" using group_inv_of_inv assms(2) by auto moreover
-    have "t\<in>G" using t \<open>q\<in>G\<close> \<open>g2\<in>G\<close> inverse_in_group[OF assms(2)] group_op_closed by auto
-    have "(g2\<inverse>)\<cdot>g1\<in>G" using assms(2) inverse_in_group[OF assms(3)] group_op_closed by auto
+    have "t\<in>G" using t \<open>q\<in>G\<close> \<open>g2\<in>G\<close> inverse_in_group assms(2) group_op_closed by auto
+    have "(g2\<inverse>)\<cdot>g1\<in>G" using assms(2) inverse_in_group assms(3) group_op_closed by auto
     with assms(3) \<open>q\<inverse>\<in>G\<close> have "g2\<cdot>(((g2\<inverse>)\<cdot>g1)\<cdot>q\<inverse>)=g2\<cdot>((g2\<inverse>)\<cdot>g1)\<cdot>q\<inverse>" using group_oper_assoc by auto
-    moreover have "g2\<cdot>((g2\<inverse>)\<cdot>g1)=g2\<cdot>(g2\<inverse>)\<cdot>g1" using assms(2) inverse_in_group[OF assms(3)] assms(3)
+    moreover have "g2\<cdot>((g2\<inverse>)\<cdot>g1)=g2\<cdot>(g2\<inverse>)\<cdot>g1" using assms(2) inverse_in_group assms(3)
       group_oper_assoc by auto
-    then have "g2\<cdot>((g2\<inverse>)\<cdot>g1)=g1" using group0_2_L6[OF assms(3)] group0_2_L2 assms(2) by auto ultimately
+    then have "g2\<cdot>((g2\<inverse>)\<cdot>g1)=g1" using group0_2_L6 assms(3) group0_2_L2 assms(2) by auto ultimately
     have "g2\<cdot>t\<inverse>=g1\<cdot>q\<inverse>" by auto
     with \<open>g1\<cdot>(q\<inverse>)\<in>H\<close> have "g2\<cdot>t\<inverse>\<in>H" by auto
-    then have "\<langle>g2,t\<rangle>\<in>r" unfolding QuotientGroupRel_def r_def using assms(3) \<open>t\<in>G\<close> by auto
+    with \<open>t\<in>G\<close> have "\<langle>g2,t\<rangle>\<in>r" unfolding QuotientGroupRel_def r_def using assms(3) by auto
     then have "t\<in>r``{g2}" using image_iff assms(4) by auto
   }
   then have A1:"{RightTranslation(G,P,(g1\<inverse>)\<cdot>g2)`t. t\<in>r``{g1}}\<subseteq>r``{g2}" by auto
