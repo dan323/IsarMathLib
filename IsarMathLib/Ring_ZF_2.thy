@@ -84,6 +84,43 @@ lemma (in ring0) ideal_dest_zero:
   shows "\<zero> \<in> I" using assms unfolding Ideal_def using
     add_group.group0_3_L5 by auto
 
+theorem (in ring0) ideal_intro:
+  assumes "\<forall>x\<in>I. \<forall>y\<in>I. x\<ra>y\<in>I" 
+    "\<forall>x\<in>I. \<forall>y\<in>R. x\<cdot>y \<in>I" 
+    "\<forall>x\<in>I. \<forall>y\<in>R. y\<cdot>x \<in>I"
+    "I \<subseteq> R" "I\<noteq>0"
+  shows "I\<triangleleft>R" unfolding Ideal_def
+proof
+  show "IsAsubgroup(I,A)"
+  proof(rule group0.group0_3_T3[of R])
+    show "I \<subseteq> R" using assms(4).
+    show "group0(R,A)" using ring0_axioms unfolding ring0_def
+      IsAring_def group0_def by auto
+    show "I {is closed under} A" unfolding IsOpClosed_def using assms(1) by auto
+    show "I \<noteq>0" using assms(5).
+    {
+      fix x assume x:"x\<in>I"
+      then have "(\<rm>x)\<in>R" using assms(4) Ring_ZF_1_L3(1) by auto
+      then have "(\<rm>x) = \<one>\<cdot>(\<rm>x)" using Ring_ZF_1_L3(6) by auto
+      then have "(\<rm>x) = \<rm>(\<one>\<cdot>x)" using Ring_ZF_1_L7(2)
+        x assms(4) Ring_ZF_1_L2(2) by auto
+      then have "(\<rm>x) = (\<rm>\<one>)\<cdot>x" using Ring_ZF_1_L7(1)
+        x assms(4) Ring_ZF_1_L2(2) by auto
+      moreover have "(\<rm>\<one>)\<in>R" using Ring_ZF_1_L2(2) Ring_ZF_1_L3(1) by auto
+      ultimately have "(\<rm>x) \<in>I" using assms(3) x by auto
+    }
+    then show "\<forall>x\<in>I. GroupInv(R, A) ` x \<in> I" by auto
+  qed
+  {
+    fix x y assume "x\<in>I" "y\<in>R"
+    then have "y \<cdot> x \<in> I \<and> x \<cdot> y \<in> I" using assms(2,3) by auto
+  }
+  then show "\<forall>x\<in>I. \<forall>y\<in>R. y \<cdot> x \<in> I \<and> x \<cdot> y \<in> I" by auto
+qed
+  
+
+
+
 text\<open>The most simple way to obtain an ideal from others is the intersection,
 since the intersection of arbitrary ideals is an ideal.\<close>
 theorem (in ring0) intersection_ideals:
@@ -592,7 +629,7 @@ For that we define the following concept of a prime ring. Note that in case that
 our ring is commutative, this is equivalent to having no zero divisors (there is no proof yet)\<close>
 definition primeRing ("[_,_,_]{is a prime ring}") where
   "IsAring(R,A,M) \<Longrightarrow> [R,A,M]{is a prime ring} \<equiv> 
-      (\<forall>x\<in>R. \<forall>y\<in>R. (\<forall>z\<in>R. M`\<langle>M`\<langle>x,z\<rangle>,y\<rangle> = TheNeutralElement(R,A)) \<longrightarrow> x =TheNeutralElement(R,A) \<or> y=TheNeutralElement(R,A))"
+      (\<forall>x\<in>R. \<forall>y\<in>R. (\<forall>z\<in>R. M`\<langle>M`\<langle>x,z\<rangle>,y\<rangle> = TheNeutralElement(R,A)) \<longrightarrow> x = TheNeutralElement(R,A) \<or> y = TheNeutralElement(R,A))"
 
 text\<open>Prime rings appear when the zero ideal is prime\<close>
 lemma (in ring0) prime_ring_zero_prime_ideal:
@@ -1100,19 +1137,23 @@ being Noetherian: every ideal is finitely generated.\<close>
 definition (in ring0) isFinGen ("_{is finitely generated}") where
 "I\<triangleleft>R \<Longrightarrow> I{is finitely generated} \<equiv> \<exists>S\<in>FinPow(R). I = \<langle>S\<rangle>\<^sub>I"
 
+text\<open>And then:\<close>
+
+definition (in ring0) isNoetherian ("{is noetherian}") where
+"{is noetherian} \<equiv> \<forall>I\<in>\<I>. (I{is finitely generated})"
 
 text\<open>For noetherian rings the arbitrary sum can be reduced
 to the sum of a finite subset of the initial set of ideals\<close>
 
 theorem (in ring0) sum_ideals_noetherian:
-  assumes "\<forall>I\<in>\<I>. (I{is finitely generated})" "\<J> \<subseteq> \<I>"
+  assumes "{is noetherian}" "\<J> \<subseteq> \<I>"
   shows "\<exists>\<T>\<in>FinPow(\<J>). (\<oplus>\<^sub>I\<J>) = (\<oplus>\<^sub>I\<T>)"
 proof-
   have JR:"(\<oplus>\<^sub>I\<J>)\<triangleleft>R" using generated_ideal_is_ideal[of "\<Union>\<J>"]
     assms(2) unfolding sumArbitraryIdeals_def[OF assms(2)]
     by auto
   with assms(1) have "(\<oplus>\<^sub>I\<J>) {is finitely generated}"
-    using ideal_dest_subset by auto
+    using ideal_dest_subset isNoetherian_def by auto
   then obtain S where S:"S\<in>FinPow(R)" "(\<oplus>\<^sub>I\<J>) = \<langle>S\<rangle>\<^sub>I"
     unfolding isFinGen_def[OF JR] by auto
   from this(1) have fins:"Finite(S)" unfolding FinPow_def

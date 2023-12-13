@@ -428,26 +428,6 @@ proof
   }
   then show "I \<subseteq> quot_homomorphism.kernel" by auto
 qed
-  
-sublocale ring2 < quotient_ring: ring0 quot qadd qmul
-  "\<lambda>x y. ideal_radd(x,I,y)" "\<lambda>y. ideal_rmin(I,y)" 
-  "\<lambda>x y. ideal_rsub(x,I,y)" "\<lambda>x y. ideal_rmult(x,I,y)"
-  "\<zero>\<^sub>I" "\<one>\<^sub>I" "\<two>\<^sub>I" "\<lambda>x. (x\<^sup>2\<^sup>I)" unfolding ring0_def quot_def
-  using quotientBy_is_ring[OF idealAssum] apply simp
-  unfolding ideal_radd_def ideal_rmin_def
-            ideal_rsub_def ideal_rmult_def
-         ideal_rzero_def ideal_rone_def
-         ideal_rtwo_def ideal_rsqr_def apply auto
-  using neutral_quotient[OF idealAssum] apply simp
-  using one_quotient[OF idealAssum] apply simp
-  using two_quotient[OF idealAssum] by simp
-
-sublocale ring2 < quot_homomorphism: ring_homo R A M quot qadd qmul qfun
-  _ _ _ _ _ _ _ _ "\<lambda>x y. ideal_radd(x,I,y)" "\<lambda>y. ideal_rmin(I,y)" 
-  "\<lambda>x y. ideal_rsub(x,I,y)" "\<lambda>x y. ideal_rmult(x,I,y)"
-  "\<zero>\<^sub>I" "\<one>\<^sub>I" "\<two>\<^sub>I" "\<lambda>x. (x\<^sup>2\<^sup>I)"
-  unfolding ring_homo_def using ringAssum quotient_ring.ringAssum
-    quotient_fun_homomor quot_fun unfolding surj_def by auto
 
 theorem (in ring_homo) kernel_empty_image:
   assumes "J\<triangleleft>R" "I \<subseteq> ker" "I\<triangleleft>R"

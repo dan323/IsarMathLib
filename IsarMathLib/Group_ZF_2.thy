@@ -75,27 +75,28 @@ text\<open>The lifted monoid operation has a neutral element, namely
   the constant function with the neutral element as the value.\<close>
 
 lemma (in monoid0) Group_ZF_2_1_L1: 
-  assumes A1: "F = f {lifted to function space over} X"
-  and A2: "E = ConstantFunction(X,TheNeutralElement(G,f))"
-  shows "E : X\<rightarrow>G \<and> (\<forall>s\<in>X\<rightarrow>G. F`\<langle> E,s\<rangle> = s \<and> F`\<langle> s,E\<rangle> = s)"
+  defines A1: "F(X) \<equiv> f {lifted to function space over} X"
+  and A2: "E(X) \<equiv> ConstantFunction(X,TheNeutralElement(G,f))"
+  shows "E(X) : X\<rightarrow>G \<and> (\<forall>s\<in>X\<rightarrow>G. F(X)`\<langle> E(X),s\<rangle> = s \<and> F(X)`\<langle> s,E(X)\<rangle> = s)"
 proof
-  from A2 show T1:"E : X\<rightarrow>G"
-    using unit_is_neutral func1_3_L1 by simp
-  show "\<forall>s\<in>X\<rightarrow>G. F`\<langle> E,s\<rangle> = s \<and> F`\<langle> s,E\<rangle> = s"
+  show T1:"E(X) : X\<rightarrow>G"
+    using unit_is_neutral func1_3_L1[of "TheNeutralElement(G,f)" G X]
+    unfolding A2 by simp
+  show "\<forall>s\<in>X\<rightarrow>G. F(X)`\<langle>E(X),s\<rangle> = s \<and> F(X)`\<langle>s,E(X)\<rangle> = s"
   proof
     fix s assume A3:"s:X\<rightarrow>G"
     from monoidAssum have T2:"f : G\<times>G\<rightarrow>G"
       using IsAmonoid_def IsAssociative_def by simp
     from A3 A1 T1 have 
-      "F`\<langle> E,s\<rangle> : X\<rightarrow>G" "F`\<langle> s,E\<rangle> : X\<rightarrow>G" "s : X\<rightarrow>G"
+      "F(X)`\<langle>E(X),s\<rangle> : X\<rightarrow>G" "F(X)`\<langle> s,E(X)\<rangle> : X\<rightarrow>G" "s : X\<rightarrow>G"
       using Group_ZF_2_1_L0 by auto
     moreover from T2 A1 T1 A2 A3 have
-      "\<forall>x\<in>X. (F`\<langle> E,s\<rangle>)`(x) = s`(x)"
-      "\<forall>x\<in>X. (F`\<langle> s,E\<rangle>)`(x) = s`(x)"
+      "\<forall>x\<in>X. (F(X)`\<langle> E(X),s\<rangle>)`(x) = s`(x)"
+      "\<forall>x\<in>X. (F(X)`\<langle> s,E(X)\<rangle>)`(x) = s`(x)"
       using func_ZF_1_L4 group0_1_L3B func1_3_L2 
 	apply_type unit_is_neutral by auto
     ultimately show 
-      "F`\<langle> E,s\<rangle> = s \<and> F`\<langle> s,E\<rangle> = s"
+      "F(X)`\<langle> E(X),s\<rangle> = s \<and> F(X)`\<langle> s,E(X)\<rangle> = s"
       using fun_extension_iff by auto
   qed
 qed
@@ -120,19 +121,16 @@ qed
 text\<open>The constant function with the neutral element as the value is the
   neutral element of the lifted monoid.\<close>
 
-lemma Group_ZF_2_1_L2:
-  assumes A1: "IsAmonoid(G,f)"
-  and A2: "F = f {lifted to function space over} X"
-  and A3: "E = ConstantFunction(X,TheNeutralElement(G,f))"
-  shows "E = TheNeutralElement(X\<rightarrow>G,F)"
+lemma (in monoid0) Group_ZF_2_1_L2:
+  defines A2: "F(X) \<equiv> f {lifted to function space over} X"
+  and A3: "E(X) \<equiv> ConstantFunction(X,TheNeutralElement(G,f))"
+  shows "E(X) = TheNeutralElement(X\<rightarrow>G,F(X))"
 proof - 
-  from A1 A2 have 
-     T1:"monoid0(G,f)" and T2:"monoid0(X\<rightarrow>G,F)"
-    using monoid0_def monoid0.Group_ZF_2_1_T1
-    by auto
-  from T1 A2 A3 have 
-    "E : X\<rightarrow>G \<and> (\<forall>s\<in>X\<rightarrow>G. F`\<langle> E,s\<rangle> = s \<and> F`\<langle> s,E\<rangle> = s)"
-    using monoid0.Group_ZF_2_1_L1 by simp
+  have T2:"monoid0(X\<rightarrow>G,F(X))" using Group_ZF_2_1_T1[of "F(X)"]
+    unfolding A2 monoid0_def by auto
+  have 
+    "E(X) : X\<rightarrow>G \<and> (\<forall>s\<in>X\<rightarrow>G. F(X)`\<langle> E(X),s\<rangle> = s \<and> F(X)`\<langle> s,E(X)\<rangle> = s)"
+    using Group_ZF_2_1_L1 unfolding A2 A3 by simp
   with T2 show ?thesis
     using monoid0.group0_1_L4 by auto
 qed

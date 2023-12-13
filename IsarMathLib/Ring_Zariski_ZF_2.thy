@@ -65,7 +65,7 @@ proof(safe)
   have m:"M = RepFun(?J,D)" using M(1) by auto
   then have mm:"\<Union>M = D(\<oplus>\<^sub>I?J)" using union_open_basic[of ?J] by auto
   obtain T where T:"T\<in>FinPow(?J)" "(\<oplus>\<^sub>I?J) = \<oplus>\<^sub>IT" using
-    sum_ideals_noetherian[OF assms(1), of ?J] by blast
+    sum_ideals_noetherian[of ?J] assms(1) unfolding isNoetherian_def by blast
   from T(2) have "D(\<oplus>\<^sub>I?J) = D(\<oplus>\<^sub>IT)" by auto
   moreover have "T\<subseteq>\<I>" using T(1) unfolding FinPow_def by auto
   ultimately have "D(\<oplus>\<^sub>I?J) = \<Union>RepFun(T,D)" using union_open_basic[of T]

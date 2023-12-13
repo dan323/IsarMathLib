@@ -101,8 +101,8 @@ text\<open>A technical lemma that allows to use $1$ as the neutral element of
   the group without referencing a list of lemmas and definitions.\<close>
 
 lemma (in group0) group0_2_L2: 
-  shows "\<one>\<in>G \<and> (\<forall>g\<in>G.(\<one>\<cdot>g = g \<and> g\<cdot>\<one> = g))"
-  using group0_2_L1 monoid.unit_is_neutral by simp
+  shows "\<one>\<in>G" "\<forall>g\<in>G.(\<one>\<cdot>g = g \<and> g\<cdot>\<one> = g)"
+  using monoid.unit_is_neutral[of "\<one>"] by auto
 
 text\<open>The group is closed under the group operation. Used all the time,
   useful to have handy.\<close>
@@ -170,13 +170,13 @@ qed
 
 text\<open>The group inverse is a function that maps G into G.\<close>
 
-theorem group0_2_T2: 
-  assumes A1: "IsAgroup(G,f)" shows "GroupInv(G,f) : G\<rightarrow>G"
+theorem (in group0) group0_2_T2: 
+  shows "GroupInv(G,P) : G\<rightarrow>G"
 proof -
-  have "GroupInv(G,f) \<subseteq> G\<times>G" using GroupInv_def by auto
-  moreover from A1 have
-    "\<forall>x\<in>G. \<exists>!y. y\<in>G \<and> \<langle>x,y\<rangle> \<in> GroupInv(G,f)"
-    using group0_def group0.group0_2_L4 GroupInv_def by simp
+  have "GroupInv(G,P) \<subseteq> G\<times>G" using GroupInv_def by auto
+  moreover have
+    "\<forall>x\<in>G. \<exists>!y. y\<in>G \<and> \<langle>x,y\<rangle> \<in> GroupInv(G,P)"
+    using group0_2_L4 unfolding GroupInv_def by simp
   ultimately show ?thesis using func1_1_L11 by simp
 qed
 
@@ -847,7 +847,7 @@ proof -
   from groupAssum have "GroupInv(G,P) : G\<rightarrow>G" 
     using group0_2_T2 by simp
   moreover from A1 A2 have "GroupInv(H,g) : H\<rightarrow>H"
-    using IsAsubgroup_def group0_2_T2 by simp
+    using IsAsubgroup_def group0.group0_2_T2 unfolding group0_def by simp
   moreover from A1 have "H \<subseteq> G" 
     using group0_3_L2 by simp
   moreover from groupAssum A1 A2 have 

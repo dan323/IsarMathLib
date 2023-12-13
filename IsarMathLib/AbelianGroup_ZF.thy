@@ -593,9 +593,13 @@ proof -
     by simp
   also from T have "\<dots> = (a\<cdot>b)\<cdot>(c\<inverse>\<cdot>(d\<inverse>\<cdot>(d\<cdot>b\<inverse>)))"
     using group_oper_assoc by simp
+  also from A2(4) T(3,4) have "\<dots> = (a\<cdot>b)\<cdot>(c\<inverse>\<cdot>((d\<inverse>\<cdot>d)\<cdot>b\<inverse>))"
+    using group_oper_assoc by simp
+  also from A2(4) T(4) have "\<dots>= (a\<cdot>b)\<cdot>(c\<inverse>\<cdot>(b\<inverse>))"
+    using group0_2_L6 group0_2_L2 by auto
   also from A1 A2 T have "\<dots> = a\<cdot>c\<inverse>"
-    using group_oper_assoc group0_2_L6 group0_2_L2 IsCommutative_def
-    inv_cancel_two by simp
+    using group_oper_assoc group0_2_L6 group0_2_L2
+    inv_cancel_two unfolding IsCommutative_def by simp
   finally show "(a\<cdot>b)\<cdot>(c\<cdot>d)\<inverse>\<cdot>(b\<cdot>d\<inverse>)\<inverse> = a\<cdot>c\<inverse>"
     by simp
 qed
