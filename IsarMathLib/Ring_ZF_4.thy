@@ -67,9 +67,8 @@ locale free_module_ring = ring0 +
 sublocale free_module_ring < module_space: abelian_group
   "n\<rightarrow>R" "AVect(n)" "ConstantFunction(n,\<zero>)" "\<lambda>q t. (q \<ra>\<^sub>n t)" "\<lambda>q. GroupInv(n \<rightarrow> R, AVect(n)) ` q"
      apply auto using vector_ring_sum_fun finite_rank apply simp
-  using Group_ZF_2_1_L2[of R A "AVect(n)" n "ConstantFunction(n,\<zero>)"] unfolding
-  vectorSum_def[OF finite_rank] apply auto
-  using Ring_ZF_1_L1(2) unfolding group0_def IsAgroup_def by auto
+  using add_group.monoid.Group_ZF_2_1_L2 unfolding
+  vectorSum_def[OF finite_rank] by auto
 
 definition (in ring0) matrixSum ("ALin") where
 "n\<in>nat \<Longrightarrow> m\<in>nat \<Longrightarrow> ALin(n,m) \<equiv> AVect(m){lifted to function space over}(n\<rightarrow>R)"

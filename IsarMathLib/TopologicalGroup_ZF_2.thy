@@ -171,8 +171,8 @@ lemma (in group0) Group_ZF_2_4_L8:
   defines "r \<equiv> QuotientGroupRel(G,P,H)" 
   and "F \<equiv> QuotientGroupOp(G,P,H)"
   shows "GroupInv(G//r,F):G//r\<rightarrow>G//r"
-  using group0_2_T2[OF Group_ZF_2_4_T1[OF _ assms(1)]] groupAssum using assms(2,3)
-    by auto
+  using group0.group0_2_T2 Group_ZF_2_4_T1[OF _ assms(1)] groupAssum using assms(2,3)
+  unfolding group0_def by auto
 
 theorem (in topgroup) quotient_top_group_INV_cont:
   assumes "IsAnormalSubgroup(G,f,H)"
@@ -194,11 +194,11 @@ proof-
       using apply_equality[OF _ quotient_proj_fun] G neg_in_tgroup unfolding grinv_def
       by auto
     then have "({\<langle>b,r``{b}\<rangle>. b\<in>G}O GroupInv(G,f))`g=(GroupInv(G//r,F)O {\<langle>b,r``{b}\<rangle>. b\<in>G})`g"
-      using comp_fun_apply[OF quotient_proj_fun G] comp_fun_apply[OF group0_2_T2[OF Ggroup] G] by auto
+      using comp_fun_apply[OF quotient_proj_fun G] comp_fun_apply[OF group0_2_T2 G] by auto
   }
   then have A1:"{\<langle>b,r``{b}\<rangle>. b\<in>G}O GroupInv(G,f)=GroupInv(G//r,F)O {\<langle>b,r``{b}\<rangle>. b\<in>G}" using fun_extension[
     OF comp_fun[OF quotient_proj_fun group0.Group_ZF_2_4_L8[OF group0_valid_in_tgroup assms(1)]] 
-    comp_fun[OF group0_2_T2[OF Ggroup] quotient_proj_fun[of "G""r"]]] unfolding r_def F_def by auto
+    comp_fun[OF group0_2_T2 quotient_proj_fun[of "G""r"]]] unfolding r_def F_def by auto
   have "IsContinuous(T,T{quotient by}r,{\<langle>b,r``{b}\<rangle>. b\<in>\<Union>T})" using quotient_func_cont[OF quotient_proj_surj]
     unfolding EquivQuo_def[OF eqT] by auto
   ultimately have "IsContinuous(T,T{quotient by}r,{\<langle>b,r``{b}\<rangle>. b\<in>\<Union>T}O GroupInv(G,f))"

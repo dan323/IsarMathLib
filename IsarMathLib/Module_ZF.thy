@@ -1166,7 +1166,7 @@ proof-
   with assms(1-4) show ?thesis by auto
 qed
 
-subsection\<open>Linear depen\<close>
+subsection\<open>Linear dependency\<close>
 
 text \<open>Now, we have the conditions to define what linear independence means:\<close>
 

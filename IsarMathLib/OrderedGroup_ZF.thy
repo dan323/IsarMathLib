@@ -1272,7 +1272,7 @@ lemma (in group3) OrderedGroup_ZF_1_L25: shows
   "(\<sm>G\<^sub>+) \<subseteq> G"
 proof -
   from ordGroupAssum have I: "GroupInv(G,P) : G\<rightarrow>G"
-    using IsAnOrdGroup_def group0_2_T2 by simp
+    using IsAnOrdGroup_def group0.group0_2_T2 group0_def by simp
   moreover have "G\<^sub>+ \<subseteq> G" using PositiveSet_def by auto
   ultimately show 
     "(\<sm>G\<^sub>+) = {a\<inverse>. a\<in>G\<^sub>+}"
@@ -1675,7 +1675,7 @@ proof -
   moreover
   { assume A3: "A\<noteq>0"
     from ordGroupAssum have I: "GroupInv(G,P) : G\<rightarrow>G"
-      using IsAnOrdGroup_def group0_2_T2 by simp
+      using IsAnOrdGroup_def group0.group0_2_T2 group0_def by simp
     with A1 A2 A3 obtain u where D: "\<forall>a\<in>(\<sm>A). a\<lsq>u"
       using func1_1_L15A IsBoundedAbove_def by auto
     { fix b assume "b\<in>A"

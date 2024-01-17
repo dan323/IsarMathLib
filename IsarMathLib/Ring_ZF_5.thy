@@ -150,6 +150,8 @@ proof(safe)
   ultimately show "aa = TheNeutralElement(R, A)" by auto
 qed
 
+text\<open>The ring constructed by quotienting by a prime ideal is a prime ring.\<close>
+
 theorem (in ring0) prime_ideal_no_zero_divs:
   assumes "I\<triangleleft>\<^sub>pR"
   shows "[QuotientBy(I),QuotientGroupOp(R, A, I),ProjFun2(R, QuotientGroupRel(R, A, I), M)]{is a prime ring}"
@@ -185,7 +187,7 @@ proof-
     {
       fix xx assume xx:"xx\<in>R" "QuotientGroupRel(R, A, I)``{xx} = x"
       {
-        fix yy assume yy:"yy\<in>R" "QuotientGroupRel(R, A, I)``{yy} = y"
+        fix yy assume yy:"yy\<in>R" "y = QuotientGroupRel(R, A, I)``{yy}"
         {
           fix zz assume zz:"zz\<in>R"
           have "QuotientGroupRel(R, A, I)``{xx\<cdot>zz\<cdot>yy} = 
@@ -204,19 +206,34 @@ proof-
           moreover note as(3) ultimately
           have "QuotientGroupRel(R, A, I)``{xx\<cdot>zz\<cdot>yy} = TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"
             by auto
-          then have "xx\<cdot>zz\<cdot>yy\<in>I" using add_group.Group_ZF_2_4_L5E[OF ideal_normal_add_subgroup[OF ideal],
-            of "xx\<cdot>zz\<cdot>yy" "QuotientGroupRel(R, A, I)" "TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"]
+          then have "xx\<cdot>zz\<cdot>yy\<in>I" using add_group.Group_ZF_2_4_L5E[OF ideal_normal_add_subgroup[OF ideal]]
             using xx(1) yy(1) zz Ring_ZF_1_L4(3) unfolding QuotientBy_def[OF ideal] by auto
         }
         then have "\<forall>zz\<in>R. xx\<cdot>zz\<cdot>yy\<in>I" by auto
         then have "xx:I\<or>yy:I" using assms equivalent_prime_ideal
-          xx(1) yy(1) by auto
-            
-          
-      
-
-
-      unfolding QuotientBy_def[OF ideal] using quotientE[of x R "QuotientGroupRel(R, A, I)"]
-      
+          xx(1) yy(1) by auto moreover
+        {
+          assume assyy:"yy\<in>I"
+          then have "QuotientGroupRel(R, A, I)``{yy} = TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"
+            using yy(1) add_group.Group_ZF_2_4_L5E[OF ideal_normal_add_subgroup[OF ideal], of yy]
+            unfolding QuotientBy_def[OF ideal] by auto
+          then have False using as(4) yy(2) by auto
+        }
+        ultimately have "xx\<in>I" by auto
+        then have "QuotientGroupRel(R, A, I)``{xx} = TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"
+          using xx(1) add_group.Group_ZF_2_4_L5E[OF ideal_normal_add_subgroup[OF ideal], of xx]
+          unfolding QuotientBy_def[OF ideal] by auto
+        with xx(2) have "x=TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))" by auto
+      }
+      then have "x=TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"
+        using quotientE[of y R "QuotientGroupRel(R, A, I)", of "x=TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"] as(2) unfolding QuotientBy_def[OF ideal]
+        by auto
+    }
+    then show "x=TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"
+      using quotientE[of x R "QuotientGroupRel(R, A, I)", of "x=TheNeutralElement(QuotientBy(I), QuotientGroupOp(R, A, I))"] as(1) unfolding QuotientBy_def[OF ideal]
+      by auto
+  qed
+  then show ?thesis unfolding primeRing_def[OF quotientBy_is_ring[OF ideal]] by auto
+qed
 
 end

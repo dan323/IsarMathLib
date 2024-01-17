@@ -174,11 +174,23 @@ text\<open>The neutral element of the lifted (pointwise)
 
 lemma (in finsupp) const_zero_fin_supp:
   shows "TheNeutralElement(X\<rightarrow>M, \<A>) \<in> \<M>"
-  using  monoidAsssum Group_ZF_2_1_L2 
-    monoid0_valid monoid0.unit_is_neutral 
-    func1_3_L1 func1_3_L2 func1_1_L1 
-    Supp_def empty_in_finpow FinSupp_def
-  by simp
+proof-
+  have e:"TheNeutralElement(X\<rightarrow>M, \<A>) = ConstantFunction(X,TheNeutralElement(M,A))"
+    using monoid0.Group_ZF_2_1_L2 monoid0_valid by auto
+  have f:"ConstantFunction(X,TheNeutralElement(M,A)):X\<rightarrow>M" using
+    func1_3_L1 monoid0.unit_is_neutral[OF monoid0_valid] by auto
+  {
+    fix x assume "x\<in>X"
+    with e have "TheNeutralElement(X\<rightarrow>M, \<A>)`x = TheNeutralElement(M,A)"
+      using func1_3_L2 by auto
+  } moreover
+  have "domain(TheNeutralElement(X\<rightarrow>M, \<A>)) = X" using func1_1_L1[OF func1_3_L1]
+    using e by auto
+  ultimately have "Supp(TheNeutralElement(X\<rightarrow>M, \<A>),M,A) = 0"
+    unfolding Supp_def by auto
+  with empty_in_finpow[of X] show ?thesis unfolding finsupp_def FinSupp_def
+    using e f by auto
+qed
 
 text\<open>Finitely supported functions form a submonoid
   of all functions with pointwise operation.\<close>
@@ -296,23 +308,4 @@ proof -
     by simp
 qed
 
-  
 end
-
-    
- 
-    
-  
-  
-    
-
-      
-
-
-
-
-
-
-
-
-

@@ -726,9 +726,9 @@ lemma (in group1) Group_ZF_3_3_L5: assumes "s \<in> AH" and
   "r = QuotientGroupRel(AH,Op1,FR)" and
   "TheNeutralElement(AH//r,QuotientGroupOp(AH,Op1,FR)) = e"
   shows "r``{s} = e \<longleftrightarrow> s \<in> FR"
-  using groupAssum isAbelian assms Group_ZF_3_2_L11 
-    group0_def Group_ZF_3_3_L2 group0.Group_ZF_2_4_L5E
-  by simp
+  using groupAssum isAbelian assms Group_ZF_3_2_L11
+     Group_ZF_3_3_L2 group0.Group_ZF_2_4_L5E unfolding group0_def
+  by auto
 
 text\<open>The group inverse of a class of an almost homomorphism $f$
   is the class of the inverse of $f$.\<close>

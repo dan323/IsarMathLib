@@ -902,7 +902,7 @@ text\<open>First, let's prove some lemmas about what relation
 is there between this properties under the influence of other ones. This will
 help us to find counter-examples.\<close>
 
-text\<open>Anti-compactness ereases the differences between several properties.\<close>
+text\<open>Anti-compactness erases the differences between several properties.\<close>
 
 lemma (in topology0) anticompact_KC_equiv_T1:
   assumes "T{is anti-compact}"

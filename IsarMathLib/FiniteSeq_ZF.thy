@@ -351,6 +351,47 @@ proof -
   qed
   ultimately show "?d = ?e" by (rule func_eq)
 qed
+
+text\<open>@{term 0} is a neutral element to concatenation.\<close>
+
+theorem concat_0_right:
+  assumes "x\<in>n \<rightarrow> X" "n\<in>nat"
+  shows "Concat(x,0) = x"
+proof-
+  show "Concat(x,0) = x" apply (rule fun_extension)
+  proof-
+    from assms(1) show x:"x:n\<rightarrow>X".
+    then show "Concat(x,0):n\<rightarrow>X" using concat_props(1)[OF assms(2) nat_0I, of x X 0]
+      add_0_right[OF assms(2)] by auto
+    {
+      fix t assume "t\<in>n"
+      then show "Concat(x,0)`t = x`t" using concat_props(2)[OF assms(2) nat_0I, of x X 0]
+        x by auto
+    }
+  qed
+qed
+
+text\<open>The other way around too\<close>
+
+theorem concat_0_left:
+  assumes "x\<in>n \<rightarrow> X" "n\<in>nat"
+  shows "Concat(0,x) = x"
+proof-
+  show "Concat(0,x) = x" apply (rule fun_extension)
+  proof-
+    from assms(1) show x:"x:n\<rightarrow>X".
+    then show "Concat(0,x):n\<rightarrow>X" using concat_props(1)[OF nat_0I assms(2), of 0 X x]
+      add_0[OF assms(2)] by auto
+    {
+      fix t assume as:"t\<in>n"
+      then have t:"0#+t = t" "t#-0 = t" using add_0[OF 
+          lt_nat_in_nat[of t n]] unfolding lt_def using nat_into_Ord[OF assms(2)] assms(2) by auto
+      from t(1) as have "t\<in>NatInterval(0, n)" unfolding NatInterval_def by force
+      then show "Concat(0,x)`t = x`t" using concat_props(3)[OF nat_0I assms(2), of 0 X x]
+        x t(2) by auto
+    }
+  qed
+qed
     
 text\<open>Properties of \<open>Tail\<close>.\<close>
 

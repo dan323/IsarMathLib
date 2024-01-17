@@ -319,11 +319,11 @@ moreover
     have "A \<union> B\<lesssim>A+B" using Un_lepoll_sum by auto
     also from I1 I2 have "\<dots>\<lesssim> |B| + |B|" using sum_lepoll_mono by auto
     also from AG have "\<dots>\<lesssim>|B| * |B|" using sum_lepoll_prod by auto
-    also from assms(3) INFB have "\<dots>\<approx>|B|" using InfCard_square_eqpoll
+    also from INFB have "\<dots>\<approx>|B|" using InfCard_square_eqpoll
       by auto
     finally have "A \<union> B\<lesssim>|B|" by simp
     also from TTT have "\<dots>\<prec>Q" by auto
-    finally have "A \<union> B\<prec>Q" by simp 
+    finally have "A \<union> B\<prec>Q" by simp
   }
   moreover
   {
@@ -390,7 +390,7 @@ qed
 subsection\<open>Choice axioms\<close>
 
 text\<open>We want to prove some theorems assuming that some version of the Axiom of Choice holds.
-  To avoid introducing it as an axiom we will defin an appropriate predicate and put that in the 
+  To avoid introducing it as an axiom we will define an appropriate predicate and put that in the 
   assumptions of the theorems. That way technically we stay inside ZF.\<close>
 
 text\<open>The first predicate we define states that the axiom of $Q$-choice holds for subsets of $K$ if 
@@ -399,14 +399,15 @@ text\<open>The first predicate we define states that the axiom of $Q$-choice hol
 
 definition
   AxiomCardinalChoice ("{the axiom of}_{choice holds for subsets}_") where
-  "{the axiom of} Q {choice holds for subsets}K \<equiv> Card(Q) \<and> (\<forall> M N. (M \<lesssim>Q \<and>  (\<forall>t\<in>M. N`t\<noteq>0 \<and> N`t\<subseteq>K)) \<longrightarrow> (\<exists>f. f:Pi(M,\<lambda>t. N`t) \<and> (\<forall>t\<in>M. f`t\<in>N`t)))"
+  "{the axiom of} Q {choice holds for subsets}K \<equiv> Card(Q) \<and> (\<forall> M N. (M \<lesssim>Q \<and>  (\<forall>t\<in>M. N`t\<noteq>0 \<and> N`t\<subseteq>K)) \<longrightarrow> (Pi(M,\<lambda>t. N`t)\<noteq>0))"
+
 
 text\<open>Next we define a general form of $Q$ choice where we don't require a collection of files
   to be included in a file.\<close>
 
 definition
   AxiomCardinalChoiceGen ("{the axiom of}_{choice holds}") where
-  "{the axiom of} Q {choice holds} \<equiv> Card(Q) \<and> (\<forall> M N. (M \<lesssim>Q \<and>  (\<forall>t\<in>M. N`t\<noteq>0)) \<longrightarrow> (\<exists>f. f:Pi(M,\<lambda>t. N`t) \<and> (\<forall>t\<in>M. f`t\<in>N`t)))"
+  "{the axiom of} Q {choice holds} \<equiv> Card(Q) \<and> (\<forall> M N. (M \<lesssim>Q \<and>  (\<forall>t\<in>M. N`t\<noteq>0)) \<longrightarrow> (Pi(M,\<lambda>t. N`t)\<noteq>0))"
 
 text\<open>The axiom of finite choice always holds.\<close>
 
@@ -420,10 +421,9 @@ proof -
     fix M N assume "M\<lesssim>0" "\<forall>t\<in>M. N`t\<noteq>0"
     then have "M=0" using lepoll_0_is_0 by auto
     then have "{\<langle>t,0\<rangle>. t\<in>M}:Pi(M,\<lambda>t. N`t)" unfolding Pi_def domain_def function_def Sigma_def by auto
-    moreover from \<open>M=0\<close> have "\<forall>t\<in>M. {\<langle>t,0\<rangle>. t\<in>M}`t\<in>N`t" by auto
-    ultimately have "(\<exists>f. f:Pi(M,\<lambda>t. N`t) \<and> (\<forall>t\<in>M. f`t\<in>N`t))" by auto
+    then have "Pi(M,\<lambda>t. N`t)\<noteq>0" by auto
   }
-  then have "(\<forall> M N. (M \<lesssim>0 \<and>  (\<forall>t\<in>M. N`t\<noteq>0)) \<longrightarrow> (\<exists>f. f:Pi(M,\<lambda>t. N`t) \<and> (\<forall>t\<in>M. f`t\<in>N`t)))" 
+  then have "(\<forall> M N. (M \<lesssim>0 \<and>  (\<forall>t\<in>M. N`t\<noteq>0)) \<longrightarrow> (Pi(M,\<lambda>t. N`t)\<noteq>0))" 
     by auto
   then have "{the axiom of} 0 {choice holds}" using AxiomCardinalChoiceGen_def nat_into_Card 
     by auto
@@ -435,9 +435,9 @@ proof -
       {
         assume "M\<lesssim>x"
         from as(2) ass(2) have 
-          "(M \<lesssim> x \<and> (\<forall>t\<in>M. N ` t \<noteq> 0)) \<longrightarrow> (\<exists>f. f \<in> Pi(M,\<lambda>t. N ` t) \<and> (\<forall>t\<in>M. f ` t \<in> N ` t))" 
+          "(M \<lesssim> x \<and> (\<forall>t\<in>M. N ` t \<noteq> 0)) \<longrightarrow> (Pi(M,\<lambda>t. N ` t) \<noteq> 0)" 
             unfolding AxiomCardinalChoiceGen_def by auto
-        with \<open>M\<lesssim>x\<close> ass(2) have "(\<exists>f. f \<in> Pi(M,\<lambda>t. N ` t) \<and> (\<forall>t\<in>M. f ` t \<in> N ` t))" 
+        with \<open>M\<lesssim>x\<close> ass(2) have "Pi(M,\<lambda>t. N ` t) \<noteq> 0" 
           by auto
       }
       moreover
@@ -455,9 +455,9 @@ proof -
         then have "x\<approx>M-{f`x}" unfolding eqpoll_def by auto
         then have "M-{f`x}\<approx>x" using eqpoll_sym by auto
         then have "M-{f`x}\<lesssim>x" using eqpoll_imp_lepoll by auto
-        with as(2) ass(2) have "(\<exists>g. g \<in> Pi(M-{f`x},\<lambda>t. N ` t) \<and> (\<forall>t\<in>M-{f`x}. g ` t \<in> N ` t))" 
+        with as(2) ass(2) have "Pi(M-{f`x},\<lambda>t. N ` t) \<noteq> 0" 
           unfolding AxiomCardinalChoiceGen_def by auto
-        then obtain g where g: "g\<in> Pi(M-{f`x},\<lambda>t. N ` t)" "\<forall>t\<in>M-{f`x}. g ` t \<in> N ` t" 
+        then obtain g where g: "g\<in> Pi(M-{f`x},\<lambda>t. N ` t)" 
           by auto
         from f have ff: "f`x\<in>M" using bij_def inj_def apply_funtype by auto
         with ass(2) have "N`(f`x)\<noteq>0" by auto
@@ -472,29 +472,40 @@ proof -
           unfolding domain_def Pi_def Sigma_def by auto  
         with dom have fg: "function(g \<union>{\<langle>f`x, y\<rangle>})" unfolding function_def by blast 
         ultimately have PP: "g \<union>{\<langle>f`x, y\<rangle>}\<in>Pi(M,\<lambda>t. N ` t)" unfolding Pi_def by auto
-        have "\<langle>f`x, y\<rangle> \<in> g \<union>{\<langle>f`x, y\<rangle>}" by auto
-        from this fg have "(g \<union>{\<langle>f`x, y\<rangle>})`(f`x)=y" by (rule function_apply_equality)
-        with y have "(g \<union>{\<langle>f`x, y\<rangle>})`(f`x)\<in>N`(f`x)" by auto 
-        moreover
-        {
-          fix t assume A:"t\<in>M-{f`x}"
-          with g(1) have "\<langle>t,g`t\<rangle>\<in>g" using apply_Pair by auto
-          then have "\<langle>t,g`t\<rangle>\<in>(g \<union>{\<langle>f`x, y\<rangle>})" by auto
-          then have "(g \<union>{\<langle>f`x, y\<rangle>})`t=g`t" using apply_equality PP by auto
-          with A have "(g \<union>{\<langle>f`x, y\<rangle>})`t\<in>N`t" using g(2) by auto
-        }
-        ultimately have "\<forall>t\<in>M. (g \<union>{\<langle>f`x, y\<rangle>})`t\<in>N`t" by auto
-        with PP have "\<exists>g. g\<in>Pi(M,\<lambda>t. N ` t) \<and> (\<forall>t\<in>M. g`t\<in>N`t)" by auto
+        then have "Pi(M,\<lambda>t. N ` t)\<noteq>0" by auto
       }
-    ultimately have "\<exists>g. g \<in> Pi(M, \<lambda>t. N`t) \<and> (\<forall>t\<in>M. g ` t \<in> N ` t)" using as(1) ass(1)
+    ultimately have "Pi(M,\<lambda>t. N ` t)\<noteq>0" using as(1) ass(1)
       lepoll_succ_disj by auto
     }
-    then have "\<forall>M N. M \<lesssim> succ(x)\<and>(\<forall>t\<in>M. N`t\<noteq>0)\<longrightarrow>(\<exists>g. g \<in> Pi(M,\<lambda>t. N ` t) \<and> (\<forall>t\<in>M. g ` t \<in> N ` t))" 
+    then have "\<forall>M N. M \<lesssim> succ(x)\<and>(\<forall>t\<in>M. N`t\<noteq>0)\<longrightarrow>(Pi(M,\<lambda>t. N ` t) \<noteq>0)" 
       by auto
     then have "{the axiom of}succ(x){choice holds}" 
       using AxiomCardinalChoiceGen_def nat_into_Card as(1) nat_succI by auto
   }
   ultimately show ?thesis by (rule nat_induct)
+qed
+
+text\<open>If we consider only a set of ordinal numbers, then the axiom of choice holds
+for all cardinals.\<close>
+
+lemma choice_holds_on_ordinals:
+  assumes "Card(Q)" "\<forall>x\<in>K. Ord(x)"
+  shows "{the axiom of} Q {choice holds for subsets}K"
+  unfolding AxiomCardinalChoice_def
+proof(safe)
+  from assms(1) show "Card(Q)".
+  fix M N assume as:"M \<lesssim> Q" "\<forall>t\<in>M. N ` t \<noteq> 0 \<and> N ` t \<subseteq> K" "(\<Prod>t\<in>M. N ` t) = 0"
+  let ?g="{\<langle>t,\<mu> x. x\<in>N`t\<rangle>. t\<in>M}"
+  have "?g\<in>(\<Prod>t\<in>M. N ` t)" unfolding Pi_def function_def apply auto
+  proof-
+    fix t assume t:"t\<in>M"
+    with as(2) have A:"N ` t \<noteq> 0" "N ` t \<subseteq> K" by auto
+    from A(1) obtain q where "q\<in>N`t" by auto moreover
+    with A(2) have "Ord(q)" using assms(2) by auto
+    moreover note LeastI[of "\<lambda>x. x\<in>N`t" q] ultimately
+    show "(\<mu> x. x \<in> N ` t) \<in> N ` t" by auto
+  qed
+  with as(3) show False by auto
 qed
 
 text\<open>The axiom of choice holds if and only if the \<open>AxiomCardinalChoice\<close>
@@ -503,14 +514,7 @@ holds for every couple of a cardinal \<open>Q\<close> and a set \<open>K\<close>
 lemma choice_subset_imp_choice:
   shows "{the axiom of} Q {choice holds} \<longleftrightarrow> (\<forall> K. {the axiom of} Q {choice holds for subsets}K)"
   unfolding AxiomCardinalChoice_def AxiomCardinalChoiceGen_def by blast
-
-text\<open>A choice axiom for greater cardinality implies one for 
-smaller cardinality\<close>
-
-lemma greater_choice_imp_smaller_choice:
-  assumes "Q\<lesssim>Q1" "Card(Q)"
-  shows "{the axiom of} Q1 {choice holds} \<longrightarrow> ({the axiom of} Q {choice holds})" using assms
-  AxiomCardinalChoiceGen_def lepoll_trans by auto   
+  
 
 text\<open>If we have a surjective function from a set which is injective to a set 
   of ordinals, then we can find an injection which goes the other way.\<close>

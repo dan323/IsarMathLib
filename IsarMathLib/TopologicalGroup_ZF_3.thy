@@ -84,7 +84,8 @@ proof-
   then have closure:"\<forall>A\<in>Pow(\<Union>T). GroupInv(G,f)``(cl(A))\<subseteq>cl(GroupInv(G,f)``A)" using two_top_spaces0.Top_ZF_2_1_L2
     two by force
   with sub1 have Inv:"GroupInv(G,f)``(cl(H))\<subseteq>cl(GroupInv(G,f)``H)" by auto moreover
-  have "GroupInv(H,restrict(f,H\<times>H)):H\<rightarrow>H" using assms unfolding IsAsubgroup_def using group0_2_T2 by auto then
+  have "GroupInv(H,restrict(f,H\<times>H)):H\<rightarrow>H" using assms unfolding IsAsubgroup_def using group0.group0_2_T2
+    unfolding group0_def by auto then
   have "GroupInv(H,restrict(f,H\<times>H))``H\<subseteq>H" using func1_1_L6(2) by auto
   then have "restrict(GroupInv(G,f),H)``H\<subseteq>H" using group0.group0_3_T1 assms group0_valid_in_tgroup by auto
   then have sss:"GroupInv(G,f)``H\<subseteq>H" using restrict_image by auto
@@ -357,7 +358,7 @@ qed
 text\<open>We can always consider a factor group which is $T_2$.\<close>
 
 theorem(in topgroup) factor_haus:
-  shows "(T{quotient by}QuotientGroupRel(G,f,cl({\<zero>}))){is T\<^sub>2}"
+  shows "(T{quotient by}(QuotientGroupRel(G,f,cl({\<zero>})))){is T\<^sub>2}"
 proof-
   let ?r="QuotientGroupRel(G,f,cl({\<zero>}))"
   let ?f="QuotientGroupOp(G,f,cl({\<zero>}))"

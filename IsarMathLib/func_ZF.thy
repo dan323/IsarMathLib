@@ -63,30 +63,29 @@ definition
 Lift2FcnSpce (infix "{lifted to function space over}" 65) where
  "f {lifted to function space over} X \<equiv> 
   {\<langle> p,{\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X}\<rangle>. 
-  p \<in> (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))}"
+  p \<in> (X\<rightarrow>domain(domain(f)))\<times>(X\<rightarrow>range(domain(f)))}"
 
 text\<open>The result of the lift belongs to the function space.\<close>
 
 lemma func_ZF_1_L1: 
   assumes A1: "f : Y\<times>Y\<rightarrow>Y" 
-  and A2: "p \<in>(X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))"
+  and A2: "p \<in>(X\<rightarrow>Y)\<times>(X\<rightarrow>Y)"
   shows 
-  "{\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X} : X\<rightarrow>range(f)"
+  "{\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X} : X\<rightarrow>Y"
   proof -
-    have "\<forall>x\<in>X. f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle> \<in> range(f)"
+    have "\<forall>x\<in>X. f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle> \<in> Y"
     proof
       fix x assume "x\<in>X"
       let ?p = "\<langle>fst(p)`(x),snd(p)`(x)\<rangle>"
       from A2 \<open>x\<in>X\<close> have 
-	"fst(p)`(x) \<in> range(f)"  "snd(p)`(x) \<in> range(f)"
+	"fst(p)`(x) \<in> Y"  "snd(p)`(x) \<in> Y"
 	using apply_type by auto
       with A1 have "?p \<in> Y\<times>Y"
 	using func1_1_L5B by blast
       with A1 have "\<langle>?p, f`(?p)\<rangle> \<in> f"
 	using apply_Pair by simp
-      with A1 show 
-	"f`(?p) \<in> range(f)"
-	using rangeI by simp
+      with A1 show "f`(?p) \<in> Y"
+	      unfolding Pi_def by auto
     qed
     then show ?thesis using ZF_fun_from_total by simp
 qed
@@ -96,57 +95,66 @@ text\<open>The values of the lift are defined by the value of the liftee in a
 
 lemma func_ZF_1_L2: 
   assumes A1: "f : Y\<times>Y\<rightarrow>Y" 
-  and A2: "p \<in> (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))" and A3: "x\<in>X"
-  and A4: "P = {\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X}"
+  and A2: "p \<in> (X\<rightarrow>Y)\<times>(X\<rightarrow>Y)" and A3: "x\<in>X"
+  defines "P \<equiv> {\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X}"
   shows "P`(x) = f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>" 
 proof -
   from A1 A2 have 
-    "{\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X} : X \<rightarrow> range(f)"
+    "{\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X} : X \<rightarrow> Y"
     using func_ZF_1_L1 by simp
-  with A4 have "P :  X \<rightarrow> range(f)" by simp
-  with  A3 A4 show "P`(x) = f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>"
+  with P_def have "P :  X \<rightarrow> Y" by simp
+  with  A3 P_def show "P`(x) = f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>"
     using ZF_fun_from_tot_val by simp
 qed
 
 text\<open>Function lifted to a function space results in  function space 
   operator.\<close>
 
-theorem func_ZF_1_L3: 
+theorem func_ZF_1_L3:
+  fixes X
   assumes "f : Y\<times>Y\<rightarrow>Y"
-  and "F = f {lifted to function space over} X"
-  shows "F : (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))\<rightarrow>(X\<rightarrow>range(f))"
-  using assms Lift2FcnSpce_def func_ZF_1_L1 ZF_fun_from_total 
+  defines "F \<equiv> f {lifted to function space over} X"
+  shows "F : (X\<rightarrow>Y)\<times>(X\<rightarrow>Y)\<rightarrow>(X\<rightarrow>Y)"
+proof-
+  from assms(1) have "domain(f) = Y\<times>Y" unfolding Pi_def by auto
+  then have A:"domain(domain(f)) = Y" "range(domain(f)) = Y" by auto
+  show "F:(X\<rightarrow>Y)\<times>(X\<rightarrow>Y)\<rightarrow>(X\<rightarrow>Y)"
+  using func_ZF_1_L1[OF assms(1), of _ X]   
+    ZF_fun_from_total[of "(X\<rightarrow>Y)\<times>(X\<rightarrow>Y)" "\<lambda>p. {\<langle>x,f `\<langle>fst(p)`x,snd(p)`x\<rangle>\<rangle>. x\<in>X}" "X\<rightarrow>Y"] 
+    A unfolding F_def Lift2FcnSpce_def
   by simp
+qed
 
 text\<open>The values of the lift are defined by the values of the liftee in
   the natural way.\<close>
 
 theorem func_ZF_1_L4: 
   assumes A1: "f : Y\<times>Y\<rightarrow>Y"
-  and A2: "F = f {lifted to function space over} X"
-  and A3: "s:X\<rightarrow>range(f)" "r:X\<rightarrow>range(f)"  
+  and A3: "s:X\<rightarrow>Y" "r:X\<rightarrow>Y"  
   and A4: "x\<in>X"
+  defines "F \<equiv> f {lifted to function space over} X"
   shows "(F`\<langle>s,r\<rangle>)`(x) = f`\<langle>s`(x),r`(x)\<rangle>"
 proof -
+  from A1 have "domain(f) = Y\<times>Y" unfolding Pi_def by auto
+  then have d:"domain(domain(f)) = Y" "range(domain(f)) = Y" 
+    by auto
   let ?p = "\<langle>s,r\<rangle>"
   let ?P = "{\<langle>x,f`\<langle>fst(?p)`(x),snd(?p)`(x)\<rangle>\<rangle>. x \<in> X}" 
-  from A1 A3 A4 have
-    "f : Y\<times>Y\<rightarrow>Y"  "?p \<in> (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))"
-    "x\<in>X"  "?P = {\<langle>x,f`\<langle>fst(?p)`(x),snd(?p)`(x)\<rangle>\<rangle>. x \<in> X}" 
+  from A1 A3 A4 have "?p \<in> (X\<rightarrow>Y)\<times>(X\<rightarrow>Y)"
     by auto
   then have "?P`(x) = f`\<langle>fst(?p)`(x),snd(?p)`(x)\<rangle>"
-    by (rule func_ZF_1_L2)
+    using func_ZF_1_L2[OF A1 _ A4] by blast
   hence "?P`(x) = f`\<langle>s`(x),r`(x)\<rangle>" by auto
   moreover have "?P = F`\<langle>s,r\<rangle>"
   proof -
-    from A1 A2 have "F : (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))\<rightarrow>(X\<rightarrow>range(f))"
-      using func_ZF_1_L3 by simp
-    moreover from A3 have "?p \<in> (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))"
+    from A1 have "F : (X\<rightarrow>Y)\<times>(X\<rightarrow>Y)\<rightarrow>(X\<rightarrow>Y)"
+      using func_ZF_1_L3 unfolding F_def by simp
+    moreover from A3 have "?p \<in> (X\<rightarrow>Y)\<times>(X\<rightarrow>Y)"
       by auto
-    moreover from A2 have
+    moreover have
       "F = {\<langle>p,{\<langle>x,f`\<langle>fst(p)`(x),snd(p)`(x)\<rangle>\<rangle>. x \<in> X}\<rangle>. 
-      p \<in> (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))}"
-      using Lift2FcnSpce_def by simp
+      p \<in> (X\<rightarrow>Y)\<times>(X\<rightarrow>Y)}" using d
+      unfolding F_def Lift2FcnSpce_def by simp
     ultimately show ?thesis using ZF_fun_from_tot_val
       by simp
   qed
@@ -192,15 +200,15 @@ text\<open>The lift of a commutative function is commutative.\<close>
 lemma func_ZF_2_L1:
   assumes A1: "f : G\<times>G\<rightarrow>G"
   and A2: "F = f {lifted to function space over} X"
-  and A3: "s : X\<rightarrow>range(f)" "r : X\<rightarrow>range(f)" 
+  and A3: "s : X\<rightarrow>G" "r : X\<rightarrow>G" 
   and A4: "f {is commutative on} G"
   shows "F`\<langle>s,r\<rangle> = F`\<langle>r,s\<rangle>" 
 proof -
   from A1 A2 have 
-    "F : (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))\<rightarrow>(X\<rightarrow>range(f))"
+    "F : (X\<rightarrow>G)\<times>(X\<rightarrow>G)\<rightarrow>(X\<rightarrow>G)"
     using func_ZF_1_L3 by simp 
   with A3 have 
-    "F`\<langle>s,r\<rangle> : X\<rightarrow>range(f)" and "F`\<langle>r,s\<rangle> : X\<rightarrow>range(f)"
+    "F`\<langle>s,r\<rangle> : X\<rightarrow>G" and "F`\<langle>r,s\<rangle> : X\<rightarrow>G"
     using apply_type by auto
   moreover have 
     "\<forall>x\<in>X. (F`\<langle>s,r\<rangle>)`(x) = (F`\<langle>r,s\<rangle>)`(x)"
@@ -225,25 +233,25 @@ lemma func_ZF_2_L2:
   assumes "f : G\<times>G\<rightarrow>G"
   and "f {is commutative on} G"
   and "F = f {lifted to function space over} X"
-  shows "F {is commutative on} (X\<rightarrow>range(f))"
+  shows "F {is commutative on} (X\<rightarrow>G)"
   using assms IsCommutative_def func_ZF_2_L1 by simp
   
 text\<open>The lift of an associative function is associative.\<close>
 
 lemma func_ZF_2_L3:
   assumes A2: "F = f {lifted to function space over} X"
-  and A3: "s : X\<rightarrow>range(f)" "r : X\<rightarrow>range(f)" "q : X\<rightarrow>range(f)"
+  and A3: "s : X\<rightarrow>G" "r : X\<rightarrow>G" "q : X\<rightarrow>G"
   and A4: "f {is associative on} G"
   shows "F`\<langle>F`\<langle>s,r\<rangle>,q\<rangle> = F`\<langle>s,F`\<langle>r,q\<rangle>\<rangle>"
 proof -
   from A4 A2 have 
-    "F : (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))\<rightarrow>(X\<rightarrow>range(f))"
+    "F : (X\<rightarrow>G)\<times>(X\<rightarrow>G)\<rightarrow>(X\<rightarrow>G)"
     using IsAssociative_def func_ZF_1_L3 by auto
   with A3 have I:
-    "F`\<langle>s,r\<rangle> : X\<rightarrow>range(f)"
-    "F`\<langle>r,q\<rangle> : X\<rightarrow>range(f)"
-    "F`\<langle>F`\<langle>s,r\<rangle>,q\<rangle> : X\<rightarrow>range(f)"
-    "F`\<langle>s,F`\<langle>r,q\<rangle>\<rangle>: X\<rightarrow>range(f)"
+    "F`\<langle>s,r\<rangle> : X\<rightarrow>G"
+    "F`\<langle>r,q\<rangle> : X\<rightarrow>G"
+    "F`\<langle>F`\<langle>s,r\<rangle>,q\<rangle> : X\<rightarrow>G"
+    "F`\<langle>s,F`\<langle>r,q\<rangle>\<rangle>: X\<rightarrow>G"
     using apply_type by auto
   moreover have
     "\<forall>x\<in>X. (F`\<langle>F`\<langle>s,r\<rangle>,q\<rangle>)`(x) = (F`\<langle>s,F`\<langle>r,q\<rangle>\<rangle>)`(x)"
@@ -268,17 +276,18 @@ text\<open>The lift of an associative function is associative
   on the function space.\<close>
 
 lemma func_ZF_2_L4:
+  fixes X
   assumes A1: "f {is associative on} G"
-  and A2: "F = f {lifted to function space over} X"
-  shows "F {is associative on} (X\<rightarrow>range(f))"
+  defines "F \<equiv> f {lifted to function space over} X"
+  shows "F {is associative on} (X\<rightarrow>G)"
 proof -
-  from A1 A2 have
-    "F : (X\<rightarrow>range(f))\<times>(X\<rightarrow>range(f))\<rightarrow>(X\<rightarrow>range(f))"
-    using IsAssociative_def func_ZF_1_L3 by auto
-  moreover from A1 A2 have
-    "\<forall>s \<in> X\<rightarrow>range(f). \<forall> r \<in> X\<rightarrow>range(f). \<forall>q \<in> X\<rightarrow>range(f).
+  from A1 have
+    "F : (X\<rightarrow>G)\<times>(X\<rightarrow>G)\<rightarrow>(X\<rightarrow>G)"
+    using IsAssociative_def func_ZF_1_L3 unfolding F_def by auto
+  moreover from A1 have
+    "\<forall>s \<in> X\<rightarrow>G. \<forall> r \<in> X\<rightarrow>G. \<forall>q \<in> X\<rightarrow>G.
     F`\<langle>F`\<langle>s,r\<rangle>,q\<rangle> = F`\<langle>s,F`\<langle>r,q\<rangle>\<rangle>"
-    using func_ZF_2_L3 by simp
+    using func_ZF_2_L3 unfolding F_def by simp
   ultimately show ?thesis using IsAssociative_def 
     by simp
 qed

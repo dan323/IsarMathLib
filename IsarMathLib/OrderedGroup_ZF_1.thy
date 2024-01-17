@@ -54,7 +54,7 @@ proof -
   moreover have "?g : G-G\<^sup>+\<rightarrow>G"
   proof -
     from ordGroupAssum have "GroupInv(G,P) : G\<rightarrow>G" 
-      using IsAnOrdGroup_def group0_2_T2 by simp
+      using IsAnOrdGroup_def group0.group0_2_T2 group0_def by simp
     moreover have "G-G\<^sup>+ \<subseteq> G" by auto
     ultimately show ?thesis using restrict_type2 by simp
   qed
@@ -73,7 +73,7 @@ lemma (in group3) OrderedGroup_ZF_3_L2:
   assumes A1: "a\<in>G\<^sup>+" shows "\<bar>a\<bar> = a"
 proof -
   from ordGroupAssum have "GroupInv(G,P) : G\<rightarrow>G"
-    using IsAnOrdGroup_def group0_2_T2 by simp
+    using IsAnOrdGroup_def group0.group0_2_T2 group0_def by simp
   with A1 show ?thesis using
     func1_1_L1 OrderedGroup_ZF_1_L4E fun_disjoint_apply1
     AbsoluteValue_def id_conv by simp
@@ -1148,7 +1148,7 @@ lemma (in group3) OrderedGroup_ZF_7_L3:
 proof -
   let ?g = "GroupInv(G,P) O f O GroupInv(G,P)"
   from ordGroupAssum have I: "GroupInv(G,P) : G\<rightarrow>G"
-    using IsAnOrdGroup_def group0_2_T2 by simp
+    using IsAnOrdGroup_def group0.group0_2_T2 group0_def by simp
   with A4 have II: "\<forall>x\<in>G. ?g`(x) = (f`(x\<inverse>))\<inverse>"
     using func1_1_L18 by simp
   note A1 A2 A3

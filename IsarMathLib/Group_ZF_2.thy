@@ -193,9 +193,9 @@ proof -
     by simp
   moreover from groupAssum A1 have
     "?E = TheNeutralElement(X\<rightarrow>G,F)"
-    using IsAgroup_def Group_ZF_2_1_L2 by simp
+    using IsAgroup_def monoid.Group_ZF_2_1_L2 by simp
   ultimately show "F`\<langle> s,i\<rangle> = TheNeutralElement(X\<rightarrow>G,F)"
-    using fun_extension_iff IsAgroup_def Group_ZF_2_1_L2
+    using fun_extension_iff IsAgroup_def monoid.Group_ZF_2_1_L2
     by simp
   from groupAssum A2 A3 show "i: X\<rightarrow>G" 
     using group0_2_T2 comp_fun by simp
@@ -649,11 +649,11 @@ text\<open>The class of $a\in G$ is the neutral
   element of the quotient $G/H$ iff $a\in H$.\<close>
 
 lemma (in group0) Group_ZF_2_4_L5E: 
-  assumes "IsAnormalSubgroup(G,P,H)" and 
-  "a\<in>G" and "r = QuotientGroupRel(G,P,H)" and 
-  "TheNeutralElement(G//r,QuotientGroupOp(G,P,H)) = e"
+  assumes "IsAnormalSubgroup(G,P,H)" and "a\<in>G" 
+  defines "r \<equiv> QuotientGroupRel(G,P,H)"
+  defines "e \<equiv> TheNeutralElement(G//r,QuotientGroupOp(G,P,H))"
   shows "r``{a} = e \<longleftrightarrow> a\<in>H"
-  using assms Group_ZF_2_4_L5C  Group_ZF_2_4_L5D
+  using assms Group_ZF_2_4_L5C Group_ZF_2_4_L5D
   by simp
 
 text\<open>Essential condition to show that every subgroup of an abelian group 

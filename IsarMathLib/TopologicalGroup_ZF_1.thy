@@ -227,7 +227,8 @@ proof-
         unfolding grsub_def grinv_def grop_def by auto
       with \<open>u\<in>Q\<close> have "(\<rm>y)\<ra>x=\<rm>u" using group0.group_inv_of_two[OF group0_valid_in_tgroup group0.inverse_in_group[OF group0_valid_in_tgroup,of x],of y] (*From here no checked*)
         using \<open>x\<in>\<Union>T\<close> \<open>y\<in>\<Union>T\<close> using group0.group_inv_of_inv[OF group0_valid_in_tgroup] unfolding G_def grinv_def grop_def by auto
-      moreover from \<open>u\<in>Q\<close> have "(\<rm>u)\<in>(\<sm>Q)" unfolding setninv_def grinv_def using func_imagedef[OF group0_2_T2[OF Ggroup] \<open>Q\<subseteq>G\<close>] by auto
+      moreover from \<open>u\<in>Q\<close> have "(\<rm>u)\<in>(\<sm>Q)" unfolding setninv_def grinv_def 
+        using func_imagedef[OF group0_2_T2 \<open>Q\<subseteq>G\<close>] by auto
       ultimately have "(\<rm>y)\<ra>x\<in>Q" using \<open>(\<rm>y)\<ra>x\<notin>Q\<close> \<open>(\<sm>Q)=Q\<close> unfolding setninv_def grinv_def by auto
       then have "False" using \<open>(\<rm>y)\<ra>x\<notin>Q\<close> by auto
     }
@@ -249,7 +250,7 @@ proof-
       then have "((\<rm>y)\<ra>x)=v\<rs>u" using group0.group0_2_L18(1)[OF group0_valid_in_tgroup,of "(\<rm>y)\<ra>x" u v]
         using \<open>(\<rm>y)\<ra>x\<in>\<Union>T\<close> \<open>u\<in>\<Union>T\<close> \<open>v\<in>\<Union>T\<close> unfolding G_def grsub_def grinv_def grop_def by force
       moreover 
-      from \<open>u\<in>Q\<close> have "(\<rm>u)\<in>(\<sm>Q)" unfolding setninv_def grinv_def using func_imagedef[OF group0_2_T2[OF Ggroup] \<open>Q\<subseteq>G\<close>] by auto
+      from \<open>u\<in>Q\<close> have "(\<rm>u)\<in>(\<sm>Q)" unfolding setninv_def grinv_def using func_imagedef[OF group0_2_T2 \<open>Q\<subseteq>G\<close>] by auto
       then have "(\<rm>u)\<in>Q" using \<open>(\<sm>Q)=Q\<close> by auto
       with \<open>v\<in>Q\<close> have "\<langle>v,\<rm>u\<rangle>\<in>Q\<times>Q" by auto
       then have "f`\<langle>v,\<rm>u\<rangle>\<in>Q\<sad>Q" using lift_subset_suff[OF group0.group_oper_fun[OF group0_valid_in_tgroup] \<open>Q\<subseteq>G\<close> \<open>Q\<subseteq>G\<close>]

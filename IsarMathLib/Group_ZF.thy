@@ -726,7 +726,7 @@ proof -
     using IsAsubgroup_def group0_def by simp
   then have I:
     "?e \<in> H \<and> (\<forall>h\<in>H. (?b`\<langle>?e,h \<rangle> = h \<and> ?b`\<langle>h,?e\<rangle> = h))"
-    by (rule group0.group0_2_L2)
+    using group0.group0_2_L2[of H "restrict(f,H\<times>H)"] by auto
   with A2 show "n \<in> H" by simp
   from A2 I show "\<forall>h\<in>H. ?b`\<langle>n,h\<rangle> = h" and "\<forall>h\<in>H. ?b`\<langle>h,n\<rangle> = h"
     by auto
@@ -874,7 +874,7 @@ theorem (in group0) group0_3_T3A:
 proof -
   let ?g = "restrict(P,H\<times>H)"
   from A1 have  "GroupInv(H,?g) \<in> H\<rightarrow>H"
-    using IsAsubgroup_def group0_2_T2 by simp
+    using IsAsubgroup_def group0.group0_2_T2 group0_def by simp
   with A2 have "GroupInv(H,?g)`(h) \<in> H"
     using apply_type by simp
   with A1 A2 show "h\<inverse>\<in> H" using group0_3_T2 by simp

@@ -862,7 +862,7 @@ finite state automaton as \textbf{regular}.\<close>
 definition
   IsRegularLanguage ("_{is a regular language on}_") where
   "Finite(\<Sigma>) \<Longrightarrow> L{is a regular language on}\<Sigma> \<equiv> \<exists>S s t F. ((S,s,t,F){is an DFSA for alphabet}\<Sigma>) \<and> L=DetFinStateAuto.LanguageDFSA(S,s,t,F,\<Sigma>)"
-
+                                                                                                                          
 text\<open>By definition, the language in the locale
 is regular.\<close>
 
@@ -884,6 +884,111 @@ proof-
 qed
 
 subsection\<open>Operations on regular languages\<close>
+
+text\<open>The empty set is a regular language.\<close>
+
+lemma regular_0:
+  assumes "Finite(\<Sigma>)"
+  shows "0{is a regular language on}\<Sigma>"
+proof-
+  let ?S=1
+  let ?s=0
+  let ?F=0
+  let ?t="ConstantFunction(1\<times>\<Sigma>,0)"
+  have "?t:?S\<times>\<Sigma>\<rightarrow>?S" using func1_3_L1 by auto
+  then have dfsa:"(?S,?s,?t,?F){is an DFSA for alphabet}\<Sigma>" unfolding DFSA_def[OF assms]
+    by auto
+  {
+    fix t assume t:"t\<in>Lists(\<Sigma>)" "t <-D (?S,?s,?t,?F){in alphabet}\<Sigma>"
+    from t(2) have "(\<exists>q\<in>?F. \<langle>\<langle>t,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*) \<or> (t = 0 \<and> ?s\<in>?F)"
+      unfolding DFSASatisfy_def[OF assms dfsa t(1)] by auto
+    then have False by auto
+  }
+  then have "0 = {t\<in>Lists(\<Sigma>). t <-D (?S,?s,?t,?F){in alphabet}\<Sigma>}" by auto
+  then show ?thesis unfolding IsRegularLanguage_def[OF assms] using dfsa by auto
+qed
+
+text\<open>The language of just the empty word is a regular language.\<close>
+
+lemma regular_empty_word:
+  assumes "Finite(\<Sigma>)"
+  shows "{0}{is a regular language on}\<Sigma>"
+proof-
+  let ?S=2
+  let ?s=0
+  let ?F=1
+  let ?t="ConstantFunction(2\<times>\<Sigma>,1)"
+  have "?t:?S\<times>\<Sigma>\<rightarrow>?S" using func1_3_L1 by auto
+  then have dfsa:"(?S,?s,?t,?F){is an DFSA for alphabet}\<Sigma>" unfolding DFSA_def[OF assms]
+    by auto
+  have "0:0\<rightarrow>\<Sigma>" by auto
+  then have "0\<in>Lists(\<Sigma>)" unfolding Lists_def using nat_0I by blast
+  have "(\<exists>q\<in>?F. \<langle>\<langle>0,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*) \<or> (0 = 0 \<and> ?s\<in>?F)"
+    by auto
+  then have "0<-D (?S,?s,?t,?F){in alphabet}\<Sigma>" unfolding DFSASatisfy_def[OF assms dfsa `0\<in>Lists(\<Sigma>)`]
+    by auto
+  with `0\<in>Lists(\<Sigma>)` have A:"{0} \<subseteq> {t\<in>Lists(\<Sigma>). t <-D (?S,?s,?t,?F){in alphabet}\<Sigma>}" by auto
+  {
+    fix t assume t:"t\<in>Lists(\<Sigma>)" "t <-D (?S,?s,?t,?F){in alphabet}\<Sigma>"
+    from t(2) have D:"(\<exists>q\<in>?F. \<langle>\<langle>t,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*) \<or> (t = 0 \<and> ?s\<in>?F)"
+      unfolding DFSASatisfy_def[OF assms dfsa t(1)] by auto
+    {
+      assume as:"\<exists>q\<in>?F. \<langle>\<langle>t,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*"
+      then have q:"\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*" by auto
+      then have r:"\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in> id(field({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)) \<union> (({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^* O ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>))" 
+        using rtrancl_rev by auto
+      {
+        assume "\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in> id(field({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>))"
+        then have "t=0" by auto
+      } moreover
+      {
+        assume "\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<notin> id(field({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>))"
+        with r have "\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in>(({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^* O ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>))"
+          by auto
+        with compE obtain m where m:"\<langle>\<langle>t,?s\<rangle>,m\<rangle>\<in>({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)" "\<langle>m,\<langle>0,0\<rangle>\<rangle>\<in>({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*"
+          by auto
+        from m(1) have mm:"t\<in>NELists(\<Sigma>)" "m=\<langle>Init(t),?t`\<langle>?s,Last(t)\<rangle>\<rangle>" 
+          unfolding DFSAExecutionRelation_def[OF assms dfsa] by auto
+        have "0\<in>2" by auto
+        with mm(2) have M:"m=\<langle>Init(t),1\<rangle>" using func1_3_L2[of "\<langle>0,Last(t)\<rangle>"] last_type[OF mm(1)]
+          by auto
+        {
+          fix x assume x:"x\<in> field({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)"
+            "snd(fst(\<langle>x, x\<rangle>)) = 1"
+          from x(2) have "snd(snd(\<langle>x, x\<rangle>)) = 1" by auto
+        }
+        then have AA:"\<And>x. x \<in> field({reduce D-relation}(2,0,ConstantFunction(2 \<times> \<Sigma>, 1)){in alphabet}\<Sigma>) \<Longrightarrow>
+        snd(fst(\<langle>x, x\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>x, x\<rangle>)) = 1" by auto 
+        {
+          fix x y z assume as:"snd(fst(\<langle>x, y\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>x, y\<rangle>)) = 1"
+            "\<langle>x, y\<rangle> \<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*"
+            "\<langle>y, z\<rangle> \<in> {reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>"
+            "snd(fst(\<langle>x, z\<rangle>)) = 1"
+          from as(1,4) have y:"snd(y) = 1" by auto
+          from as(3) obtain l s where "l\<in>NELists(\<Sigma>)" "s\<in>?S" "y=\<langle>l,s\<rangle>" "z=\<langle>Init(l),?t`\<langle>s,Last(l)\<rangle>\<rangle>"
+            unfolding DFSAExecutionRelation_def[OF assms dfsa] by auto
+          with y have z:"l\<in>NELists(\<Sigma>)" "y=\<langle>l,1\<rangle>" "z=\<langle>Init(l),?t`\<langle>1,Last(l)\<rangle>\<rangle>" by auto
+          from z(3) have "z=\<langle>Init(l),1\<rangle>" using last_type[OF z(1)] func1_3_L2[of _ "2\<times>\<Sigma>" 1] by auto
+          then have "snd(snd(\<langle>x,z\<rangle>)) = 1" by auto
+        }
+        then have BB:"\<And>x y z.
+      snd(fst(\<langle>x, y\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>x, y\<rangle>)) = 1 \<Longrightarrow>
+      \<langle>x, y\<rangle> \<in> ({reduce D-relation}(2,0,ConstantFunction(2 \<times> \<Sigma>, 1)){in alphabet}\<Sigma>)^* \<Longrightarrow>
+      \<langle>y, z\<rangle> \<in> {reduce D-relation}(2,0,ConstantFunction(2 \<times> \<Sigma>, 1)){in alphabet}\<Sigma> \<Longrightarrow>
+      snd(fst(\<langle>x, z\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>x, z\<rangle>)) = 1" by auto
+        have "snd(fst(\<langle>m, 0, 0\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>m, 0, 0\<rangle>)) = 1"
+          apply (rule rtrancl_full_induct[of _ _ "({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)" "\<lambda>q. snd(fst(q)) = 1 \<longrightarrow> snd(snd(q)) = 1",
+              OF m(2)]) using AA apply simp using BB by blast
+        with M have False by auto
+      } ultimately
+      have "t=0" by auto
+    }
+    with D have "t=0" by auto
+  }
+  then have "{t\<in>Lists(\<Sigma>). t <-D (?S,?s,?t,?F){in alphabet}\<Sigma>} \<subseteq> {0}" by auto
+  with A have "{0} = {t\<in>Lists(\<Sigma>). t <-D (?S,?s,?t,?F){in alphabet}\<Sigma>}" by auto
+  then show ?thesis unfolding IsRegularLanguage_def[OF assms] using dfsa by auto
+qed
 
 text\<open>The intersection of two regular languages
 is a regular language.\<close>
@@ -2022,38 +2127,35 @@ proof-
   have epsNFSA:"(?S,?s,?t,?F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
     unfolding FullNFSA_def[OF assms(1)] by auto
   {
-    fix x y z w assume as:"\<langle>\<langle>x,y\<rangle>,\<langle>z,w\<rangle>\<rangle>\<in>DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^*"
-    then have "\<langle>x,y\<rangle>\<in>field(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^*)" by auto
+    fix x y z w assume as:"\<langle>\<langle>x,y\<rangle>,\<langle>z,w\<rangle>\<rangle>\<in>DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^*" "x\<in>NELists(\<Sigma>)"
+    then have "\<langle>x,y\<rangle>\<in>field(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^* )" by auto
     then have f:"\<langle>x,y\<rangle>\<in>field(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>))" using rtrancl_field by auto
+    then have "y\<in>S1" using DetFinStateAuto.reduce_field(1) unfolding DetFinStateAuto_def using assms(1) l1(1) by blast
+    with as(2) have pair:"\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>NELists(\<Sigma>)\<times>Pow(succ(S1+S2))" unfolding sum_def by auto
+    then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>domain(NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>))" using NonEpsDetFinStateAuto.field_rel(2)[THEN sym]
+      assms(1) epsNFSA unfolding NonEpsDetFinStateAuto_def by auto
+    then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>field(NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>))" unfolding field_def by auto
+    then have "\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^*" using rtrancl_refl by auto
+    then have base:"\<exists>U\<in>Pow(succ(S1+S2)). \<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>fst(\<langle>x,y\<rangle>),U\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^* \<and> \<langle>0,snd(\<langle>x,y\<rangle>)\<rangle>\<in>U" using pair by auto
     {
-      assume "\<langle>x,y\<rangle>\<in>domain(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>))"
-      then have "x\<in>NELists(\<Sigma>)" "y\<in>S1" using DetFinStateAuto.reduce_field(2)[THEN sym] unfolding DetFinStateAuto_def
-        using assms(1) l1(1) by auto
-      then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>NELists(\<Sigma>)\<times>Pow(succ(S1+S2))" unfolding sum_def by auto
-      then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>domain(NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>))" using NonEpsDetFinStateAuto.field_rel(2)[THEN sym]
-        assms(1) epsNFSA unfolding NonEpsDetFinStateAuto_def by auto
-      then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>field(NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>))" unfolding field_def by auto
-      then have "\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^*" using rtrancl_refl by auto
-    } moreover
-    {
-      assume "\<langle>x,y\<rangle>\<notin>domain(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>))"
-      with f have "\<langle>x,y\<rangle>: range(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>))" unfolding field_def by auto
-      then have "\<langle>x,y\<rangle>\<in>{\<langle>Init(w),t1`\<langle>s,Last(w)\<rangle>\<rangle>. \<langle>w,s\<rangle>\<in>NELists(\<Sigma>)\<times>S1}"
-        using range_fun[of "NELists(\<Sigma>)\<times>S1" "\<lambda>w. \<langle>Init(fst(w)),t1`\<langle>snd(w),Last(fst(w))\<rangle>\<rangle>"] unfolding DFSAExecutionRelation_def[OF assms(1) l1(1)]
-        by auto+
-      then obtain w s where "x=Init(w)" "y=t1`\<langle>s,Last(w)\<rangle>" "s\<in>S1" "w\<in>NELists(\<Sigma>)" by auto
-      
+     fix p z assume as:"\<langle>\<langle>x, y\<rangle>, p\<rangle> \<in> ({reduce D-relation}(S1,s1,t1){in alphabet}\<Sigma>)^*"
+       "\<langle>p, z\<rangle> \<in> {reduce D-relation}(S1,s1,t1){in alphabet}\<Sigma>"
+       "\<exists>U\<in>Pow(succ(S1 + S2)).
+         \<langle>\<langle>x, {\<langle>0, y\<rangle>}\<rangle>, fst(p), U\<rangle> \<in> ({reduce \<epsilon>-N-relation} (?S,?s,?t){in alphabet}\<Sigma>)^* \<and>
+         \<langle>0, snd(p)\<rangle> \<in> U"
+     from as(3) obtain U where u:"U\<in>Pow(succ(S1 + S2))" "\<langle>\<langle>x, {\<langle>0, y\<rangle>}\<rangle>, fst(p), U\<rangle> \<in> ({reduce \<epsilon>-N-relation} (?S,?s,?t){in alphabet}\<Sigma>)^*"
+       "\<langle>0, snd(p)\<rangle> \<in> U" by auto
+     from as(2) obtain pl ps where p:"p=\<langle>pl,ps\<rangle>" "pl\<in>NELists(\<Sigma>)" "ps\<in>S1" "z=\<langle>Init(pl),t1`\<langle>ps,Last(pl)\<rangle>\<rangle>"
+       unfolding DFSAExecutionRelation_def[OF assms(1) l1(1)] by auto
+     {
+       assume pf:"ps\<in>F1"
+       have "\<langle>\<langle>pl,{\<langle>0,ps\<rangle>}\<rangle>,\<langle>Init(pl),{\<langle>0,t1`\<langle>ps,Last(pl)\<rangle>\<rangle>,\<langle>1,s2\<rangle>}\<rangle>\<rangle> \<in> {reduce \<epsilon>-N-relation} (?S,?s,?t){in alphabet}\<Sigma>"
+        
 
-    have "field(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^*) \<subseteq> Lists(\<Sigma>)\<times>S1" using DetFinStateAuto.reduce_field(1) unfolding DetFinStateAuto_def
-      using assms(1) l1(1) rtrancl_field by auto
-    with as have "x\<in>Lists(\<Sigma>)" "y\<in>S1" unfolding field_def by auto
-    then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>Lists(\<Sigma>)\<times>Pow(succ(S1+S2))" unfolding sum_def by auto
-    have "\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^*" using rtrancl_refl NonEpsDetFinStateAuto.field_rel
-      unfolding NonEpsDetFinStateAuto_def using assms(1) epsNFSA
-    have "\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>z,{\<langle>0,w\<rangle>}\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^*"
-      using rtrancl_induct[of _ _ "DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)"
-"\<lambda>t. (\<langle>\<langle>x,y\<rangle>,t\<rangle>\<in>DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^*) \<longrightarrow> (\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>fst(t),{\<langle>0,snd(t)\<rangle>}\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^*)",
-  OF as(1)] oops
+
+    from rtrancl_induct[of "\<langle>x,y\<rangle>" _ "DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)"
+  "\<lambda>t. \<exists>U\<in>Pow(succ(S1+S2)). (\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>fst(t),U\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^* \<and> \<langle>0,snd(t)\<rangle>\<in>U)", OF _ base] 
+    oops
 
 
 
@@ -2070,5 +2172,5 @@ proof-
         ({reduce \<epsilon>-N-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*" unfolding FullNFSASatisfy_def[OF assms(1) epsNFSA q(1)]
         by auto
       
-
+*)
 end
