@@ -732,17 +732,101 @@ proof-
       eqpoll_trans[of "A*B" "n*m" "|n*m|"] by auto
   then have "A*B\<approx>n#*m" using nat_cmult_eq_mult nm(3,4) by auto
   then show "Finite(A*B)" unfolding Finite_def by auto
-qed
-
-    
+qed    
     
 lemma hyperfinite_internal:
   assumes "H\<in>Pow(*\<nat>)" "isHyperFinite(H)"
-  shows "\<exists>N\<in>*\<nat>. \<exists>S. internal_fun(S,\<lambda>_.nat):bij(H,N)"
+  shows "\<exists>N\<in>*\<nat>. \<exists>S. internal_fun(S,\<lambda>_.nat):bij(H,{i\<in>*\<nat>. i *\<le> N})"
 proof
-  from assms(2) obtain S where "S:nat\<rightarrow>FinPow(nat)" "H=internal_set(S,\<lambda>_. nat)"
+  from assms(2) obtain S where S:"S:nat\<rightarrow>FinPow(nat)" "H=internal_set(S,\<lambda>_. nat)"
     unfolding isHyperFinite_def[OF assms(1)] by auto
-  
+  {
+    fix g assume g:"g\<in>Pi(nat,\<lambda>i. bij(S`i,|S`i|))"
+    let ?f="internal_fun(g,\<lambda>_. nat)"
+    have const:"{\<langle>i, nat\<rangle> . i \<in> nat} = ConstantFunction(nat,nat)" 
+      unfolding ConstantFunction_def by auto
+    have S2:"S:nat \<rightarrow> Pow(nat)" using S(1) unfolding FinPow_def Pi_def by auto moreover
+    have "g\<in>Pi(nat,\<lambda>i. S`i \<rightarrow> nat)"
+      unfolding Pi_def function_def apply auto
+        prefer 3 using g unfolding Pi_def function_def apply blast
+       prefer 2 using g unfolding Pi_def apply blast
+    proof-
+      fix x assume "x\<in>g"
+      with g have "x\<in>(\<Sum>i\<in>nat. bij(S ` i, |S ` i|))" unfolding Pi_def by auto
+      then obtain i f where x:"x=\<langle>i,f\<rangle>" "i\<in>nat" "f\<in>bij(S ` i, |S ` i|)" by auto
+      have f:"f\<in>{f \<in> Pow(S ` i \<times> |S`i|) .
+              S ` i \<subseteq> domain(f) \<and> (\<forall>x y. \<langle>x, y\<rangle> \<in> f \<longrightarrow> (\<forall>y'. \<langle>x, y'\<rangle> \<in> f \<longrightarrow> y = y'))}"
+        using bij_is_fun[OF x(3)] unfolding Pi_def function_def .
+      have "|S`i|\<in>nat" using apply_type[OF S(1) x(2)] unfolding FinPow_def
+        using Finite_cardinal_in_nat by auto
+      then have "|S`i| \<subseteq> nat" using OrdmemD[OF _ Ord_nat] by auto moreover
+      from f have "f\<in> Pow(S ` i \<times> |S`i|)"  by auto
+      ultimately have "f:  Pow(S ` i \<times> nat)" by auto
+      with f have "f\<in>{f \<in> Pow(S ` i \<times> nat) .
+              S ` i \<subseteq> domain(f) \<and> (\<forall>x y. \<langle>x, y\<rangle> \<in> f \<longrightarrow> (\<forall>y'. \<langle>x, y'\<rangle> \<in> f \<longrightarrow> y = y'))}" by blast
+      with x(1,2) show "x \<in>
+         (\<Sum>i\<in>nat.
+             {f \<in> Pow(S ` i \<times> nat) .
+              S ` i \<subseteq> domain(f) \<and> (\<forall>x y. \<langle>x, y\<rangle> \<in> f \<longrightarrow> (\<forall>y'. \<langle>x, y'\<rangle> \<in> f \<longrightarrow> y = y'))})" by blast
+    qed
+    then have g2:"g \<in> (\<Prod>i\<in>nat. S ` i \<rightarrow> ConstantFunction(nat,nat)`i)" using
+      func1_3_L2[of _ nat nat] unfolding Pi_def by force
+    have n:"nat\<in>Pow(nat)" by auto
+    have fun:"?f:H\<rightarrow>*\<nat>" using internal_fun_is_fun[OF S2 func1_3_L1[OF n] g2]
+      internal_total_set[of "\<lambda>_. nat"] const S(2) by auto
+    
+    let ?N="{\<langle>i,|S`i|\<rangle>. i\<in>nat}"
+    have n_fun:"?N:nat\<rightarrow>nat" unfolding Pi_def function_def using apply_type[OF S(1)] unfolding FinPow_def
+      using Finite_cardinal_in_nat by auto
+    then have "[?N]:*\<nat>" unfolding hyper_set_def quotient_def using seq_class_def by auto
+    {
+      fix t assume t:"t\<in>range(?f)"
+      then obtain q where "\<langle>q,t\<rangle>\<in>?f" using rangeE by auto
+      with fun have f:"q\<in>H" "t\<in>*\<nat>" "\<langle>q,t\<rangle>\<in>?f" unfolding Pi_def by auto
+      from f(1,3) have fqt:"?f`q=t" using apply_equality[OF _ fun] by auto
+      from f(1) S(2) obtain qx where qx:"qx:nat\<rightarrow>nat" "{i\<in>nat. qx`i\<in>S`i}\<in>\<FF>" "q=[qx]"
+        unfolding internal_set_def[OF S2] using seq_class_def by auto
+      from f(2) obtain tx where tx:"tx:nat\<rightarrow>nat" "t=[tx]" using seq_class_def
+        unfolding hyper_set_def quotient_def by auto
+      from fqt qx(3) have "t = hyper_rel(\<lambda>_. nat) `` {{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}}" using internal_fun_apply_2[OF S2 func1_3_L1[OF n] g2, of qx]
+        f(1) S(2) unfolding seq_class_def[OF qx(1)] by auto
+      with tx(2) have "[tx] = hyper_rel(\<lambda>_. nat) `` {{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}}" by auto
+      then have "hyper_rel(\<lambda>_. nat) `` {{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}} = [tx]" by auto
+      then have "\<langle>{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat},tx\<rangle>\<in>hyper_rel(\<lambda>_. nat)"
+        using eq_equiv_class[OF _ hyper_equiv, of "\<lambda>_. nat" _ tx] unfolding seq_class_def[OF tx(1)] using tx(1) by auto
+      then have "{i\<in>nat. {\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}`i = tx`i}:\<FF>"
+  and ff:"{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}:nat\<rightarrow>nat"
+        unfolding hyper_rel_def by auto
+      then have "{i\<in>nat. {\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}`i = tx`i}\<inter>{i\<in>nat. qx`i\<in>S`i}\<in>\<FF>"
+        using ultraFilter qx(2) unfolding IsFilter_def IsUltrafilter_def by auto moreover
+      {
+        fix i assume "i\<in>{i\<in>nat. {\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}`i = tx`i}\<inter>{i\<in>nat. qx`i\<in>S`i}"
+        then have "i\<in>nat" "{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}`i = tx`i" "qx`i\<in>S`i" by auto
+        then have i:"i\<in>nat" "(g ` i)  ` (qx ` i)  = tx`i" "qx`i\<in>S`i" using apply_equality[OF _ ff] by auto
+        from i(1) have "g`i\<in>bij(S`i,|S`i|)" using g apply_type by auto
+        with i(3) have "(g`i)`(qx`i)\<in>|S`i|" using apply_type[OF bij_is_fun] by auto
+        with i(2) have "tx`i\<in>|S`i|" by auto moreover
+        have "Ord(succ(|S`i|))" using Ord_cardinal Ord_succ by auto
+        ultimately have "tx`i \<le> |S`i|" unfolding lt_def by auto
+        then have "tx`i \<le> ?N`i" using apply_equality[of i "|S`i|" ?N] n_fun i(1) by auto
+        then have "i\<in>{i\<in>nat. tx`i \<le> ?N`i }" using i(1) by auto
+      }
+      then have "{i\<in>nat. {\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}`i = tx`i}\<inter>{i\<in>nat. qx`i\<in>S`i} \<subseteq> {i\<in>nat. tx`i \<le> ?N`i }" by auto moreover
+      have "{i\<in>nat. tx`i \<le> ?N`i }:Pow(nat)" by auto ultimately
+      have "{i\<in>nat. tx`i \<le> ?N`i }:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+      then have "[tx] *\<le> [?N]" using less_than_seq[OF tx(1) n_fun] by auto
+      then have "t *\<le>[?N]" using tx(2) by auto
+      with f(2) have "t:{p:*\<nat>. p *\<le>[?N]}" by auto
+    }
+    then have "range(?f) \<subseteq> {p:*\<nat>. p *\<le>[?N]}" by auto
+    then have fun:"?f:H\<rightarrow>{p:*\<nat>. p *\<le>[?N]}" using range_of_fun[OF fun] func1_1_L1B by auto
 
+    {
+      fix i assume i:"i\<in>nat"
+      then have "g`i \<in>S ` i \<rightarrow> ConstantFunction(nat,nat)`i" using g2 apply_type by auto
+      from i have "g`i\<in>bij(S`i,|S`i| )" using g apply_type by auto
+
+  
+    (*from internal_fun_inj[OF S2 func1_3_L1[OF n] g2]*)
 end
 end
