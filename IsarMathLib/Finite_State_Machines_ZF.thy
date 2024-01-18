@@ -335,13 +335,17 @@ proof-
   then show ?thesis by auto
 qed
 
+text\<open>The relation created for a deterministic automata, is deterministic
+in the following sense: if I reach the same state in two ways, then the left out
+words are actually the same.\<close>
+
 lemma (in DetFinStateAuto) relation_deteministic:
   assumes "\<langle>\<langle>w,s\<rangle>,\<langle>u,v\<rangle>\<rangle>\<in>r\<^sub>D^*" "\<langle>\<langle>w,s\<rangle>,\<langle>u,m\<rangle>\<rangle>\<in>r\<^sub>D^*"
   shows "v=m"
 proof-
   let ?P="\<lambda>y. \<forall>q1 q2. \<langle>\<langle>w,s\<rangle>,\<langle>q1,q2\<rangle>\<rangle>\<in>r\<^sub>D^* \<longrightarrow> fst(y) = q1 \<longrightarrow> snd(y) = q2"
   {
-    fix q1 q2 assume "\<langle>\<langle>w, s\<rangle>, q1, q2\<rangle> \<in> r\<^sub>D^*" "fst(\<langle>w, ss\<rangle>) = q1" 
+    fix q1 q2 assume "\<langle>\<langle>w, s\<rangle>, q1, q2\<rangle> \<in> r\<^sub>D^*" "fst(\<langle>w, s\<rangle>) = q1"
     then have "\<langle>\<langle>w, s\<rangle>, w, q2\<rangle> \<in> r\<^sub>D^*" by auto
     then have "\<langle>\<langle>w, s\<rangle>, w, q2\<rangle> \<in> id(field(r\<^sub>D)) \<union> (r\<^sub>D^* O r\<^sub>D)" using rtrancl_rev by auto
     then have A:"s=q2 \<or> \<langle>\<langle>w, s\<rangle>, w, q2\<rangle>:(r\<^sub>D^* O r\<^sub>D)" by auto
@@ -862,7 +866,7 @@ finite state automaton as \textbf{regular}.\<close>
 definition
   IsRegularLanguage ("_{is a regular language on}_") where
   "Finite(\<Sigma>) \<Longrightarrow> L{is a regular language on}\<Sigma> \<equiv> \<exists>S s t F. ((S,s,t,F){is an DFSA for alphabet}\<Sigma>) \<and> L=DetFinStateAuto.LanguageDFSA(S,s,t,F,\<Sigma>)"
-                                                                                                                          
+
 text\<open>By definition, the language in the locale
 is regular.\<close>
 
@@ -935,7 +939,7 @@ proof-
     {
       assume as:"\<exists>q\<in>?F. \<langle>\<langle>t,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*"
       then have q:"\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*" by auto
-      then have r:"\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in> id(field({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)) \<union> (({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^* O ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>))" 
+      then have r:"\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in> id(field({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)) \<union> (({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^* O ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>))"
         using rtrancl_rev by auto
       {
         assume "\<langle>\<langle>t,?s\<rangle>,\<langle>0,0\<rangle>\<rangle>\<in> id(field({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>))"
@@ -947,7 +951,7 @@ proof-
           by auto
         with compE obtain m where m:"\<langle>\<langle>t,?s\<rangle>,m\<rangle>\<in>({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)" "\<langle>m,\<langle>0,0\<rangle>\<rangle>\<in>({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*"
           by auto
-        from m(1) have mm:"t\<in>NELists(\<Sigma>)" "m=\<langle>Init(t),?t`\<langle>?s,Last(t)\<rangle>\<rangle>" 
+        from m(1) have mm:"t\<in>NELists(\<Sigma>)" "m=\<langle>Init(t),?t`\<langle>?s,Last(t)\<rangle>\<rangle>"
           unfolding DFSAExecutionRelation_def[OF assms dfsa] by auto
         have "0\<in>2" by auto
         with mm(2) have M:"m=\<langle>Init(t),1\<rangle>" using func1_3_L2[of "\<langle>0,Last(t)\<rangle>"] last_type[OF mm(1)]
@@ -958,7 +962,7 @@ proof-
           from x(2) have "snd(snd(\<langle>x, x\<rangle>)) = 1" by auto
         }
         then have AA:"\<And>x. x \<in> field({reduce D-relation}(2,0,ConstantFunction(2 \<times> \<Sigma>, 1)){in alphabet}\<Sigma>) \<Longrightarrow>
-        snd(fst(\<langle>x, x\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>x, x\<rangle>)) = 1" by auto 
+        snd(fst(\<langle>x, x\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>x, x\<rangle>)) = 1" by auto
         {
           fix x y z assume as:"snd(fst(\<langle>x, y\<rangle>)) = 1 \<longrightarrow> snd(snd(\<langle>x, y\<rangle>)) = 1"
             "\<langle>x, y\<rangle> \<in> ({reduce D-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*"
@@ -1443,7 +1447,7 @@ of the automata without $\varepsilon$-transitions.\<close>
 definition
   FullNFSASatisfy ("_ <-\<epsilon>-N '(_,_,_,_'){in alphabet}_") where
   "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow> 
-  i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> s\<^sub>0\<in>F)"
+  i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> \<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>F \<noteq>0)"
 
 text\<open>We define a locale to create some notation\<close>
 
@@ -1625,8 +1629,6 @@ locale NonEpsDetFinStateAuto =
   
   assumes NFSA: "(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
 
-
-
 text\<open>Notation for the transition relation\<close>
 
 abbreviation (in NonEpsDetFinStateAuto) \<epsilon>nd_rel ("r\<^sub>\<epsilon>")
@@ -1639,7 +1641,6 @@ abbreviation (in NonEpsDetFinStateAuto) Language\<epsilon>NFSA
 lemma (in NonEpsDetFinStateAuto) cl_state:
   assumes "E \<subseteq> S"
   shows "\<epsilon>-cl(S,t,\<Sigma>,E) \<subseteq> S" using EpsilonClosure_def[OF finite_alphabet NFSA] assms by auto
-
 
 lemma (in NonEpsDetFinStateAuto) field_rel:
   shows "field(r\<^sub>\<epsilon>) \<subseteq> Lists(\<Sigma>)\<times>Pow(S)" "domain(r\<^sub>\<epsilon>) = NELists(\<Sigma>)\<times>Pow(S)"
@@ -1808,7 +1809,6 @@ proof
   then show " \<epsilon>-cl(S, t, \<Sigma>, \<Union>E) \<subseteq> (\<Union>y\<in>E. \<epsilon>-cl(S, t, \<Sigma>, y))" by auto
 qed
 
-
 subsection\<open>Equivalence of Non-deterministic and \<epsilon>-Non-deterministic
 Finite State Automata\<close>
 
@@ -1820,44 +1820,189 @@ that generates the same language.\<close>
 text\<open>The transition function of the ND
 automata we will construct\<close>
 
+definition (in NonEpsDetFinStateAuto) s0 where
+  "s0 \<equiv> \<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})"
+
+definition (in NonEpsDetFinStateAuto) s1 where
+  "s1(G) \<equiv> if s0\<inter>G=0 then G else (G-s0)\<union>{S}"
+
 definition (in NonEpsDetFinStateAuto) tcl where
-  "tcl \<equiv> {\<langle>\<langle>U,u\<rangle>, \<epsilon>-cl(S,t,\<Sigma>,t ` \<langle>U, u\<rangle>)\<rangle>. \<langle>U,u\<rangle>\<in>S\<times>\<Sigma>}"
+  "tcl \<equiv> {\<langle>\<langle>U,u\<rangle>, s1(\<epsilon>-cl(S,t,\<Sigma>,t ` \<langle>U, u\<rangle>))\<rangle>. \<langle>U,u\<rangle>\<in>(S-s0)\<times>\<Sigma>} \<union> {\<langle>\<langle>S,v\<rangle>, s1(\<epsilon>-cl(S,t,\<Sigma>,\<Union>u\<in>s0. t ` \<langle>u, v\<rangle>))\<rangle>. v\<in>\<Sigma>}"
 
 text\<open>The transition relation of the ND
 automata we will construct\<close>
 
 definition (in NonEpsDetFinStateAuto) rcl where
-  "rcl \<equiv> NonDetFinStateAuto.nd_rel(S,s\<^sub>0,tcl,\<Sigma>)"
+  "rcl \<equiv> NonDetFinStateAuto.nd_rel(s1(S),S,tcl,\<Sigma>)"
+
+lemma (in NonEpsDetFinStateAuto) s1_subset:
+  assumes "A\<subseteq>S" shows "s1(A)\<subseteq>s1(S)"
+proof
+  have q:"s0\<inter>S \<noteq>0" unfolding s0_def using cl_contains NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
+  then have eq:"s1(S) = (S-s0)\<union>{S}" unfolding s1_def by auto
+  fix x assume x:"x\<in>s1(A)"
+  {
+    assume as:"A\<inter>s0 = 0"
+    then have "s1(A) =A" unfolding s1_def by auto
+    with x have "x\<in>A" by auto
+    with as have "x\<in>A" "x\<notin>s0" by auto
+    with assms have "x\<in>S-s0" by auto
+    with eq have "x\<in>s1(S)" by auto
+  } moreover
+  {
+    assume as:"A\<inter>s0\<noteq>0"
+    then have "s1(A) = (A-s0)\<union>{S}" unfolding s1_def by auto
+    with eq have "s1(A) \<subseteq> s1(S)" using assms by auto
+    with x have "x\<in>s1(S)" by auto
+  } ultimately
+  show "x\<in>s1(S)" by auto
+qed
+
+lemma (in NonEpsDetFinStateAuto) s1_union:
+  assumes "\<Union>E\<subseteq>S" shows "\<Union>{s1(y). y\<in>E} = s1(\<Union>E)"
+proof
+  {
+    fix x assume "x\<in>\<Union>{s1(y). y\<in>E}"
+    then obtain y where y:"y:E" "x\<in>s1(y)" by auto
+    moreover
+    from y(1) have s:"y \<subseteq> \<Union>E" by auto
+    {
+      assume as:"\<Union>E \<inter> s0 =0"
+      with s have "y\<inter>s0 =0" by auto
+      with as s have "s1(y) \<subseteq> s1(\<Union>E)" unfolding s1_def by auto
+    }
+    moreover
+    {
+      assume as:"\<Union>E \<inter> s0 \<noteq>0"
+      then have e:"s1(\<Union>E) = (\<Union>E-s0)\<union>{S}" unfolding s1_def by auto
+      {
+        assume r:"y\<inter>s0 = 0"
+        then have "y \<subseteq> (\<Union>E-s0)" using s by auto
+        with r e have "s1(y) \<subseteq> s1(\<Union>E)" unfolding s1_def by auto
+      } moreover
+      {
+        assume r:"y\<inter>s0 \<noteq> 0"
+        then have "y-s0 \<subseteq> (\<Union>E-s0)" using s by auto
+        with r e have "s1(y) \<subseteq> s1(\<Union>E)" unfolding s1_def by auto
+      } ultimately
+      have "s1(y) \<subseteq> s1(\<Union>E)" by auto
+    }
+    ultimately have "x: s1(\<Union>E)" by auto
+  }
+  then show "\<Union>RepFun(E, s1) \<subseteq> s1(\<Union>E)" by auto
+next
+  {
+    fix t assume t:"t\<in>s1(\<Union>E)"
+    {
+      assume as:"s0\<inter>\<Union>E=0"
+      with t have "t\<in>\<Union>E" unfolding s1_def by auto
+      then obtain y where y:"y:E" "t:y" by auto
+      from y(1) as have "s0\<inter>y=0" by auto
+      then have "s1(y) = y" unfolding s1_def by auto
+      then have "t\<in>s1(y)" using y(2) by auto
+      then have "t\<in>\<Union>{s1(y). y\<in>E}" using y(1) by auto
+    }
+    moreover
+    {
+      assume as:"s0\<inter>\<Union>E\<noteq>0"
+      then have o:"t\<in>\<Union>E-s0 \<or> t=S" using t unfolding s1_def by auto
+      {
+        assume tt:"t=S"
+        from as obtain y where y:"y\<in>E" "s0\<inter>y\<noteq>0" by auto
+        then have "y:E" "t:s1(y)" using tt unfolding s1_def by auto
+        then have "t\<in>\<Union>{s1(y). y\<in>E}" by auto
+      } moreover
+      {
+        assume tt:"t\<noteq>S"
+        with o have "t\<in>\<Union>E-s0" by auto
+        then obtain y where y:"y:E" "t:y-s0" by auto
+        then have "y:E" "t:s1(y)" unfolding s1_def by auto
+        then have "t\<in>\<Union>{s1(y). y\<in>E}" by auto
+      } ultimately
+      have "t\<in>\<Union>{s1(y). y\<in>E}" by auto
+    } ultimately
+    have "t\<in>\<Union>{s1(y). y\<in>E}" by auto
+  }
+  then show "s1(\<Union>E) \<subseteq> \<Union>RepFun(E, s1)" by auto
+qed
+
 
 text\<open>We show that we do have a ND automaton\<close>
 
-sublocale NonEpsDetFinStateAuto < ndfsa:NonDetFinStateAuto "S" "s\<^sub>0" tcl F \<Sigma> 
+sublocale NonEpsDetFinStateAuto < ndfsa:NonDetFinStateAuto "s1(S)" "S" tcl "s1(F)" \<Sigma>
   unfolding NonDetFinStateAuto_def NFSA_def[OF finite_alphabet] unfolding tcl_def
   apply safe using finite_alphabet apply simp
-  using NFSA unfolding FullNFSA_def[OF finite_alphabet]
-  apply simp using NFSA unfolding FullNFSA_def[OF finite_alphabet] apply simp
-  unfolding Pi_def function_def apply auto
 proof-
-  fix x assume "x\<in>F"
-  with NFSA show "x\<in>S" unfolding FullNFSA_def[OF finite_alphabet] by auto
+  have "s1(S) \<subseteq> succ(S)" unfolding s1_def by auto
+  then have "Finite(S) \<Longrightarrow> Finite(s1(S))" using Finite_succ subset_Finite by auto
+  with NFSA show "Finite(s1(S))" unfolding FullNFSA_def[OF finite_alphabet] by auto
+  have q:"S\<inter>s0 \<noteq>0" unfolding s0_def using cl_contains NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
+  then show "S\<in>s1(S)" unfolding s1_def by auto
+  fix x assume "x:s1(F)"
+  then show "x\<in>s1(S)" using s1_subset NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
 next
-  fix b y x v assume as:"y \<in> \<Sigma>" "b \<in> S" "x \<in> \<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>b, y\<rangle>)"
-  from as(3) have "t`\<langle>b,y\<rangle> \<subseteq> S \<longrightarrow> x\<in>S" using cl_state by auto
-  moreover have "\<langle>b,y\<rangle>\<in>S\<times>succ(\<Sigma>)" using as(1,2) by auto
-  then have "t`\<langle>b,y\<rangle>\<in>Pow(S)" using apply_type[of t "S\<times>succ(\<Sigma>)" "\<lambda>_. Pow(S)" "\<langle>b,y\<rangle>"]
-    NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
-  ultimately show "x\<in>S" by auto
+  let ?f1="{\<langle>\<langle>U, u\<rangle>, s1(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>U, u\<rangle>))\<rangle> . \<langle>U,u\<rangle> \<in> (S - s0) \<times> \<Sigma>}"
+  let ?f2="{\<langle>\<langle>S, v\<rangle>, s1(\<epsilon>-cl(S, t, \<Sigma>, \<Union>u\<in>s0. t ` \<langle>u, v\<rangle>))\<rangle> . v \<in> \<Sigma>}"
+  have q:"s0\<inter>S \<noteq>0" unfolding s0_def using cl_contains NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
+  {
+    fix U u assume "U\<in>S-s0" "u\<in>\<Sigma>"
+    then have "t ` \<langle>U, u\<rangle> \<in> Pow(S)" using NFSA unfolding FullNFSA_def[OF finite_alphabet]
+      using apply_type[of t "S\<times>succ(\<Sigma>)" "\<lambda>_. Pow(S)"] by auto
+    then have "(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>U, u\<rangle>))\<in>Pow(S)" using cl_state by auto
+    then have "s1(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>U, u\<rangle>))\<in>Pow(s1(S))" using s1_subset by auto
+  } moreover
+  have "S-s0 \<subseteq> s1(S)" unfolding s1_def by auto
+  ultimately have f1:"?f1 \<subseteq> (s1(S) \<times> \<Sigma>) \<times> Pow(s1(S))"
+    by auto
+  have eq0:"s0 \<subseteq> S" unfolding s0_def using cl_state NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
+  {
+    fix v assume v:"v:\<Sigma>"
+    {
+      fix u assume "u\<in>s0"
+      with v have "t`\<langle>u,v\<rangle> \<subseteq> S" using eq0 using NFSA unfolding FullNFSA_def[OF finite_alphabet]
+        using apply_type[of t "S\<times>succ(\<Sigma>)" "\<lambda>_. Pow(S)"] by auto
+    }
+    then have "(\<Union>u\<in>s0. t ` \<langle>u, v\<rangle>) \<subseteq>S" by auto
+    then have "(\<epsilon>-cl(S, t, \<Sigma>,(\<Union>u\<in>s0. t ` \<langle>u, v\<rangle>))) \<subseteq>S" using cl_state by auto
+    then have "s1(\<epsilon>-cl(S, t, \<Sigma>,(\<Union>u\<in>s0. t ` \<langle>u, v\<rangle>))) \<subseteq>s1(S)" using s1_subset by auto
+  } moreover
+  have "S\<in>s1(S)" using q unfolding s1_def by auto
+  ultimately have f2:"?f2 \<subseteq> (s1(S) \<times> \<Sigma>) \<times> Pow(s1(S))"
+    by auto
+  {
+    fix t assume "t\<in>s1(S)\<times>\<Sigma>"
+    with q obtain t1 t2 where t:"t=\<langle>t1,t2\<rangle>" "t1\<in>(S-s0)\<union>{S}" "t2:\<Sigma>" unfolding s1_def by auto
+    {
+      assume "t1=S"
+      with t(3) have "\<langle>t1,t2\<rangle>\<in>domain(?f2)" by auto
+      then have "\<langle>t1,t2\<rangle>\<in>domain(?f1\<union>?f2)" by auto
+      with t(1) have "t\<in>domain(?f1\<union>?f2)" by auto
+    } moreover
+    {
+      assume "t1\<noteq>S"
+      with t(2) have "t1\<in>S-s0" by auto
+      with t(3) have "\<langle>t1,t2\<rangle>\<in>domain(?f1)" by auto
+      then have "\<langle>t1,t2\<rangle>\<in>domain(?f1\<union>?f2)" by auto
+      with t(1) have "t\<in>domain(?f1\<union>?f2)" by auto
+    } ultimately
+    have "t\<in>domain(?f1\<union>?f2)" by auto
+  }
+  then have f3:"s1(S) \<times> \<Sigma> \<subseteq>domain(?f1\<union>?f2)" by auto
+  from f1 f2 have f4:"?f1\<union>?f2:Pow((s1(S) \<times> \<Sigma>)\<times> Pow(s1(S)))" by auto
+  with f3 show "?f1\<union>?f2:s1(S) \<times> \<Sigma> \<rightarrow> Pow(s1(S))"
+    unfolding Pi_def[of "(s1(S) \<times> \<Sigma>)" "\<lambda>_. Pow(s1(S))"] using mem_irrefl[of S False]
+    unfolding function_def by auto
 qed
 
 lemma (in NonEpsDetFinStateAuto) nd_impl_det:
   assumes "\<langle>\<langle>w,Q\<rangle>,\<langle>u,G\<rangle>\<rangle>\<in>r\<^sub>\<epsilon>"
-  shows "\<langle>\<langle>w,Q\<rangle>,\<langle>u,G\<rangle>\<rangle>\<in>rcl"
+  shows "\<langle>\<langle>w,s1(Q)\<rangle>,\<langle>u,s1(G)\<rangle>\<rangle>\<in>rcl"
 proof-
   from assms have w:"w\<in>NELists(\<Sigma>)" "u=Init(w)" "Q\<in>Pow(S)" "G=\<epsilon>-cl(S, t, \<Sigma>, \<Union>s\<in>Q. t ` \<langle>s, Last(w)\<rangle>)"
     unfolding FullNFSAExecutionRelation_def[OF finite_alphabet NFSA] by auto
   have lt:"Last(w):\<Sigma>" using w(1) last_type by auto
-  from w have "(\<Union>s\<in>Q. tcl`\<langle>s,Last(w)\<rangle>) = \<epsilon>-cl(S, t, \<Sigma>, \<Union>s\<in>Q. t ` \<langle>s, Last(w)\<rangle>) \<Longrightarrow> ?thesis"
-    unfolding rcl_def using NFSAExecutionRelation_def[OF finite_alphabet ndfsa.NFSA]
+  from w have "(\<Union>s\<in>s1(Q). tcl`\<langle>s,Last(w)\<rangle>) = s1(\<epsilon>-cl(S, t, \<Sigma>, \<Union>s\<in>Q. t ` \<langle>s, Last(w)\<rangle>)) \<Longrightarrow> ?thesis"
+    unfolding rcl_def  NFSAExecutionRelation_def[OF finite_alphabet ndfsa.NFSA] using s1_subset[of Q]
     by auto
   moreover
   {
@@ -1873,11 +2018,50 @@ proof-
     using cl_union[of "{t ` \<langle>s, Last(w)\<rangle>. s\<in>Q}", THEN sym] by auto
   moreover
   {
-    fix s assume "s\<in>Q"
-    then have "\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>s, Last(w)\<rangle>) = tcl`\<langle>s,Last(w)\<rangle>"
-      using w(3) lt apply_equality[of "\<langle>s,Last(w)\<rangle>" _ tcl] ndfsa.NFSA 
-      unfolding NFSA_def[OF finite_alphabet] tcl_def 
-      by auto
+    fix s assume s:"s\<in>s1(Q)"
+    {
+      assume "s0\<inter>Q = 0"
+      with s have "s\<in>Q" "s\<notin>s0" unfolding s1_def by auto
+      then have "s\<in>S-s0" using w(3) by auto
+      with lt have "tcl`\<langle>s,Last(w)\<rangle> = s1(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>s, Last(w)\<rangle>))" unfolding tcl_def
+        using apply_equality[of "\<langle>s,Last(w)\<rangle>" _ tcl "s1(S) \<times> \<Sigma>" "\<lambda>_. Pow(s1(S))"] ndfsa.NFSA unfolding NFSA_def[OF finite_alphabet]
+        tcl_def by auto
+      with `s\<in>Q` have "\<exists>q\<in>Pow(Q). tcl`\<langle>s,Last(w)\<rangle> = (\<Union>r\<in>q. s1(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>)))" by auto
+    }
+    {
+      assume "s0\<inter>Q \<noteq> 0"
+      with s have "s\<in>Q-s0 \<or> S=s" unfolding s1_def by auto
+      {
+        assume as:"s=S"
+        have "S\<notin>S" using mem_irrefl by auto
+        with lt as have "tcl`\<langle>s,Last(w)\<rangle> = s1(\<epsilon>-cl(S, t, \<Sigma>, \<Union>s\<in>s0. t ` \<langle>s, Last(w)\<rangle>))" unfolding tcl_def
+          using apply_equality[of "\<langle>S,Last(w)\<rangle>" _ tcl "s1(S) \<times> \<Sigma>" "\<lambda>_. Pow(s1(S))"] ndfsa.NFSA unfolding NFSA_def[OF finite_alphabet]
+          tcl_def by auto moreover
+        have ss:"s0 \<subseteq> S" using cl_state unfolding s0_def using NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
+        {
+          fix r assume "r\<in>s0"
+          then have "\<langle>r,Last(w)\<rangle>\<in>S\<times>succ(\<Sigma>)" using ss lt by auto
+          then have "t ` \<langle>r, Last(w)\<rangle> \<subseteq> S" using apply_type[of t "S\<times>succ(\<Sigma>)" "\<lambda>_. Pow(S)" "\<langle>r,Last(w)\<rangle>"]
+            using NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
+        }
+        then have "{t ` \<langle>r, Last(w)\<rangle>. r\<in>s0} \<subseteq> Pow(S)" by auto
+        then have "\<Union>{t ` \<langle>r, Last(w)\<rangle>. r\<in>s0} \<subseteq> S" by auto
+        ultimately have "tcl`\<langle>s,Last(w)\<rangle> = s1(\<Union>r\<in>s0. \<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>))" using cl_union[of "{t ` \<langle>r, Last(w)\<rangle>. r\<in>s0}"]
+          by auto moreover
+        {
+          fix r assume "r\<in>s0"
+          then have "\<langle>r,Last(w)\<rangle>\<in>S\<times>succ(\<Sigma>)" using ss lt by auto
+          then have "t ` \<langle>r, Last(w)\<rangle> \<subseteq> S" using apply_type[of t "S\<times>succ(\<Sigma>)" "\<lambda>_. Pow(S)" "\<langle>r,Last(w)\<rangle>"]
+            using NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
+          then have "\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>) \<subseteq> S" using cl_state by auto
+        }
+        then have "{(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>)). r:s0} \<subseteq> Pow(S)" by auto
+        then have "(\<Union>r\<in>s0. \<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>)) \<subseteq> S" by auto
+        ultimately have "tcl`\<langle>s,Last(w)\<rangle> = (\<Union>r\<in>s0. s1(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>)))"
+          using s1_union[of "{(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>)). r:s0}"] by auto
+        then have "\<exists>q\<in>Pow(Q). tcl`\<langle>s,Last(w)\<rangle> = (\<Union>r\<in>q. s1(\<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>r, Last(w)\<rangle>)))"
+          using ss
+    }
   }
   then have "\<forall>s\<in>Q. \<epsilon>-cl(S, t, \<Sigma>, t ` \<langle>s, Last(w)\<rangle>) = tcl`\<langle>s,Last(w)\<rangle>" by auto
   ultimately show ?thesis by auto
@@ -1937,11 +2121,13 @@ proof-
   let ?s = "s\<^sub>0"
   let ?f = "tcl"
   let ?F = "F"
+  have sub:"F\<subseteq>S" using NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
   {
     fix i assume i:"i\<in>Lists(\<Sigma>)" "i <-N (?S,?s,?f,?F){in alphabet}\<Sigma>"
     {
-      assume "i=0" "?s\<in>?F"
-      then have "i=0" "s\<^sub>0\<in>F" by auto
+      assume as:"i=0" "?s\<in>?F"
+      then have "i=0" "\<epsilon>-cl(S, t, \<Sigma>, {s\<^sub>0}) \<inter> F \<noteq> 0"
+        using cl_contains NFSA unfolding FullNFSA_def[OF finite_alphabet] by auto
       then have "i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>" 
         unfolding FullNFSASatisfy_def[OF finite_alphabet NFSA i(1)] by auto
     } moreover
@@ -1970,14 +2156,23 @@ proof-
         unfolding tcl_def rcl_def by auto
     } moreover
     {
-      assume "\<not>(i=0 \<and> s\<^sub>0\<in>F)"
-      with i(2) obtain q where q:"q\<in>Pow(S)" "q\<inter>F\<noteq>0" "\<langle>\<langle>i,{?s}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>r\<^sub>\<epsilon>^*" 
-        unfolding FullNFSASatisfy_def[OF finite_alphabet NFSA i(1)] by auto
-      then have "\<langle>\<langle>i,{?s}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>rcl^*" using relation_FullNFSA_to_NDFSA
-        by auto
-      with q(1,2) have "i <-N (?S,?s,?f,?F){in alphabet}\<Sigma>"
-        using NFSASatisfy_def[OF finite_alphabet ndfsa.NFSA i(1)]
-      unfolding tcl_def rcl_def by auto
+      assume as:"\<not>(i=0 \<and> s\<^sub>0\<in>F)"
+      {
+        assume "\<epsilon>-cl(S, t, \<Sigma>, {s\<^sub>0}) \<inter> F = 0"
+        with i(2) obtain q where q:"q\<in>Pow(S)" "q\<inter>F\<noteq>0" "\<langle>\<langle>i,{?s}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>r\<^sub>\<epsilon>^*"
+          unfolding FullNFSASatisfy_def[OF finite_alphabet NFSA i(1)] by auto
+        then have "\<langle>\<langle>i,{?s}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>rcl^*" using relation_FullNFSA_to_NDFSA
+          by auto
+        with q(1,2) have "i <-N (?S,?s,?f,?F){in alphabet}\<Sigma>"
+          using NFSASatisfy_def[OF finite_alphabet ndfsa.NFSA i(1)]
+          unfolding tcl_def rcl_def by auto
+      } moreover
+      {
+        assume "\<epsilon>-cl(S, t, \<Sigma>, {s\<^sub>0}) \<inter> F \<noteq> 0"
+        {
+          assume "i = 0 \<and> s\<^sub>0 \<in> F"
+          with as have "s\<^sub>0\<notin>F" by auto
+        }
     } ultimately
     have "i <-N (?S,?s,?f,?F){in alphabet}\<Sigma>" by auto
   }
@@ -2126,40 +2321,7 @@ proof-
   ultimately
   have epsNFSA:"(?S,?s,?t,?F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
     unfolding FullNFSA_def[OF assms(1)] by auto
-  {
-    fix x y z w assume as:"\<langle>\<langle>x,y\<rangle>,\<langle>z,w\<rangle>\<rangle>\<in>DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^*" "x\<in>NELists(\<Sigma>)"
-    then have "\<langle>x,y\<rangle>\<in>field(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)^* )" by auto
-    then have f:"\<langle>x,y\<rangle>\<in>field(DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>))" using rtrancl_field by auto
-    then have "y\<in>S1" using DetFinStateAuto.reduce_field(1) unfolding DetFinStateAuto_def using assms(1) l1(1) by blast
-    with as(2) have pair:"\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>NELists(\<Sigma>)\<times>Pow(succ(S1+S2))" unfolding sum_def by auto
-    then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>domain(NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>))" using NonEpsDetFinStateAuto.field_rel(2)[THEN sym]
-      assms(1) epsNFSA unfolding NonEpsDetFinStateAuto_def by auto
-    then have "\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<in>field(NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>))" unfolding field_def by auto
-    then have "\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>x,{\<langle>0,y\<rangle>}\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^*" using rtrancl_refl by auto
-    then have base:"\<exists>U\<in>Pow(succ(S1+S2)). \<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>fst(\<langle>x,y\<rangle>),U\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^* \<and> \<langle>0,snd(\<langle>x,y\<rangle>)\<rangle>\<in>U" using pair by auto
-    {
-     fix p z assume as:"\<langle>\<langle>x, y\<rangle>, p\<rangle> \<in> ({reduce D-relation}(S1,s1,t1){in alphabet}\<Sigma>)^*"
-       "\<langle>p, z\<rangle> \<in> {reduce D-relation}(S1,s1,t1){in alphabet}\<Sigma>"
-       "\<exists>U\<in>Pow(succ(S1 + S2)).
-         \<langle>\<langle>x, {\<langle>0, y\<rangle>}\<rangle>, fst(p), U\<rangle> \<in> ({reduce \<epsilon>-N-relation} (?S,?s,?t){in alphabet}\<Sigma>)^* \<and>
-         \<langle>0, snd(p)\<rangle> \<in> U"
-     from as(3) obtain U where u:"U\<in>Pow(succ(S1 + S2))" "\<langle>\<langle>x, {\<langle>0, y\<rangle>}\<rangle>, fst(p), U\<rangle> \<in> ({reduce \<epsilon>-N-relation} (?S,?s,?t){in alphabet}\<Sigma>)^*"
-       "\<langle>0, snd(p)\<rangle> \<in> U" by auto
-     from as(2) obtain pl ps where p:"p=\<langle>pl,ps\<rangle>" "pl\<in>NELists(\<Sigma>)" "ps\<in>S1" "z=\<langle>Init(pl),t1`\<langle>ps,Last(pl)\<rangle>\<rangle>"
-       unfolding DFSAExecutionRelation_def[OF assms(1) l1(1)] by auto
-     {
-       assume pf:"ps\<in>F1"
-       have "\<langle>\<langle>pl,{\<langle>0,ps\<rangle>}\<rangle>,\<langle>Init(pl),{\<langle>0,t1`\<langle>ps,Last(pl)\<rangle>\<rangle>,\<langle>1,s2\<rangle>}\<rangle>\<rangle> \<in> {reduce \<epsilon>-N-relation} (?S,?s,?t){in alphabet}\<Sigma>"
-        
-
-
-    from rtrancl_induct[of "\<langle>x,y\<rangle>" _ "DetFinStateAuto.r\<^sub>D(S1,s1,t1,\<Sigma>)"
-  "\<lambda>t. \<exists>U\<in>Pow(succ(S1+S2)). (\<langle>\<langle>x,{\<langle>0,y\<rangle>}\<rangle>,\<langle>fst(t),U\<rangle>\<rangle>\<in>NonEpsDetFinStateAuto.\<epsilon>nd_rel(?S,?s,?t,\<Sigma>)^* \<and> \<langle>0,snd(t)\<rangle>\<in>U)", OF _ base] 
-    oops
-
-
-
-
+  let ?RR="({reduce \<epsilon>-N-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*"
   have "NonEpsDetFinStateAuto.Language\<epsilon>NFSA(?S,?s,?t,?F,\<Sigma>) = concat(L1,L2)"
   proof
     {
@@ -2168,9 +2330,9 @@ proof-
       have "?s\<notin>?F" by auto
       with q(2) obtain qq where qq:"qq\<in>Pow(succ(S1 + S2))"
          "qq \<inter> {1} \<times> F2 \<noteq> 0"
-         "\<langle>\<langle>q, {\<langle>0, s1\<rangle>}\<rangle>, 0, qq\<rangle> \<in>
-        ({reduce \<epsilon>-N-relation}(?S,?s,?t){in alphabet}\<Sigma>)^*" unfolding FullNFSASatisfy_def[OF assms(1) epsNFSA q(1)]
+         "\<langle>\<langle>q, {\<langle>0, s1\<rangle>}\<rangle>, 0, qq\<rangle> \<in> ?RR" unfolding FullNFSASatisfy_def[OF assms(1) epsNFSA q(1)]
         by auto
-      
-*)
+      have "\<exists>y\<in>Lists(\<Sigma>). \<langle>\<langle>q,s1\<rangle>,\<lan
+
+
 end

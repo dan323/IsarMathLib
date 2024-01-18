@@ -221,6 +221,34 @@ proof-
   then show "internal_set(S,Y) \<subseteq> hyper_set(Y)" by auto
 qed
 
+lemma internal_sub:
+  assumes "S1:Pi(I,\<lambda>i. Pow(Y(i)))"  "S2:Pi(I,\<lambda>i. Pow(Y(i)))" "{n\<in>I. S1`n \<subseteq> S2`n}\<in>\<FF>"
+  shows "internal_set(S1,Y) \<subseteq> internal_set(S2,Y)"
+proof
+  fix x assume "x\<in>internal_set(S1,Y)"
+  then obtain xx where x:"xx\<in>Pi(I,Y)" "x=hyper_rel(Y)``{xx}" "{n\<in>I. xx`n\<in>S1`n}\<in>\<FF>"
+    unfolding internal_set_def[OF assms(1)] by auto
+  from x(3) assms(3) have "{n\<in>I. S1`n \<subseteq> S2`n}\<inter>{n\<in>I. xx`n\<in>S1`n}\<in>\<FF>" using ultraFilter
+    unfolding IsFilter_def IsUltrafilter_def by auto
+  moreover have "{n\<in>I. xx`n\<in>S2`n}\<in>Pow(I)" by auto
+  moreover have "{n\<in>I. S1`n \<subseteq> S2`n}\<inter>{n\<in>I. xx`n\<in>S1`n} \<subseteq> {n\<in>I. xx`n\<in>S2`n}" by auto
+  ultimately have "{n\<in>I. xx`n\<in>S2`n}\<in>\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def
+    by auto
+  with x(1,2) show "x\<in>internal_set(S2,Y)" unfolding internal_set_def[OF assms(2)] by auto
+qed
+
+corollary internal_eq:
+  assumes "S1:Pi(I,\<lambda>i. Pow(Y(i)))"  "S2:Pi(I,\<lambda>i. Pow(Y(i)))" "{n\<in>I. S1`n = S2`n}\<in>\<FF>"
+  shows "internal_set(S1,Y) = internal_set(S2,Y)"
+proof
+  have "{n\<in>I. S1`n = S2`n} \<subseteq> {n\<in>I. S1`n \<subseteq> S2`n}" "{n\<in>I. S1`n = S2`n} \<subseteq> {n\<in>I. S2`n \<subseteq> S1`n}" by auto
+  moreover have "{n\<in>I. S1`n \<subseteq> S2`n}:Pow(I)" "{n\<in>I. S2`n \<subseteq> S1`n}:Pow(I)" by auto
+  moreover note assms(3) ultimately have A:"{n\<in>I. S1`n \<subseteq> S2`n}:\<FF>" "{n\<in>I. S2`n \<subseteq> S1`n}:\<FF>"
+    using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+  from A(1) show "internal_set(S1,Y) \<subseteq> internal_set(S2,Y)" using internal_sub[OF assms(1,2)] by auto
+  from A(2) show "internal_set(S2,Y) \<subseteq> internal_set(S1,Y)" using internal_sub[OF assms(2,1)] by auto
+qed
+
 lemma internal_total_set:
   shows "internal_set({\<langle>i,X(i)\<rangle>. i\<in>I},X) = hyper_set(X)"
 proof
@@ -572,9 +600,6 @@ qed
 definition internal_rel where
 "S:Pi(I,\<lambda>i. Pow(X(i)\<times>X(i))) \<Longrightarrow> internal_rel(S,X) \<equiv> {\<langle>hyper_rel(X)``{x},hyper_rel(X)``{y}\<rangle>. \<langle>x,y\<rangle>\<in>{\<langle>p,q\<rangle>\<in>Pi(I,X)\<times>Pi(I,X). {n\<in>I. \<langle>p`n,q`n\<rangle>\<in>S`n}\<in>\<FF>}}"
 
-definition isInternal_rel where
-"isInternal_rel(R,X) \<equiv> \<exists>S\<in>Pi(I,\<lambda>i. Pow(X(i)\<times>X(i))). R=internal_rel(S,X)" 
-
 lemma internal_rel_subset:
   assumes "S:Pi(I,\<lambda>i. Pow(X(i)\<times>X(i)))"
   shows "internal_rel(S,X) \<subseteq> hyper_set(X)\<times>hyper_set(X)"
@@ -589,6 +614,28 @@ proof-
   }
   then show "internal_rel(S,X) \<subseteq> hyper_set(X)\<times>hyper_set(X)" by auto
 qed
+
+lemma converse_internal:
+  assumes "S:Pi(I,\<lambda>i. Pow(X(i)\<times>X(i)))"
+  shows "converse(internal_rel(S,X)) = internal_rel({\<langle>i,converse(S`i)\<rangle>. i\<in>I},X)"
+proof
+  have "\<And>i. i\<in>I \<Longrightarrow> (S`i) \<subseteq> X(i)\<times>X(i)" using apply_type[OF assms] by auto
+  then have "\<And>i. i\<in>I \<Longrightarrow> converse(S`i) \<subseteq> X(i)\<times>X(i)" unfolding converse_def by auto
+  then have A:"{\<langle>i,converse(S`i)\<rangle>. i\<in>I}:Pi(I,\<lambda>i. Pow(X(i)\<times>X(i)))" unfolding Pi_def function_def by auto
+  {
+    fix x assume "x\<in>converse(internal_rel(S,X))"
+    then obtain y z where x:"x=\<langle>y,z\<rangle>" "\<langle>z,y\<rangle>\<in>internal_rel(S,X)" using converse_iff by auto
+    from x(2) obtain zz yy where q:"zz:Pi(I,X)" "yy:Pi(I,X)" "z=hyper_rel(X)``{zz}"  "y=hyper_rel(X)``{yy}" 
+      "{n \<in> I . \<langle>zz ` n, yy ` n\<rangle> \<in> S ` n} \<in> \<FF>" 
+      unfolding internal_rel_def[OF assms] by auto
+    from q(5) have "{n \<in> I . \<langle>yy ` n, zz ` n\<rangle> \<in> converse(S ` n)}:\<FF>" using converse_iff by auto
+    then have "{n \<in> I . \<langle>yy ` n, zz ` n\<rangle> \<in> {\<langle>i,converse(S`i)\<rangle>. i\<in>I}`n}:\<FF>" using apply_equality[OF _ A] by auto
+    with q(1-4) x(1) have "x\<in>internal_rel({\<langle>i,converse(S`i)\<rangle>. i\<in>I},X)" unfolding internal_rel_def[OF A] by auto
+  }
+  then show "converse(internal_rel(S, X)) \<subseteq> internal_rel({\<langle>i, converse(S ` i)\<rangle> . i \<in> I}, X)" by auto
+  {
+    fix x assume "x\<in>internal_rel({\<langle>i,converse(S`i)\<rangle>. i\<in>I},X)"
+    
 
 lemma internal_rel_total:
   shows "internal_rel({\<langle>i,X(i)\<times>X(i)\<rangle>. i\<in>I},X) = hyper_set(X)\<times>hyper_set(X)"
@@ -620,16 +667,29 @@ qed
 
 definition internal_fun where
 "S1:Pi(I,\<lambda>i. Pow(X(i))) \<Longrightarrow> S2:Pi(I,\<lambda>i. Pow(X(i))) \<Longrightarrow> S:Pi(I, \<lambda>i. S1`i \<rightarrow> S2`i) 
-  \<Longrightarrow> internal_fun(S,X) \<equiv> {\<langle>hyper_rel(X)``{x},hyper_rel(X)``{y}\<rangle>. \<langle>x,y\<rangle>\<in>{\<langle>p,q\<rangle>\<in>Pi(I,X)\<times>Pi(I,X). {n\<in>I. \<langle>p`n, q`n\<rangle>:S`n}\<in>\<FF>}}"
+  \<Longrightarrow> internal_fun(S,X) \<equiv> internal_rel(S,X)"
 
 
 lemma internal_fun_is_fun:
   assumes "S1:Pi(I,\<lambda>i. Pow(X(i)))" "S2:Pi(I,\<lambda>i. Pow(X(i)))" "S:Pi(I, \<lambda>i. S1`i \<rightarrow> S2`i)"
   shows "internal_fun(S,X):internal_set(S1,X)\<rightarrow>internal_set(S2,X)" unfolding Pi_def function_def
 proof(safe)
+  have SS:"S:Pi(I, \<lambda>i. Pow(X(i)\<times>X(i)))"
+  proof-
+    {
+      fix x assume "x\<in>S"
+      with assms(3) have "x\<in>(\<Sum>i\<in>I. S1`i \<rightarrow> S2`i)" unfolding Pi_def by auto
+      then obtain i f where f:"x=\<langle>i,f\<rangle>" "i\<in>I" "f\<in>S1`i \<rightarrow> S2`i" by auto
+      from f(3) have "f \<subseteq> S1`i\<times>S2`i" unfolding Pi_def by auto
+      then have "f \<subseteq> X(i)\<times>X(i)" using apply_type[OF assms(1) f(2)] apply_type[OF assms(2) f(2)] by auto
+      with f(1,2) have "x\<in>(\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    }
+    then have "S \<subseteq> (\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    then show ?thesis using assms(3) unfolding Pi_def by auto
+  qed
   fix x assume x:"x\<in>internal_fun(S,X)"
   then obtain y z where f:"x= \<langle>hyper_rel(X)``{y},hyper_rel(X)``{z}\<rangle>" "y:Pi(I,X)" "z:Pi(I,X)" "{n\<in>I. \<langle>y`n, z`n\<rangle>:S`n}\<in>\<FF>"
-    unfolding internal_fun_def[OF assms] by auto
+    unfolding internal_fun_def[OF assms] internal_rel_def[OF SS] by auto
   {
     fix n assume n:"n:{n\<in>I. \<langle>y`n, z`n\<rangle>:S`n}"
     then have n:"n:I" "\<langle>y`n,z`n\<rangle>:S`n" by auto
@@ -648,6 +708,19 @@ proof(safe)
     using f(3) by auto moreover note f(1)
   ultimately show "x\<in>internal_set(S1,X)\<times>internal_set(S2,X)" by auto
 next
+  have SS:"S:Pi(I, \<lambda>i. Pow(X(i)\<times>X(i)))"
+  proof-
+    {
+      fix x assume "x\<in>S"
+      with assms(3) have "x\<in>(\<Sum>i\<in>I. S1`i \<rightarrow> S2`i)" unfolding Pi_def by auto
+      then obtain i f where f:"x=\<langle>i,f\<rangle>" "i\<in>I" "f\<in>S1`i \<rightarrow> S2`i" by auto
+      from f(3) have "f \<subseteq> S1`i\<times>S2`i" unfolding Pi_def by auto
+      then have "f \<subseteq> X(i)\<times>X(i)" using apply_type[OF assms(1) f(2)] apply_type[OF assms(2) f(2)] by auto
+      with f(1,2) have "x\<in>(\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    }
+    then have "S \<subseteq> (\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    then show ?thesis using assms(3) unfolding Pi_def by auto
+  qed
   fix x assume "x\<in>internal_set(S1,X)"
   then obtain y where x:"x=hyper_rel(X)``{y}" "y:Pi(I,X)" "{n:I. y`n\<in>S1`n}:\<FF>"
     unfolding internal_set_def[OF assms(1)] by auto
@@ -675,14 +748,27 @@ next
   then have "{n:I. y`n\<in>S1`n} \<subseteq> {n:I.  \<langle>y`n, ?z`n\<rangle>:S`n} \<longrightarrow> {n:I.  \<langle>y`n, ?z`n\<rangle>:S`n} \<in> \<FF>" by auto
   ultimately have "{n:I.  \<langle>y`n, ?z`n\<rangle>:S`n} \<in> \<FF>" by auto
   then have "\<langle>hyper_rel(X)``{y},hyper_rel(X)``{?z}\<rangle>\<in>internal_fun(S,X)"
-    using z x(2,3) unfolding internal_fun_def[OF assms] by auto
+    using z x(2,3) unfolding internal_fun_def[OF assms] internal_rel_def[OF SS] by auto
   then show "x\<in>domain(internal_fun(S,X))" using x(1) unfolding domain_def by auto
 next
+  have SS:"S:Pi(I, \<lambda>i. Pow(X(i)\<times>X(i)))"
+  proof-
+    {
+      fix x assume "x\<in>S"
+      with assms(3) have "x\<in>(\<Sum>i\<in>I. S1`i \<rightarrow> S2`i)" unfolding Pi_def by auto
+      then obtain i f where f:"x=\<langle>i,f\<rangle>" "i\<in>I" "f\<in>S1`i \<rightarrow> S2`i" by auto
+      from f(3) have "f \<subseteq> S1`i\<times>S2`i" unfolding Pi_def by auto
+      then have "f \<subseteq> X(i)\<times>X(i)" using apply_type[OF assms(1) f(2)] apply_type[OF assms(2) f(2)] by auto
+      with f(1,2) have "x\<in>(\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    }
+    then have "S \<subseteq> (\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    then show ?thesis using assms(3) unfolding Pi_def by auto
+  qed
   fix x y z assume as:"\<langle>x,y\<rangle>\<in>internal_fun(S,X)" "\<langle>x,z\<rangle>\<in>internal_fun(S,X)"
   from as(1) obtain h j where f:"x= hyper_rel(X)``{h}" "y=hyper_rel(X)``{j}" "h:Pi(I,X)" "j:Pi(I,X)" "{n\<in>I. \<langle>h`n, j`n\<rangle>:S`n}\<in>\<FF>"
-    unfolding internal_fun_def[OF assms] by auto
+    unfolding internal_fun_def[OF assms] internal_rel_def[OF SS] by auto
   from as(2) obtain k m where g:"x=hyper_rel(X)``{m}" "z=hyper_rel(X)``{k}" "m:Pi(I,X)" "k:Pi(I,X)" "{n\<in>I. \<langle>m`n, k`n\<rangle>:S`n}\<in>\<FF>"
-    unfolding internal_fun_def[OF assms] using f(1) by auto
+    unfolding internal_fun_def[OF assms] internal_rel_def[OF SS] using f(1) by auto
   from f(1) g(1) have "hyper_rel(X)``{h} = hyper_rel(X)``{m}" by auto
   then have "\<langle>h,m\<rangle>\<in>hyper_rel(X)" using same_image_equiv[OF hyper_equiv] g(3) by auto
   then have "{n:I. h`n = m`n}:\<FF>" unfolding hyper_rel_def by auto
@@ -711,9 +797,23 @@ lemma internal_fun_apply:
   assumes "S1 \<in> (\<Prod>i\<in>I. Pow(X(i)))" "S2 \<in> (\<Prod>i\<in>I. Pow(X(i)))" "S \<in> (\<Prod>i\<in>I. S1 ` i \<rightarrow> S2 ` i)" 
     and "x\<in>Pi(I,X)" "{i:I. x`i\<in>S1`i}\<in>\<FF>" (*[x]\<in>internal_set(S1)*)
   shows "internal_fun(S, X)`(hyper_rel(X)``{x}) = hyper_rel(X)``{{\<langle>i, if x ` i \<in> S1 ` i then S ` i ` (x ` i) else x ` i\<rangle> . i \<in> I}}"
-proof-
+    and "{\<langle>i, if x ` i \<in> S1 ` i then S ` i ` (x ` i) else x ` i\<rangle> . i \<in> I}:Pi(I,X)"
+proof- 
+  have SS:"S:Pi(I, \<lambda>i. Pow(X(i)\<times>X(i)))"
+  proof-
+    {
+      fix x assume "x\<in>S"
+      with assms(3) have "x\<in>(\<Sum>i\<in>I. S1`i \<rightarrow> S2`i)" unfolding Pi_def by auto
+      then obtain i f where f:"x=\<langle>i,f\<rangle>" "i\<in>I" "f\<in>S1`i \<rightarrow> S2`i" by auto
+      from f(3) have "f \<subseteq> S1`i\<times>S2`i" unfolding Pi_def by auto
+      then have "f \<subseteq> X(i)\<times>X(i)" using apply_type[OF assms(1) f(2)] apply_type[OF assms(2) f(2)] by auto
+      with f(1,2) have "x\<in>(\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    }
+    then have "S \<subseteq> (\<Sum>i\<in>I. Pow(X(i)\<times>X(i)))" by auto
+    then show ?thesis using assms(3) unfolding Pi_def by auto
+  qed
   let ?z="{\<langle>i, if x`i\<in>S1`i then (S`i)`(x`i) else x`i\<rangle>. i\<in>I}"
-  have z:"?z\<in>Pi(I,X)" unfolding Pi_def function_def apply auto prefer 2
+  show z:"?z\<in>Pi(I,X)" unfolding Pi_def function_def apply auto prefer 2
     using assms(4) apply_type apply simp
   proof-
     fix i assume i:"i:I" "x ` i \<in> S1 ` i"
@@ -727,7 +827,7 @@ proof-
     using apply_Pair[OF internal_fun_is_fun[OF assms(1-3)]] by auto
   then have "\<langle>hyper_rel(X)``{x},internal_fun(S, X)`(hyper_rel(X)``{x})\<rangle>\<in>{\<langle>hyper_rel(X)``{x},hyper_rel(X)``{y}\<rangle>.
     \<langle>x,y\<rangle> \<in> {\<langle>p,q\<rangle> \<in> (\<Prod>i\<in>I. X(i)) \<times> (\<Prod>i\<in>I. X(i)) . {n \<in> I . \<langle>p ` n, q ` n\<rangle> \<in> S ` n} \<in> \<FF>}}"
-    unfolding internal_fun_def[OF assms(1-3)] by auto
+    unfolding internal_fun_def[OF assms(1-3)] internal_rel_def[OF SS] by auto
   then obtain t y where A:"hyper_rel(X)``{x}=hyper_rel(X)``{t}" "internal_fun(S, X)`(hyper_rel(X)``{x}) = hyper_rel(X)``{y}"
     "t:Pi(I,X)" "y:Pi(I,X)" "{n \<in> I . \<langle>t ` n, y ` n\<rangle> \<in> S ` n} \<in> \<FF>" by auto
   from A(1,3) assms(4) have "\<langle>x,t\<rangle>\<in>hyper_rel(X)" using eq_equiv_class hyper_equiv[of X] by auto
@@ -764,7 +864,7 @@ proof-
   then have "\<langle>y,?z\<rangle>\<in>hyper_rel(X)" using hyper_sym unfolding sym_def by auto
   then have "hyper_rel(X)``{y} = hyper_rel(X)``{?z}" using equiv_class_eq[OF hyper_equiv]
     by auto
-  with A(2) show ?thesis by auto
+  with A(2) show "internal_fun(S, X)`(hyper_rel(X)``{x}) = hyper_rel(X)``{{\<langle>i, if x ` i \<in> S1 ` i then S ` i ` (x ` i) else x ` i\<rangle> . i \<in> I}}" by auto
 qed
 
 lemma internal_fun_apply_2:

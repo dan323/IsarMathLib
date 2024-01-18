@@ -28,7 +28,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. *)
 
 section \<open>Hyper natural numbers\<close>
 
-theory HyperNatural_ZF imports UltraConstruction_ZF
+theory HyperNatural_ZF imports UltraConstruction_ZF FinOrd_ZF
 begin
 
 text\<open>This theory deals with hyper numbers.\<close>
@@ -109,6 +109,12 @@ by a constant relation of order in natural numbers\<close>
 definition lessEq (infix "*\<le>" 80) where
 "x*\<le>y \<equiv> \<langle>x,y\<rangle>\<in>internal_rel({\<langle>n,{\<langle>x,y\<rangle>\<in>nat\<times>nat. x\<le>y}\<rangle>. n\<in>nat},\<lambda>_. nat)"
 
+text\<open>We define the order relation as the internal relation created
+by a constant relation of order in natural numbers\<close>
+
+definition lessStrEq (infix "*<" 80) where
+"x*<y \<equiv> \<langle>x,y\<rangle>\<in>internal_rel({\<langle>n,{\<langle>x,y\<rangle>\<in>nat\<times>nat. x<y}\<rangle>. n\<in>nat},\<lambda>_. nat)"
+
 text\<open>Two hyper naturals are ordered iff where their representative sequences are ordered
 is a set in the filter\<close>
 
@@ -164,69 +170,221 @@ function_def by auto
   }
 qed
 
+lemma less_seq:
+  assumes "x:nat\<rightarrow>nat" "y:nat\<rightarrow>nat"
+  shows "[x] *< [y] \<longleftrightarrow> {i\<in>nat. x`i < y`i}\<in>\<FF>"
+proof(safe)
+  have S_fun:"{\<langle>n,{\<langle>x,y\<rangle>\<in>nat\<times>nat. x<y}\<rangle>. n\<in>nat}:nat \<rightarrow> Pow(nat\<times>nat)" unfolding Pi_def
+function_def by auto
+  {
+    assume "[x] *< [y]"
+    then have "\<langle>[x],[y]\<rangle>\<in>internal_rel({\<langle>n,{\<langle>x,y\<rangle>\<in>nat\<times>nat. x<y}\<rangle>. n\<in>nat},\<lambda>_. nat)"
+      unfolding lessStrEq_def.
+    then obtain z t where zt:"[x] = [z]" "[y] = [t]" "z:nat\<rightarrow>nat " "t:nat\<rightarrow>nat"
+"{n \<in> nat . \<langle>z ` n, t ` n\<rangle> \<in> {\<langle>n, {\<langle>x,y\<rangle> \<in> nat \<times> nat . x < y}\<rangle> . n \<in> nat} ` n} \<in> \<FF>"
+      unfolding internal_rel_def[OF S_fun] using seq_class_def by auto
+    from zt(5) have "{n \<in> nat . \<langle>z ` n, t ` n\<rangle> \<in> {\<langle>x,y\<rangle> \<in> nat \<times> nat . x < y}} \<in> \<FF>"
+      using apply_equality S_fun by auto
+    then have A:"{n \<in> nat . z ` n < t ` n} \<in> \<FF>"
+      using apply_type[OF zt(3)] apply_type[OF zt(4)] by auto
+    from zt(1) have "\<langle>x,z\<rangle>\<in>hyper_rel(\<lambda>_. nat)" unfolding seq_class_def[OF zt(3)]
+      seq_class_def[OF assms(1)] using eq_equiv_class[OF _ hyper_equiv zt(3)] by auto
+    then have "{n:nat. x`n = z`n}\<in>\<FF>" unfolding hyper_rel_def by auto
+    with A have A:"{n \<in> nat . z ` n < t ` n}\<inter>{n:nat. x`n = z`n}\<in>\<FF>" using ultraFilter
+      unfolding IsFilter_def IsUltrafilter_def by auto
+    from zt(2) have "\<langle>y,t\<rangle>\<in>hyper_rel(\<lambda>_. nat)" unfolding seq_class_def[OF zt(4)]
+      seq_class_def[OF assms(2)] using eq_equiv_class[OF _ hyper_equiv zt(4)] by auto
+    then have "{n:nat. y`n = t`n}\<in>\<FF>" unfolding hyper_rel_def by auto
+    with A have "{n:nat. y`n = t`n}\<inter>({n \<in> nat . z ` n < t ` n}\<inter>{n:nat. x`n = z`n})\<in>\<FF>" using ultraFilter
+      unfolding IsFilter_def IsUltrafilter_def by auto
+    then have "\<forall>B\<in>Pow(nat). {n:nat. y`n = t`n}\<inter>({n \<in> nat . z ` n < t ` n}\<inter>{n:nat. x`n = z`n}) \<subseteq> B \<longrightarrow> B\<in>\<FF>"
+      using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+    then have "{n\<in>nat. x`n < y`n}\<in>Pow(nat) \<Longrightarrow> {n:nat. y`n = t`n}\<inter>({n \<in> nat . z ` n < t ` n}\<inter>{n:nat. x`n = z`n}) \<subseteq> {n\<in>nat. x`n < y`n} \<Longrightarrow> {n\<in>nat. x`n < y`n}\<in>\<FF>"
+      by auto
+    then have "{n:nat. y`n = t`n}\<inter>({n \<in> nat . z ` n < t ` n}\<inter>{n:nat. x`n = z`n}) \<subseteq> {n\<in>nat. x`n < y`n} \<Longrightarrow> {n\<in>nat. x`n < y`n}\<in>\<FF>" by auto moreover
+    {
+      fix n assume "n\<in>{n:nat. y`n = t`n}\<inter>({n \<in> nat . z ` n < t ` n}\<inter>{n:nat. x`n = z`n})"
+      then have "n\<in>nat" "y`n = t`n" "z`n < t`n" "x`n = z`n" by auto
+      then have "n\<in>nat" "x`n < y`n" by auto
+      then have "n\<in>{n\<in>nat. x`n < y`n}" by auto
+    }
+    then have "{n:nat. y`n = t`n}\<inter>({n \<in> nat . z ` n < t ` n}\<inter>{n:nat. x`n = z`n}) \<subseteq> {n\<in>nat. x`n < y`n}" by auto
+    ultimately show "{n\<in>nat. x`n < y`n}\<in>\<FF>" by auto
+  }
+  {
+    assume "{n\<in>nat. x`n <y`n}\<in>\<FF>" 
+    then have "{n \<in> nat . \<langle>x ` n, y ` n\<rangle> \<in> {\<langle>n, {\<langle>x,y\<rangle> \<in> nat \<times> nat . x < y}\<rangle> . n \<in> nat} ` n} \<in> \<FF>"
+      using apply_equality[OF _ S_fun] apply_type[OF assms(1)] apply_type[OF assms(2)] by auto
+    with assms have "\<langle>[x],[y]\<rangle>\<in>internal_rel({\<langle>n,{\<langle>x,y\<rangle>\<in>nat\<times>nat. x<y}\<rangle>. n\<in>nat},\<lambda>_. nat)"
+      unfolding internal_rel_def[OF S_fun] seq_class_def[OF assms(1)] seq_class_def[OF assms(2)]
+      by auto
+    then show "[x] *< [y]" unfolding lessStrEq_def.
+  }
+qed
+
+text\<open>It is a linear order\<close>
+
+lemma order_linear:
+  shows "IsLinOrder(*\<nat>, {\<langle>x,y\<rangle>\<in>*\<nat>\<times>*\<nat>. x *\<le> y})" unfolding IsLinOrder_def
+antisym_def trans_def IsTotal_def apply auto
+proof-
+  fix x y assume as:" x \<in> *\<nat>" "y \<in> *\<nat>" "x *\<le> y" "y *\<le> x"
+  from as(1,2) obtain xx xy where xy:"xx:nat\<rightarrow>nat" "xy:nat\<rightarrow>nat" "[xx] = x"  "[xy] = y"
+    unfolding hyper_set_def quotient_def using seq_class_def by auto
+  from xy as(3,4) have "{i \<in> nat . xx ` i \<le> xy ` i} \<in> \<FF>"  "{i \<in> nat . xy ` i \<le> xx ` i} \<in> \<FF>"
+    using less_than_seq by auto
+  then have "{i \<in> nat . xx ` i \<le> xy ` i} \<inter>{i \<in> nat . xy ` i \<le> xx ` i} \<in> \<FF>" using ultraFilter
+    unfolding IsFilter_def IsUltrafilter_def by auto moreover
+  have "{i \<in> nat . xx ` i \<le> xy ` i} \<inter>{i \<in> nat . xy ` i \<le> xx ` i} \<subseteq> {i \<in> nat . xx ` i = xy ` i}"
+    using le_anti_sym by auto moreover
+  have "{i \<in> nat . xx ` i = xy ` i}:Pow(nat)" by auto
+  ultimately have "{i \<in> nat . xx ` i = xy ` i}:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+  then have "\<langle>xx,xy\<rangle>\<in>hyper_rel(\<lambda>_. nat)" unfolding hyper_rel_def using xy(1,2) by auto
+  then show "x = y" using equiv_class_eq[OF hyper_equiv] seq_class_def xy by auto
+next
+  fix x y z assume as:"x \<in> *\<nat>" "y \<in> *\<nat>" "x *\<le> y" "z \<in> *\<nat>" "y *\<le> z"
+  from as(1,2,4) obtain xx xy xz where xyz:"xx:nat\<rightarrow>nat" "xy:nat\<rightarrow>nat" "xz:nat\<rightarrow>nat" "[xx] = x"  "[xy] = y" "[xz] = z"
+    unfolding hyper_set_def quotient_def using seq_class_def by auto
+  from xyz as(3,5) have "{i \<in> nat . xx ` i \<le> xy ` i} \<in> \<FF>" "{i \<in> nat . xy ` i \<le> xz ` i} \<in> \<FF>" 
+    using less_than_seq by auto
+  then have "{i \<in> nat . xx ` i \<le> xy ` i} \<inter>{i \<in> nat . xy ` i \<le> xz ` i} \<in> \<FF>" using ultraFilter
+    unfolding IsFilter_def IsUltrafilter_def by auto moreover
+  have "{i \<in> nat . xx ` i \<le> xy ` i} \<inter>{i \<in> nat . xy ` i \<le> xz ` i} \<subseteq> {i \<in> nat . xx ` i \<le> xz ` i}"
+    using le_trans by auto moreover
+  have "{i \<in> nat . xx ` i \<le> xz ` i}:Pow(nat)" by auto
+  ultimately have "{i \<in> nat . xx ` i \<le> xz ` i}:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+  then show "x *\<le> z" using less_than_seq xyz by auto
+next
+  fix x y assume as:"x \<in> *\<nat>" "y \<in> *\<nat>" "\<not>(x *\<le> y)"
+  from as(1,2) obtain xx xy where xy:"xx:nat\<rightarrow>nat" "xy:nat\<rightarrow>nat" "[xx] = x"  "[xy] = y"
+    unfolding hyper_set_def quotient_def using seq_class_def by auto
+  from xy as(3) have "{i \<in> nat . xx ` i \<le> xy ` i} \<notin> \<FF>" using less_than_seq by auto
+  then have "nat-{i \<in> nat . xx ` i \<le> xy ` i} \<in> \<FF>" using set_ultrafilter[OF _ ultraFilter, of "{i \<in> nat . xx ` i \<le> xy ` i}"] by auto
+  then have "\<And>Q. Q\<in>Pow(nat) \<Longrightarrow> nat-{i \<in> nat . xx ` i \<le> xy ` i} \<subseteq> Q \<Longrightarrow> Q \<in> \<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+  moreover have "{i \<in> nat . (xy ` i \<le> xx ` i)} :Pow(nat)" by auto moreover
+  {
+    fix n assume "n\<in>nat-{i \<in> nat . xx ` i \<le> xy ` i}"
+    then have n:"n:nat" "\<not> xx`n \<le>xy`n" by auto
+    from apply_type n(1) have "xx`n:nat" "xy`n:nat" using xy(1,2) by auto
+    then have "\<langle>xx`n,xy`n\<rangle>\<in>Le \<or> \<langle>xy`n,xx`n\<rangle>\<in>Le" using NatOrder_ZF_1_L2(3) unfolding IsTotal_def by auto
+    with n(2) have "xy`n\<le>xx`n" unfolding Le_def by auto
+    then have "n:{i \<in> nat . xy ` i \<le> xx ` i}" using n(1) by auto
+  }
+  then have "nat-{i \<in> nat . xx ` i \<le> xy ` i} \<subseteq> {i \<in> nat . xy ` i \<le> xx ` i}" by auto ultimately
+  have "{i \<in> nat . xy ` i \<le> xx ` i}:\<FF>" by auto
+  then show "y *\<le> x" using less_than_seq[OF xy(2,1)] xy(3,4) by auto
+qed
+
+text\<open>The strict version\<close>
+
+lemma strict_order:
+  assumes "x:*\<nat>" "y:*\<nat>"
+  shows "(x *\<le> y \<and> x\<noteq>y) \<longleftrightarrow> x *< y"
+proof(safe)
+  from assms(1,2) obtain xx xy where xy:"xx:nat\<rightarrow>nat" "xy:nat\<rightarrow>nat" "[xx] = x"  "[xy] = y"
+    unfolding hyper_set_def quotient_def using seq_class_def by auto
+  {
+    assume as:"x *\<le> y" "x\<noteq>y"
+    from as(1) xy have A:"{i:nat. xx`i \<le> xy`i}:\<FF>" using less_than_seq by auto
+    {
+      assume "{i:nat. xx`i = xy`i}:\<FF>"
+      then have "x=y" using xy(3,4) equiv_class_eq[OF hyper_equiv, of xx xy] unfolding seq_class_def[OF xy(1)]
+        seq_class_def[OF xy(2)] unfolding hyper_rel_def using xy(1,2) by auto
+      with as(2) have False by auto
+    }
+    then have "{i:nat. xx`i = xy`i}\<notin>\<FF>" by auto
+    then have "nat-{i:nat. xx`i = xy`i}\<in>\<FF>" using set_ultrafilter[OF _ ultraFilter, of "{i:nat. xx`i = xy`i}"] by auto
+    moreover have "nat-{i:nat. xx`i = xy`i} = {i:nat. xx`i \<noteq> xy`i}" by auto
+    ultimately have "{i:nat. xx`i \<noteq> xy`i} :\<FF>" by auto
+    with A have "{i:nat. xx`i \<noteq> xy`i}\<inter>{i:nat. xx`i \<le> xy`i}:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto moreover
+    {
+      fix i assume  "i:{i:nat. xx`i \<noteq> xy`i}\<inter>{i:nat. xx`i \<le> xy`i}"
+      then have "i\<in>nat" "xx`i < xy`i" using le_iff by auto
+      then have "i\<in>{i:nat. xx`i < xy`i}" by auto
+    }
+    then have "{i:nat. xx`i \<noteq> xy`i}\<inter>{i:nat. xx`i \<le> xy`i}\<subseteq>{i:nat. xx`i < xy`i}" by auto
+    moreover have "{i:nat. xx`i < xy`i}:Pow(nat)" by auto
+    ultimately have "{i:nat. xx`i < xy`i}:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+    then show "x *< y" using less_seq[OF xy(1,2)] xy(3,4) by auto
+  }
+  {
+    assume as:"x *< y"
+    then have "{i\<in>nat. xx`i < xy`i}:\<FF>" using less_seq xy by auto moreover
+    have "{i\<in>nat. xx`i \<le> xy`i}:Pow(nat)" by auto moreover
+    have "{i\<in>nat. xx`i < xy`i} \<subseteq> {i\<in>nat. xx`i \<le> xy`i}" using leI by auto ultimately
+    have "{i\<in>nat. xx`i \<le> xy`i}:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+    then show "x *\<le> y" using less_than_seq xy by auto
+  }
+  {
+    assume "y *<y"
+    then have "{i\<in>nat. xy`i < xy`i}:\<FF>" using less_seq xy(2,4) by auto
+    then have "0:\<FF>" using lt_not_refl by auto
+    then show False using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+  }
+qed      
+
 text\<open>There is a hyper natural bigger than all natural numbers\<close>
 
 lemma omega_bigger_naturals:
   assumes "x:nat"
-  shows "(*x) *\<le> \<omega>"
+  shows "(*x) *< \<omega>"
 proof-
   from assms have "(*x) = [ConstantFunction(nat,x)]"
     using incl_def by auto
-  have "{n\<in>nat. ConstantFunction(nat,x)`n \<le> id(nat)`n} = {n\<in>nat. x \<le> n}"
+  have "{n\<in>nat. ConstantFunction(nat,x)`n < id(nat)`n} = {n\<in>nat. x < n}"
     using func1_3_L2[of _ nat x] id_iff by auto
-  have "nat-{n\<in>nat. x \<le> n}\<in>FinPow(nat)" apply (rule nat_induct[of x "\<lambda>q. nat-{n\<in>nat. q \<le> n}\<in>FinPow(nat)"])
+  have "nat-{n\<in>nat. x < n}\<in>FinPow(nat)" apply (rule nat_induct[of x "\<lambda>q. nat-{n\<in>nat. q < n}\<in>FinPow(nat)"])
   proof-
     from assms show "x\<in>nat".
-    have "{n \<in> nat . 0 \<le> n} = nat" using nat_0_le by auto
-    then have "nat-{n \<in> nat . 0 \<le> n} = 0" by auto
-    then show "nat-{n \<in> nat . 0 \<le> n}\<in>FinPow(nat)" using Finite_0 unfolding FinPow_def by auto
+    have "{n \<in> nat . 0 < n} = nat-{0}" using Ord_0_lt[OF nat_into_Ord] lt_irrefl[of 0 False] by auto
+    then have "nat-{n \<in> nat . 0 < n} = {0}" by auto
+    then show "nat-{n \<in> nat . 0 < n}\<in>FinPow(nat)" unfolding FinPow_def by auto
     {
-      fix x assume x:"x\<in>nat" "nat - {n \<in> nat . x \<le> n} \<in> FinPow(nat)"
+      fix x assume x:"x\<in>nat" "nat - {n \<in> nat . x < n} \<in> FinPow(nat)"
       {
-        fix t assume t:"t\<in>(nat - {n \<in> nat . x \<le> n})\<union>{x}"
+        fix t assume t:"t\<in>(nat - {n \<in> nat . x < n})\<union>{succ(x)}"
         {
-          assume e:"t=x"
+          assume e:"t=succ(x)"
           then have "t\<in>nat" using x(1) by auto moreover
           {
-            assume "succ(x) \<le> x"
-            then have "x < x" using succ_leE by auto
+            assume "succ(x) < x"
+            then have "x < x" using leI by auto
             then have False by auto
           } moreover note e
-          ultimately have "t\<in>nat-{n \<in> nat. succ(x) \<le> n}" by auto
+          ultimately have "t\<in>nat-{n \<in> nat. succ(x) < n}" by blast
         } moreover
         {
-          assume e:"t\<noteq>x"
-          with t have t:"t\<in>nat - {n \<in> nat . x \<le> n}" by auto
+          assume e:"t\<noteq>succ(x)"
+          with t have t:"t\<in>nat - {n \<in> nat . x < n}" by auto
           then have tnat:"t\<in>nat" by auto
           {
-            assume "succ(x)\<le>t"
-            then have "x<t" using succ_leE by auto
-            then have "x\<le>t" using leI by auto
+            assume "succ(x)<t"
+            then have "x<t" using le_refl[OF nat_into_Ord[OF x(1)]] lt_trans[of x "succ(x)" t] by auto
             with t have False by auto
           }
-          with tnat have "t\<in>nat-{n \<in> nat. succ(x) \<le> n}" by auto
+          with tnat have "t\<in>nat-{n \<in> nat. succ(x) < n}" by auto
         } ultimately
-        have "t\<in>nat-{n \<in> nat. succ(x) \<le> n}" by auto
+        have "t\<in>nat-{n \<in> nat. succ(x) < n}" by auto
       }
-      then have "nat - {n \<in> nat . x \<le> n} \<union> {x} \<subseteq> nat - {n \<in> nat . succ(x) \<le> n}" by auto moreover
+      then have "(nat - {n \<in> nat . x < n}) \<union> {succ(x)} \<subseteq> nat - {n \<in> nat . succ(x) < n}" by auto moreover
       {
-        fix t assume t:"t\<in>nat - {n \<in> nat . succ(x) \<le> n}"
+        fix t assume t:"t\<in>nat - {n \<in> nat . succ(x) < n}"
         {
-          assume tn:"t\<noteq>x"
+          assume tn:"t\<noteq>succ(x)"
           {
-            assume tx:"x\<le>t"
-            with tn have "x < t" using le_iff by auto
+            assume tx: "x < t"
             then have "succ(x)\<le>t" using succ_leI by auto
+            with tn have "succ(x)<t" using le_iff by auto
             with t have False by auto
           }
-          with t have "t\<in>nat - {n \<in> nat . x \<le> n}" by auto
+          with t have "t\<in>nat - {n \<in> nat . x < n}" by auto
         }
-        then have "t\<in>nat - {n \<in> nat . x \<le> n} \<union> {x}" by auto
+        then have "t\<in>nat - {n \<in> nat . x < n} \<union> {succ(x)}" by auto
       }
-      then have "nat - {n \<in> nat . succ(x) \<le> n} \<subseteq> nat - {n \<in> nat . x \<le> n} \<union> {x}" by auto
-      ultimately have "nat - {n \<in> nat . succ(x) \<le> n} = nat - {n \<in> nat . x \<le> n} \<union> {x}" by auto
-      then show "nat - {n \<in> nat . succ(x) \<le> n}\<in>FinPow(nat)" 
-        using union_finpow[OF x(2) singleton_in_finpow[OF x(1)]] by auto
+      then have "nat - {n \<in> nat . succ(x) < n} \<subseteq> nat - {n \<in> nat . x < n} \<union> {succ(x)}" by auto
+      ultimately have "nat - {n \<in> nat . succ(x) < n} = nat - {n \<in> nat . x < n} \<union> {succ(x)}" by auto
+      then show "nat - {n \<in> nat . succ(x) < n}\<in>FinPow(nat)" 
+        using union_finpow[OF x(2) singleton_in_finpow[OF nat_succI[OF x(1)]]] by auto
     }
   qed moreover
   {
@@ -258,12 +416,12 @@ proof-
     then have False using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
   }
   then have "\<forall>x\<in>nat. {x} \<notin> \<FF>" by auto
-  ultimately have "nat - {n \<in> nat . x \<le> n}\<notin>\<FF>" using ultrafilter_finite_set[OF ultraFilter]
+  ultimately have "nat - {n \<in> nat . x < n}\<notin>\<FF>" using ultrafilter_finite_set[OF ultraFilter]
     by auto
-  then have "{n \<in> nat . x \<le> n}:\<FF>" using ultraFilter set_ultrafilter[of "{n \<in> nat . x \<le> n}"] by auto
-  then have "{n\<in>nat. ConstantFunction(nat,x)`n \<le> id(nat)`n}:\<FF>"
+  then have "{n \<in> nat . x < n}:\<FF>" using ultraFilter set_ultrafilter[of "{n \<in> nat . x < n}"] by auto
+  then have "{n\<in>nat. ConstantFunction(nat,x)`n < id(nat)`n}:\<FF>"
     using func1_3_L2[of _ nat x] by auto
-  then have "[ConstantFunction(nat,x)]*\<le>[id(nat)]" using less_than_seq[OF func1_3_L1 inj_is_fun[OF id_inj]]
+  then have "[ConstantFunction(nat,x)]*<[id(nat)]" using less_seq[OF func1_3_L1 inj_is_fun[OF id_inj]]
     assms by auto
   then show ?thesis unfolding omega_def incl_def[OF assms] by auto
 qed
@@ -717,29 +875,58 @@ proof-
   with S(2) show ?thesis unfolding isInternal_def by auto
 qed
 
-lemma bij_finite:
-  assumes "Finite(A)" "Finite(B)"
-  shows "Finite(A\<rightarrow>B)" apply (rule subset_Finite[of _ "Pow(A\<times>B)"])
-  prefer 2 apply (rule Finite_Pow)
+text\<open>The family defining an internal set only need to be finite for a
+set of indices in the ultrafilter for it to be hyperfinite.\<close>
+
+lemma internal_finite_ultrafilter_imp_hyperfinite:
+  assumes "S\<in>nat \<rightarrow> Pow(nat)" "{i\<in>nat. Finite(S`i)}:\<FF>"
+  shows "isHyperFinite(internal_set(S,\<lambda>_. nat))"
 proof-
-  show "A\<rightarrow>B \<subseteq> Pow(A\<times>B)" unfolding Pi_def by auto
-  from assms obtain n m where nm:"A\<approx>n" "B\<approx>m" "n\<in>nat" "m\<in>nat" unfolding Finite_def by auto
-  then have "A*B\<approx>n*m" using prod_eqpoll_cong by auto
-  then have "A*B\<approx>n\<otimes>m"
-    unfolding Card_def cmult_def using nat_implies_well_ord[OF nm(4)] 
-      nat_implies_well_ord[OF nm(3)] well_ord_rmult [of n _ m]
-      well_ord_cardinal_eqpoll[THEN eqpoll_sym, of "n*m"]
-      eqpoll_trans[of "A*B" "n*m" "|n*m|"] by auto
-  then have "A*B\<approx>n#*m" using nat_cmult_eq_mult nm(3,4) by auto
-  then show "Finite(A*B)" unfolding Finite_def by auto
-qed    
+  have A:"internal_set(S,%_. nat) \<in>Pow(*\<nat>)" using internal_subset[OF assms(1)] by auto
+  let ?S ="{\<langle>i,if Finite(S`i) then S`i else 0\<rangle>. i\<in>nat}"
+  have S:"?S\<in>nat \<rightarrow> Pow(nat)" "?S\<in>nat \<rightarrow> FinPow(nat)" using apply_type[OF assms(1)] unfolding Pi_def function_def FinPow_def
+    apply auto
+  proof-
+    fix i xa assume as:"i\<in>nat"  "xa \<in> (if Finite(S ` i) then S ` i else 0)"
+    then have "S`i\<in>Pow(nat)" using apply_type[OF assms(1)] by auto
+    then have "(if Finite(S`i) then S`i else 0)\<in>Pow(nat)" using if_type by auto
+    with as(2) show "xa\<in>nat" by auto
+    then show "xa\<in>nat".
+  qed
+  {
+    fix i assume "i\<in>{i\<in>nat. Finite(S`i)}"
+    then have i:"i:nat" "Finite(S`i)" by auto
+    then have "?S`i = S`i" using apply_equality[OF _ S(1)] by auto
+    with i(1) have "i\<in>{i\<in>nat. ?S`i = S`i}" by auto
+  }
+  then have "{i\<in>nat. Finite(S`i)} \<subseteq> {i\<in>nat. S`i = ?S`i}" by auto
+  moreover note assms(2) moreover have "{i\<in>nat. S`i = ?S`i}:Pow(nat)" by auto
+  ultimately have " {i\<in>nat. S`i = ?S`i}:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def
+    by auto
+  then have "internal_set(S,\<lambda>_. nat) = internal_set(?S,%_. nat)" using internal_eq[OF assms(1) S(1)] by auto moreover
+  note S(2)
+  ultimately show ?thesis unfolding isHyperFinite_def[OF A] by auto
+qed
+
+
+text\<open>For every hyper finite set there is an internal bijection of it
+with the hyper naturals up to a number. We make a note that the choice
+is valid since there is an identifiable bijection that is the only
+order isomorphism between any two bijective linearly ordered finite sets.
+
+This is possible because the order is out of the choice function since
+both are subsets of the natural numbers.\<close>
     
-lemma hyperfinite_internal:
+lemma hyperfinite_internally_bijective:
   assumes "H\<in>Pow(*\<nat>)" "isHyperFinite(H)"
-  shows "\<exists>N\<in>*\<nat>. \<exists>S. internal_fun(S,\<lambda>_.nat):bij(H,{i\<in>*\<nat>. i *\<le> N})"
-proof
+  shows "\<exists>N\<in>*\<nat>. \<exists>S1\<in>nat\<rightarrow>Pow(nat). \<exists>S2\<in>nat\<rightarrow>Pow(nat). \<exists>S\<in>Pi(nat, \<lambda>i. S1`i \<rightarrow> S2`i). internal_fun(S,\<lambda>_.nat):bij(H,{i\<in>*\<nat>. i *< N})"
+proof-
   from assms(2) obtain S where S:"S:nat\<rightarrow>FinPow(nat)" "H=internal_set(S,\<lambda>_. nat)"
     unfolding isHyperFinite_def[OF assms(1)] by auto
+  let ?N="{\<langle>i,|S`i|\<rangle>. i\<in>nat}"
+  have n_fun:"?N:nat\<rightarrow>nat" unfolding Pi_def function_def using apply_type[OF S(1)] unfolding FinPow_def
+    using Finite_cardinal_in_nat by auto
+  then have N:"[?N]:*\<nat>" unfolding hyper_set_def quotient_def using seq_class_def by auto
   {
     fix g assume g:"g\<in>Pi(nat,\<lambda>i. bij(S`i,|S`i|))"
     let ?f="internal_fun(g,\<lambda>_. nat)"
@@ -771,14 +958,8 @@ proof
     qed
     then have g2:"g \<in> (\<Prod>i\<in>nat. S ` i \<rightarrow> ConstantFunction(nat,nat)`i)" using
       func1_3_L2[of _ nat nat] unfolding Pi_def by force
-    have n:"nat\<in>Pow(nat)" by auto
-    have fun:"?f:H\<rightarrow>*\<nat>" using internal_fun_is_fun[OF S2 func1_3_L1[OF n] g2]
+    have fun:"?f:H\<rightarrow>*\<nat>" using internal_fun_is_fun[OF S2 func1_3_L1 g2]
       internal_total_set[of "\<lambda>_. nat"] const S(2) by auto
-    
-    let ?N="{\<langle>i,|S`i|\<rangle>. i\<in>nat}"
-    have n_fun:"?N:nat\<rightarrow>nat" unfolding Pi_def function_def using apply_type[OF S(1)] unfolding FinPow_def
-      using Finite_cardinal_in_nat by auto
-    then have "[?N]:*\<nat>" unfolding hyper_set_def quotient_def using seq_class_def by auto
     {
       fix t assume t:"t\<in>range(?f)"
       then obtain q where "\<langle>q,t\<rangle>\<in>?f" using rangeE by auto
@@ -788,7 +969,7 @@ proof
         unfolding internal_set_def[OF S2] using seq_class_def by auto
       from f(2) obtain tx where tx:"tx:nat\<rightarrow>nat" "t=[tx]" using seq_class_def
         unfolding hyper_set_def quotient_def by auto
-      from fqt qx(3) have "t = hyper_rel(\<lambda>_. nat) `` {{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}}" using internal_fun_apply_2[OF S2 func1_3_L1[OF n] g2, of qx]
+      from fqt qx(3) have "t = hyper_rel(\<lambda>_. nat) `` {{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}}" using internal_fun_apply_2[OF S2 func1_3_L1 g2, of qx]
         f(1) S(2) unfolding seq_class_def[OF qx(1)] by auto
       with tx(2) have "[tx] = hyper_rel(\<lambda>_. nat) `` {{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}}" by auto
       then have "hyper_rel(\<lambda>_. nat) `` {{\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}} = [tx]" by auto
@@ -805,28 +986,150 @@ proof
         then have i:"i\<in>nat" "(g ` i)  ` (qx ` i)  = tx`i" "qx`i\<in>S`i" using apply_equality[OF _ ff] by auto
         from i(1) have "g`i\<in>bij(S`i,|S`i|)" using g apply_type by auto
         with i(3) have "(g`i)`(qx`i)\<in>|S`i|" using apply_type[OF bij_is_fun] by auto
-        with i(2) have "tx`i\<in>|S`i|" by auto moreover
-        have "Ord(succ(|S`i|))" using Ord_cardinal Ord_succ by auto
-        ultimately have "tx`i \<le> |S`i|" unfolding lt_def by auto
-        then have "tx`i \<le> ?N`i" using apply_equality[of i "|S`i|" ?N] n_fun i(1) by auto
-        then have "i\<in>{i\<in>nat. tx`i \<le> ?N`i }" using i(1) by auto
+        with i(2) have "tx`i\<in>|S`i|" by auto
+        then have "tx`i < |S`i|" unfolding lt_def by auto
+        then have "tx`i < ?N`i" using apply_equality[of i "|S`i|" ?N] n_fun i(1) by auto
+        then have "i\<in>{i\<in>nat. tx`i < ?N`i }" using i(1) by auto
       }
-      then have "{i\<in>nat. {\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}`i = tx`i}\<inter>{i\<in>nat. qx`i\<in>S`i} \<subseteq> {i\<in>nat. tx`i \<le> ?N`i }" by auto moreover
-      have "{i\<in>nat. tx`i \<le> ?N`i }:Pow(nat)" by auto ultimately
-      have "{i\<in>nat. tx`i \<le> ?N`i }:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
-      then have "[tx] *\<le> [?N]" using less_than_seq[OF tx(1) n_fun] by auto
-      then have "t *\<le>[?N]" using tx(2) by auto
-      with f(2) have "t:{p:*\<nat>. p *\<le>[?N]}" by auto
+      then have "{i\<in>nat. {\<langle>i, if qx ` i \<in> S ` i then g ` i ` (qx ` i) else qx ` i\<rangle> . i \<in> nat}`i = tx`i}\<inter>{i\<in>nat. qx`i\<in>S`i} \<subseteq> {i\<in>nat. tx`i < ?N`i }" by auto moreover
+      have "{i\<in>nat. tx`i < ?N`i }:Pow(nat)" by auto ultimately
+      have "{i\<in>nat. tx`i < ?N`i }:\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+      then have "[tx] *< [?N]" using less_seq[OF tx(1) n_fun] by auto
+      then have "t *<[?N]" using tx(2) by auto
+      with f(2) have "t:{p:*\<nat>. p *<[?N]}" by auto
     }
-    then have "range(?f) \<subseteq> {p:*\<nat>. p *\<le>[?N]}" by auto
-    then have fun:"?f:H\<rightarrow>{p:*\<nat>. p *\<le>[?N]}" using range_of_fun[OF fun] func1_1_L1B by auto
-
+    then have "range(?f) \<subseteq> {p:*\<nat>. p *<[?N]}" by auto
+    then have fun:"?f:H\<rightarrow>{p:*\<nat>. p *<[?N]}" using range_of_fun[OF fun] func1_1_L1B by auto
     {
       fix i assume i:"i\<in>nat"
-      then have "g`i \<in>S ` i \<rightarrow> ConstantFunction(nat,nat)`i" using g2 apply_type by auto
-      from i have "g`i\<in>bij(S`i,|S`i| )" using g apply_type by auto
+      then have "g`i \<in>S ` i \<rightarrow> ConstantFunction(nat,nat)`i" using g2 apply_type by auto moreover
+      from i have "g`i\<in>bij(S`i,|S`i| )" using g apply_type by auto ultimately
+      have "g`i\<in>inj(S ` i, ConstantFunction(nat,nat)`i)" unfolding bij_def inj_def by auto
+      with i have "i\<in>{i\<in>nat. g`i\<in>inj(S ` i, ConstantFunction(nat,nat)`i)}" by auto
+    }
+    then have "{i\<in>nat. g`i\<in>inj(S ` i, ConstantFunction(nat,nat)`i)} =nat" by auto
+    then have "{i\<in>nat. g`i\<in>inj(S ` i, ConstantFunction(nat,nat)`i)}\<in>\<FF>" using ultraFilter unfolding IsFilter_def
+IsUltrafilter_def by auto
+    then have "?f\<in>inj(H,*\<nat>)" using internal_fun_inj[OF S2 func1_3_L1 g2] internal_total_set[of "\<lambda>_. nat"] const S(2) by auto
+    with fun have "?f:inj(H,{p:*\<nat>. p *<[?N]})" unfolding inj_def by auto
+    moreover
+    {
+      fix p assume "p\<in> {p:*\<nat>. p *<[?N]}"
+      then have p:"p:*\<nat>" "p *<[?N]" by auto
+      from p(1) obtain px where px:"px:nat\<rightarrow>nat" "[px] =p" unfolding hyper_set_def quotient_def using seq_class_def by auto
+      from px(2) p(2) have "{i\<in>nat. px`i < ?N`i}\<in>\<FF>" using less_seq px(1) n_fun by auto
+      then have A:"{i\<in>nat. px`i < |S`i|}\<in>\<FF>" using apply_equality n_fun by auto
+      let ?m="{\<langle>i,if px`i < |S`i| then converse(g`i)`(px`i) else 0\<rangle>. i\<in>nat}"
+      have m:"?m:nat\<rightarrow>nat" unfolding Pi_def function_def apply auto
+      proof-
+        fix i assume i:"i\<in>nat" "px`i < |S`i|"
+        from i(1) have  "g`i\<in>bij(S`i,|S`i| )" using g apply_type by auto
+        then have "converse(g`i):|S`i| \<rightarrow> S`i" using bij_converse_bij bij_is_fun by auto
+        with i(2) have "converse(g`i)`(px`i)\<in>S`i" using apply_type unfolding lt_def by auto
+        then show "converse(g`i)`(px`i)\<in>nat" using apply_type[OF S2] i(1) by auto
+      qed
+      {
+        fix i assume "i\<in>{i\<in>nat. px`i < |S`i|}"
+        then have i:"i\<in>nat" "px`i < |S`i|" by auto
+        from i(1) have  "g`i\<in>bij(S`i,|S`i| )" using g apply_type by auto
+        then have "converse(g`i):|S`i| \<rightarrow> S`i" using bij_converse_bij bij_is_fun by auto
+        with i(2) have "converse(g`i)`(px`i)\<in>S`i" using apply_type unfolding lt_def by auto
+        with i(2) have "?m`i\<in>S`i" using apply_equality[OF _ m] i(1) by auto
+        then have "i\<in>{i\<in>nat. ?m`i\<in>S`i}" using i(1) by auto
+      }
+      then have B:"{i\<in>nat. px`i < |S`i|} \<subseteq> {i\<in>nat. ?m`i\<in>S`i}" by auto moreover
+      from A have "\<And>Q. Q\<in>Pow(nat) \<Longrightarrow> {i\<in>nat. px`i < |S`i|} \<subseteq> Q \<Longrightarrow> Q\<in>\<FF> " using 
+ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto moreover
+      have "{i\<in>nat. ?m`i\<in>S`i} :Pow(nat)" by auto ultimately
+      have C:"{i\<in>nat. ?m`i\<in>S`i}:\<FF>" by auto
+      then have fm:"?f`[?m] = hyper_rel(\<lambda>_. nat) ``{{\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}}" using internal_fun_apply(1)[OF S2 func1_3_L1 g2 m] seq_class_def[OF m] by auto
+      {
+        fix i assume "i\<in>{i\<in>nat. px`i < |S`i|}"
+        then have i:"i:nat" "px`i < |S`i|" by auto
+        from i(1) have bij:"g`i\<in>bij(S`i,|S`i| )" using g apply_type by auto
+        then have "converse(g`i):|S`i| \<rightarrow> S`i" using bij_converse_bij bij_is_fun by auto
+        with i(2) have "converse(g`i)`(px`i)\<in>S`i" using apply_type unfolding lt_def by auto
+        then have "{\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i = (if (?m ` i \<in> S ` i) then (g ` i) ` (?m ` i) else (?m ` i))" 
+          using apply_equality[OF _ internal_fun_apply(2)[OF S2 func1_3_L1 g2 m C]] i(1) by auto
+        then have "{\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i = (g ` i) ` (?m ` i)"  using i B by auto
+        then have "{\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i = (g ` i) ` (converse(g ` i) ` (px ` i))" using i apply_equality[OF _ m] by auto
+        then have "{\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i =px ` i" using right_inverse_bij[OF bij] using i(2) unfolding lt_def by auto
+        with i(1) have "i\<in>{i\<in>nat. {\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i =px ` i}" by auto
+      }
+      then have "{i\<in>nat. px`i < |S`i| } \<subseteq> {i\<in>nat. {\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i =px ` i}" by auto
+      moreover have "{i\<in>nat. {\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i =px ` i}\<in>Pow(nat)" by auto moreover note A
+      ultimately have "{i\<in>nat. {\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}`i =px ` i}\<in>\<FF>" using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
+      with px(1) have "\<langle>{\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat},px\<rangle>\<in>hyper_rel(\<lambda>_. nat)" using internal_fun_apply(2)[OF S2 func1_3_L1 g2 m C] unfolding hyper_rel_def by auto
+      then have "hyper_rel(\<lambda>_. nat)``{{\<langle>i, if {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i \<in> S ` i
+          then g ` i ` ({\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i)
+          else {\<langle>i, if px ` i < |S ` i| then converse(g ` i) ` (px ` i) else 0\<rangle> . i \<in> nat} ` i\<rangle> .
+      i \<in> nat}} = p" using equiv_class_eq[OF hyper_equiv] using px(2) seq_class_def[OF px(1)] by auto
+      with fm have "?f`[?m] = p" by auto moreover
+      from C m have "?m\<in>{f:nat\<rightarrow>nat. {i\<in>nat. f`i:S`i}:\<FF>}" by auto
+      then have "[?m]\<in>internal_set(S,\<lambda>_. nat)" unfolding internal_set_def[OF S2] seq_class_def[OF m] by auto
+      ultimately have "\<exists>m\<in>H. ?f`m = p" using S(2) by auto
+    }
+    then have "\<forall>p\<in>{q\<in>*\<nat>. q *< [?N]}. \<exists>m\<in>H. ?f`m = p" by auto
+    then have "?f:surj(H,{p\<in>*\<nat>. p *< [?N]})" unfolding surj_def using fun by blast
+    ultimately have "?f:bij(H,{p\<in>*\<nat>. p *< [?N]})" unfolding bij_def by auto
+    then have "\<exists>N\<in>*\<nat>. \<exists>S1\<in>nat\<rightarrow>Pow(nat). \<exists>S2\<in>nat\<rightarrow>Pow(nat). \<exists>S\<in>Pi(nat, \<lambda>i. S1`i \<rightarrow> S2`i). internal_fun(S, \<lambda>_. nat) \<in> bij(H, {i \<in> *\<nat> . i *< N})" using N S2 g2
+      func1_3_L1[of nat "Pow(nat)"] by auto
+  }
+  then have R:"(\<Prod>i\<in>nat. bij(S ` i, |S ` i|))\<noteq>0 \<Longrightarrow> \<exists>N\<in>*\<nat>. \<exists>S1\<in>nat\<rightarrow>Pow(nat). \<exists>S2\<in>nat\<rightarrow>Pow(nat). \<exists>S\<in>Pi(nat, \<lambda>i. S1`i \<rightarrow> S2`i). internal_fun(S, \<lambda>_. nat) \<in> bij(H, {i \<in> *\<nat> . i *< N})" by blast
+  let ?g="{\<langle>i,THE f. f \<in> ord_iso(S`i,Le,|S`i|,Le)\<rangle>. i\<in>nat}"
+  {
+    fix i assume i:"i:nat"
+    have f:"Finite(S`i)" using apply_type[OF S(1)] i unfolding FinPow_def by auto
+    then have "|S`i| :nat" using Finite_cardinal_in_nat by auto
+    then have "|S`i| \<subseteq> nat" "Finite( |S`i|)" using Ord_nat nat_into_Finite unfolding Ord_def Transset_def by auto 
+    then have A:"|S`i| :FinPow(nat)" unfolding FinPow_def by auto
+    from f have B:"|S`i| \<approx> S`i" using well_ord_cardinal_eqpoll Finite_imp_well_ord[OF f] by auto
+    from fin_ord_iso_ex_uniq[OF NatOrder_ZF_1_L2(4) NatOrder_ZF_1_L2(4) apply_type[OF S(1) i] A B] have "\<exists>!f. f\<in>ord_iso(S`i,Le,|S`i|,Le)" by auto
+    then have "(THE f. f \<in> ord_iso(S`i,Le,|S`i|,Le)) \<in> ord_iso(S`i,Le,|S`i|,Le)" using theI[of "\<lambda>f. f\<in> ord_iso(S`i,Le,|S`i|,Le)"] by auto
+    then have "(THE f. f \<in> ord_iso(S`i,Le,|S`i|,Le)) \<in> bij(S`i,| S`i| )" unfolding ord_iso_def by blast
+  }
+  then have "?g\<in>Pi(nat, \<lambda>i. bij(S ` i, |S ` i|))" unfolding Pi_def function_def by auto
+  with R show ?thesis by auto
+qed
 
-  
-    (*from internal_fun_inj[OF S2 func1_3_L1[OF n] g2]*)
+lemma hyperfinite_internally_bijective:
+  assumes "H\<in>Pow(*\<nat>)"  "N\<in>*\<nat>" "S1\<in>nat \<rightarrow> Pow(nat)" "S2\<in>nat \<rightarrow> Pow(nat)" "S\<in>(\<Prod>i\<in>nat. S1 ` i \<rightarrow> S2 ` i)" "internal_fun(S,\<lambda>_.nat):bij(H,{i\<in>*\<nat>. i *< N})"
+  shows "isHyperFinite(H)"
+proof-
+  from internal_fun_is_fun[OF assms(3-5)] have "internal_fun(S,\<lambda>_.nat):internal_set(S1,\<lambda>_. nat) \<rightarrow> internal_set(S2,\<lambda>_. nat)".
+  then have "H = internal_set(S1,%_. nat)" using domain_of_fun domain_of_bij[OF assms(6)] by auto
+  have "internal_fun(S,\<lambda>_. nat) =  {\<langle>hyper_rel(%_. nat)``{x},hyper_rel(X)``{y}\<rangle>. \<langle>x,y\<rangle>\<in>{\<langle>p,q\<rangle>\<in>(nat\<rightarrow>nat)\<times>(nat\<rightarrow>nat). {n:nat. \<langle>p`n,q`n\<rangle>\<in>S`n}\<in>\<FF>}}"
+        
+
 end
 end
