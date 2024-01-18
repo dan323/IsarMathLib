@@ -1126,6 +1126,8 @@ lemma hyperfinite_internally_bijective:
   assumes "H\<in>Pow(*\<nat>)"  "N\<in>*\<nat>" "S1\<in>nat \<rightarrow> Pow(nat)" "S2\<in>nat \<rightarrow> Pow(nat)" "S\<in>(\<Prod>i\<in>nat. S1 ` i \<rightarrow> S2 ` i)" "internal_fun(S,\<lambda>_.nat):bij(H,{i\<in>*\<nat>. i *< N})"
   shows "isHyperFinite(H)"
 proof-
+  from assms(6) have "converse(internal_fun(S,\<lambda>_. nat)):bij({i\<in>*\<nat>. i *< N},H)" using bij_converse_bij by auto
+  
   from internal_fun_is_fun[OF assms(3-5)] have "internal_fun(S,\<lambda>_.nat):internal_set(S1,\<lambda>_. nat) \<rightarrow> internal_set(S2,\<lambda>_. nat)".
   then have "H = internal_set(S1,%_. nat)" using domain_of_fun domain_of_bij[OF assms(6)] by auto
   have "internal_fun(S,\<lambda>_. nat) =  {\<langle>hyper_rel(%_. nat)``{x},hyper_rel(X)``{y}\<rangle>. \<langle>x,y\<rangle>\<in>{\<langle>p,q\<rangle>\<in>(nat\<rightarrow>nat)\<times>(nat\<rightarrow>nat). {n:nat. \<langle>p`n,q`n\<rangle>\<in>S`n}\<in>\<FF>}}"

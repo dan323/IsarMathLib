@@ -635,6 +635,17 @@ proof
   then show "converse(internal_rel(S, X)) \<subseteq> internal_rel({\<langle>i, converse(S ` i)\<rangle> . i \<in> I}, X)" by auto
   {
     fix x assume "x\<in>internal_rel({\<langle>i,converse(S`i)\<rangle>. i\<in>I},X)"
+    then obtain zz yy where q:"zz:Pi(I,X)" "yy:Pi(I,X)" "x=\<langle>hyper_rel(X)``{zz},hyper_rel(X)``{yy}\<rangle>" 
+      "{n \<in> I . \<langle>zz ` n, yy ` n\<rangle> \<in> {\<langle>i,converse(S`i)\<rangle>. i\<in>I} ` n} \<in> \<FF>" 
+      unfolding internal_rel_def[OF A] by auto
+    from q(4) have "{n \<in> I . \<langle>zz ` n, yy ` n\<rangle> \<in> converse(S ` n)} \<in> \<FF>"  using apply_equality[OF _ A] by auto
+    then have "{n \<in> I . \<langle>yy ` n, zz ` n\<rangle> \<in> (S ` n)} \<in> \<FF>" using converse_iff by auto
+    then have "\<langle>hyper_rel(X)``{yy},hyper_rel(X)``{zz}\<rangle>\<in>internal_rel(S,X)" unfolding internal_rel_def[OF assms]
+      using q(1,2) by auto
+    then have "x:converse(internal_rel(S,X))" using q(3) converse_iff by auto
+  }
+  then show "internal_rel({\<langle>i,converse(S`i)\<rangle>. i\<in>I},X) \<subseteq> converse(internal_rel(S,X))" by auto
+qed
     
 
 lemma internal_rel_total:
@@ -664,6 +675,8 @@ proof
   }
   then show "hyper_set(X)\<times>hyper_set(X) \<subseteq> internal_rel({\<langle>i,X(i)\<times>X(i)\<rangle>. i\<in>I},X)" by auto
 qed
+
+subsection\<open>Internal functions\<close>
 
 definition internal_fun where
 "S1:Pi(I,\<lambda>i. Pow(X(i))) \<Longrightarrow> S2:Pi(I,\<lambda>i. Pow(X(i))) \<Longrightarrow> S:Pi(I, \<lambda>i. S1`i \<rightarrow> S2`i) 
@@ -935,6 +948,11 @@ hyper_rel(X) `` {{\<langle>i, if wx ` i \<in> S1 ` i then S ` i ` (wx ` i) else 
   then have "\<langle>xx,wx\<rangle>\<in>hyper_rel(X)" unfolding hyper_rel_def using p(1,2) by auto
   then show "w = x" using equiv_class_eq[OF hyper_equiv, THEN sym] p(5,6) by auto
 qed
+
+lemma converse_fun:
+  assumes "S1 \<in> (\<Prod>i\<in>I. Pow(X(i)))" "S2 \<in> (\<Prod>i\<in>I. Pow(X(i)))" "S \<in> (\<Prod>i\<in>I. S1 ` i \<rightarrow> S2 ` i)" 
+  shows "isInternal(range(internal_fun(S,X)),X)" unfolding isInternal_def
+proof-
 
 end
 end
