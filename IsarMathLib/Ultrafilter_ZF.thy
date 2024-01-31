@@ -96,12 +96,12 @@ proof(rule set_ultrafilter_equiv)
   show "{A \<in> Pow(X) . x \<in> A} {is a filter on} X" unfolding IsFilter_def
     apply safe using assms apply simp by auto
   {
-    fix A assume A:"A\<in>Pow(X)" "A\<noteq>0"
+    fix A assume A:"A\<in>Pow(X)"
     have "x:A \<or> x\<notin>A" by auto
     with assms have "x\<in>A \<or> x\<in>X-A" by auto
     with A(1) have "A\<in>{A \<in> Pow(X) . x \<in> A} \<or> X-A: {A \<in> Pow(X) . x \<in> A} " by auto
   }
-  then show "\<forall>A\<in>Pow(X). A \<noteq> 0 \<longrightarrow> A \<in> {A \<in> Pow(X) . x \<in> A} \<or> X - A \<in> {A \<in> Pow(X) . x \<in> A}" by auto
+  then show "\<forall>A\<in>Pow(X). A \<in> {A \<in> Pow(X) . x \<in> A} \<or> X - A \<in> {A \<in> Pow(X) . x \<in> A}" by auto
 qed
 
 text\<open>An ultrafilter that has no singleton sets, does not have finite sets\<close>

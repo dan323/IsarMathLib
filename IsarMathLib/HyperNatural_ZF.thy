@@ -862,6 +862,53 @@ proof
   ultimately show False using ultraFilter unfolding IsFilter_def IsUltrafilter_def by auto
 qed
 
+lemma internal_inj_fun_hyper_nat:
+  assumes "S1:nat \<rightarrow> Pow(nat)" "S2:nat \<rightarrow> Pow(nat)" "S \<in> (\<Prod>i\<in>nat. S1 ` i \<rightarrow> S2 ` i)"
+  shows "internal_fun(S,\<lambda>_. nat)\<in>inj(internal_set(S1,\<lambda>_. nat), internal_set(S2,\<lambda>_. nat)) \<longleftrightarrow> {n\<in>nat. S`n\<in>inj(S1`n,S2`n)}\<in>\<FF>"
+  apply safe
+proof(rule internal_inj_fun[where X="\<lambda>_. nat"])
+  assume as:"internal_fun(S,\<lambda>_. nat)\<in>inj(internal_set(S1,\<lambda>_. nat), internal_set(S2,\<lambda>_. nat))"
+  from assms(1) show "S1:nat \<rightarrow> Pow(nat)" by auto
+  from assms(2) show "S2:nat \<rightarrow> Pow(nat)" by auto
+  from assms(3) show "S \<in> (\<Prod>i\<in>nat. S1 ` i \<rightarrow> S2 ` i)" by auto
+  from as show "internal_fun(S,\<lambda>_. nat)\<in>inj(internal_set(S1,\<lambda>_. nat), internal_set(S2,\<lambda>_. nat))" by auto
+  have "id(nat):nat\<rightarrow>nat" unfolding Pi_def function_def by auto
+  then show "nat\<rightarrow>nat \<noteq>0" by auto
+  let ?qq="\<lambda>n. \<mu> q1. q1\<in>S1`n \<and> (\<exists>q2. q2\<in>S1`n \<and> S ` n ` q1 = S ` n ` q2 \<and> q1 \<noteq> q2)"
+  let ?gg="\<lambda>n. \<mu> q2. q2\<in>S1`n \<and> S ` n ` ?qq(n) = S ` n ` q2 \<and> ?qq(n) \<noteq> q2"
+  {
+    fix n assume "n:{n \<in> nat . S ` n \<notin> inj(S1 ` n, S2 ` n)}"
+    then have n:"n:nat" "S`n\<notin>inj(S1`n,S2`n)" by auto
+    from n(2) obtain q1 q2 where q:"(S`n)`q1=(S`n)`q2" "q1\<noteq>q2" "q1\<in>S1`n" "q2\<in>S1`n" unfolding inj_def
+      using apply_type[OF assms(3) n(1)] by auto
+    then have Pi:"q1\<in>S1`n \<and> (\<exists>q2. q2\<in>S1`n \<and> S ` n ` q1 = S ` n ` q2 \<and> q1 \<noteq> q2)" by auto
+    from Pi have "q1\<in>nat" using apply_type[OF assms(1) n(1)] by auto
+    then have Ordi:"Ord(q1)" using nat_into_Ord by auto
+    have A:"?qq(n)\<in>S1`n" "\<exists>q2. q2\<in>S1`n \<and> S ` n ` ?qq(n) = S ` n ` q2 \<and> ?qq(n) \<noteq> q2"
+      using LeastI[of "\<lambda>q1. q1\<in>S1`n \<and> (\<exists>q2. q2\<in>S1`n \<and> S ` n ` q1 = S ` n ` q2 \<and> q1 \<noteq> q2)" q1, OF Pi Ordi] by auto
+    from A(2) obtain qq where Pi:"qq\<in>S1`n \<and> S ` n ` ?qq(n) = S ` n ` qq \<and> ?qq(n) \<noteq> qq" by auto
+    then have "qq\<in>nat" using apply_type[OF assms(1) n(1)] by auto
+    then have Ordi:"Ord(qq)" using nat_into_Ord by auto
+    have B:"?gg(n)\<in>S1`n" "S ` n ` ?qq(n) = S ` n ` ?gg(n) \<and> ?qq(n) \<noteq> ?gg(n)"
+      using LeastI[of "\<lambda>q2. q2\<in>S1`n \<and> S ` n ` ?qq(n) = S ` n ` q2 \<and> ?qq(n) \<noteq> q2" qq, OF Pi Ordi] by auto
+    with A(1) have C:"?qq(n)\<in>S1`n" "?gg(n)\<in>S1`n" "S ` n ` ?qq(n) = S ` n ` ?gg(n) \<and> ?qq(n) \<noteq> ?gg(n)" by auto
+    then have "\<langle>?qq(n),?gg(n)\<rangle>\<in>{\<langle>q1,q2\<rangle> \<in> S1 ` n \<times> S1 ` n . S ` n ` q1 = S ` n ` q2 \<and> q1 \<noteq> q2}" by auto
+  }
+  then have "{\<langle>n,\<langle>?qq(n),?gg(n)\<rangle>\<rangle>. n:{n \<in> nat . S ` n \<notin> inj(S1 ` n, S2 ` n)}}\<in>(\<Prod>n\<in>{n \<in> nat . S ` n \<notin> inj(S1 ` n, S2 ` n)}.
+        {\<langle>q1,q2\<rangle> \<in> S1 ` n \<times> S1 ` n . S ` n ` q1 = S ` n ` q2 \<and> q1 \<noteq> q2})" unfolding Pi_def
+    function_def by auto
+  then show "(\<Prod>n\<in>{n \<in> nat . S ` n \<notin> inj(S1 ` n, S2 ` n)}.
+        {\<langle>q1,q2\<rangle> \<in> S1 ` n \<times> S1 ` n . S ` n ` q1 = S ` n ` q2 \<and> q1 \<noteq> q2}) \<noteq>
+    0" by auto
+next
+  from internal_fun_inj[OF assms(1-3)]
+  show "{n \<in> nat . S ` n \<in> inj(S1 ` n, S2 ` n)} \<in> \<FF> \<Longrightarrow>
+    internal_fun(S, \<lambda>_. nat) \<in> inj(internal_set(S1, \<lambda>_. nat), internal_set(S2, \<lambda>_. nat))".
+qed
+    
+
+
+
 definition isHyperFinite where
 "H\<in>Pow(*\<nat>) \<Longrightarrow> isHyperFinite(H) \<equiv> \<exists>S\<in>nat\<rightarrow>FinPow(nat). H = internal_set(S,\<lambda>_. nat)"
 
