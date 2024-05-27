@@ -759,6 +759,90 @@ proof-
   with assms(1-4) show ?thesis by auto
 qed
 
+
+theorem(in module0) linComb_sum_same_family:
+  assumes "P:X\<rightarrow>R" "Q:X\<rightarrow>R" "B:X\<rightarrow>\<M>" "D\<in>FinPow(X)"
+  shows "(\<Sum>[D;{P,B}])+\<^sub>V(\<Sum>[D;{Q,B}])=\<Sum>[D;{(A{lifted to function space over}X)`\<langle>P,Q\<rangle>,B}]"
+proof(rule FinPow_ind_rem_one[of "\<lambda>D. (\<Sum>[D;{P,B}])+\<^sub>V(\<Sum>[D;{Q,B}])=\<Sum>[D;{(A{lifted to function space over}X)`\<langle>P,Q\<rangle>,B}]"])
+  from assms(4) show "D\<in>FinPow(X)" by auto
+  have A:"A:R\<times>R\<rightarrow>R" using ringAssum unfolding IsAring_def IsAgroup_def IsAmonoid_def IsAssociative_def
+    by auto
+  then have "range(A) \<subseteq> R" using func1_1_L5B by auto moreover
+  {
+    fix r assume r:"r:R"
+    then have "A`\<langle>\<zero>,r\<rangle> = r" using Ring_ZF_1_L3(4) by auto
+    then have "r\<in>range(A)" using rangeI[of "\<langle>\<zero>,r\<rangle>" r A] apply_Pair[OF A, of "\<langle>\<zero>,r\<rangle>"] Ring_ZF_1_L2(1) r by auto
+  }
+  ultimately have R:"range(A) = R" by auto
+  then have FF:"(A{lifted to function space over}X)`\<langle>P,Q\<rangle>:X\<rightarrow>R"
+    using apply_type[OF func_ZF_1_L3[of A R]] A assms(1,2) by auto
+  have z:"0\<in>FinPow(X)" unfolding FinPow_def using Finite_0 by auto
+  then have "(\<Sum>[0;{P,B}]) = \<Theta>" "(\<Sum>[0;{Q,B}]) = \<Theta>" using LinearComb_def assms(1-3) by auto
+  then have "(\<Sum>[0;{P,B}])+\<^sub>V(\<Sum>[0;{Q,B}])=\<Theta>" using zero_neutral(1) zero_in_mod by auto
+  moreover
+  from FF assms(3) have "\<Sum>[0;{(A{lifted to function space over}X)`\<langle>P,Q\<rangle>,B}] = \<Theta>"
+    using LinearComb_def z by auto
+  ultimately show "(\<Sum>[0;{P,B}])+\<^sub>V(\<Sum>[0;{Q,B}])=\<Sum>[0;{(A{lifted to function space over}X)`\<langle>P,Q\<rangle>,B}]" by auto
+  {
+    fix Z assume z:"Z\<in>FinPow(X)" "Z\<noteq>0"
+    from z(2) obtain x where xz:"x\<in>Z" by auto
+    then have "\<Sum>[Z \<setminus> {x};{P,B}] +\<^sub>V (P`x)\<cdot>\<^sub>S(B`x) = \<Sum>[Z;{P,B}]"
+      using sum_one_element[OF assms(1,3) z(1), of x]
+      apply_equality[OF _ coordinate_function[OF assms(1,3)], of x] z(1)
+      unfolding FinPow_def by auto moreover
+    from xz z(1) have x:"x\<in>X" unfolding FinPow_def by auto
+    then have q:"(P`x)\<cdot>\<^sub>S(B`x)\<in>\<M>"  "(Q`x)\<cdot>\<^sub>S(B`x)\<in>\<M>" using
+        apply_type[OF coordinate_function[OF assms(2,3)] x] apply_type[OF coordinate_function[OF assms(1,3)] x]
+      apply_equality[OF _ coordinate_function[OF assms(2,3)]] apply_equality[OF _ coordinate_function[OF assms(1,3)]]
+      by auto
+    from xz have "\<Sum>[Z \<setminus> {x};{Q,B}] +\<^sub>V (Q`x)\<cdot>\<^sub>S(B`x) = \<Sum>[Z;{Q,B}]"
+      using sum_one_element[OF assms(2,3) z(1), of x]
+      apply_equality[OF _ coordinate_function[OF assms(2,3)], of x] z(1)
+      unfolding FinPow_def by auto ultimately
+    have "\<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = (\<Sum>[Z \<setminus> {x};{P,B}] +\<^sub>V (P`x)\<cdot>\<^sub>S(B`x))+\<^sub>V(\<Sum>[Z \<setminus> {x};{Q,B}] +\<^sub>V (Q`x)\<cdot>\<^sub>S(B`x) )"
+      by auto moreover
+    have ff:"Z\<setminus>{x}\<in>FinPow(X)" using z(1) unfolding FinPow_def using subset_Finite[of "Z-{x}" Z] by auto 
+    have comm:"A\<^sub>M{is commutative on}\<M>" using module0_axioms unfolding module0_def
+      module0_axioms_def by auto
+    ultimately have "\<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = ((\<Sum>[Z \<setminus> {x};{P,B}])+\<^sub>V(\<Sum>[Z \<setminus> {x};{Q,B}])) +\<^sub>V (P`x)\<cdot>\<^sub>S(B`x)+\<^sub>V (Q`x)\<cdot>\<^sub>S(B`x)"
+      using linComb_is_in_module[OF assms(1,3) ff]  linComb_is_in_module[OF assms(2,3) ff] q
+       mod_ab_gr.rearr_ab_gr_4_elemA(2)[OF comm, of "\<Sum>[Z \<setminus> {x};{P,B}]" "\<Sum>[Z \<setminus> {x};{Q,B}]" "(P`x)\<cdot>\<^sub>S(B`x)" "(Q`x)\<cdot>\<^sub>S(B`x)"]
+      by auto
+    then have eq:"\<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = ((\<Sum>[Z \<setminus> {x};{P,B}])+\<^sub>V(\<Sum>[Z \<setminus> {x};{Q,B}])) +\<^sub>V ((P`x)\<cdot>\<^sub>S(B`x)+\<^sub>V (Q`x)\<cdot>\<^sub>S(B`x))"
+      using mod_ab_gr.group_oper_assoc[OF mod_ab_gr.group_op_closed[OF linComb_is_in_module[OF assms(1,3) ff] linComb_is_in_module[OF assms(2,3) ff]]
+          q] by auto
+    {
+      assume AS:"\<Sum>[Z \<setminus> {x};{P,B}] +\<^sub>V \<Sum>[Z \<setminus> {x};{Q,B}] =
+           \<Sum>[Z \<setminus>{x};{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}]"
+      with eq have "\<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = \<Sum>[Z \<setminus>{x};{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}]+\<^sub>V ((P`x)\<cdot>\<^sub>S(B`x)+\<^sub>V (Q`x)\<cdot>\<^sub>S(B`x))"
+        by auto
+      moreover
+      have "(P`x)\<cdot>\<^sub>S(B`x)+\<^sub>V (Q`x)\<cdot>\<^sub>S(B`x) = ((P`x)\<ra>(Q`x))\<cdot>\<^sub>S(B`x)"
+        using module_ax2[OF apply_type[OF assms(1)]  apply_type[OF assms(2)]  apply_type[OF assms(3)]]
+        x by auto
+      then have "(P`x)\<cdot>\<^sub>S(B`x)+\<^sub>V (Q`x)\<cdot>\<^sub>S(B`x) = (((A {lifted to function space over} X) ` \<langle>P, Q\<rangle>)`x)\<cdot>\<^sub>S(B`x)"
+        using func_ZF_1_L4[OF A _ _ _ x, of "A{lifted to function space over} X" P Q] R assms(1,2) by auto
+      ultimately have "\<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = \<Sum>[Z \<setminus>{x};{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}]+\<^sub>V ((((A {lifted to function space over} X) ` \<langle>P, Q\<rangle>)`x)\<cdot>\<^sub>S(B`x))" by auto
+      moreover
+      have "{\<langle>k, ((A {lifted to function space over} X) ` \<langle>P, Q\<rangle> ` k) \<cdot>\<^sub>S (B ` k)\<rangle> . k \<in> X} ` x = (((A {lifted to function space over} X) ` \<langle>P, Q\<rangle>)`x)\<cdot>\<^sub>S(B`x)"
+        using apply_equality[OF _ coordinate_function[OF FF assms(3)]] x by auto
+      ultimately have "\<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] =\<Sum>[Z;{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}]"
+        using sum_one_element[OF FF assms(3) z(1) xz] by auto
+    }
+    then have "\<Sum>[Z \<setminus> {x};{P,B}] +\<^sub>V \<Sum>[Z \<setminus> {x};{Q,B}] =
+           \<Sum>[Z \<setminus> {x};{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}] \<longrightarrow>
+           \<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = \<Sum>[Z;{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}]"
+      by auto
+    with xz have "\<exists>x\<in>Z. \<Sum>[Z \<setminus> {x};{P,B}] +\<^sub>V \<Sum>[Z \<setminus> {x};{Q,B}] =
+           \<Sum>[Z \<setminus> {x};{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}] \<longrightarrow>
+           \<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = \<Sum>[Z;{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}]" by auto
+  }
+  then show "\<forall>Z\<in>FinPow(X). Z\<noteq>0 \<longrightarrow> (\<exists>x\<in>Z. \<Sum>[Z \<setminus> {x};{P,B}] +\<^sub>V \<Sum>[Z \<setminus> {x};{Q,B}] =
+           \<Sum>[Z \<setminus> {x};{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}] \<longrightarrow>
+           \<Sum>[Z;{P,B}] +\<^sub>V \<Sum>[Z;{Q,B}] = \<Sum>[Z;{(A {lifted to function space over} X) ` \<langle>P, Q\<rangle>,B}])"
+    by auto
+qed
+
 subsubsection\<open>Linear dependency\<close>
 
 text \<open>Now, we have the conditions to define what linear independence means:\<close>
@@ -812,6 +896,7 @@ lemma(in module0) sumodule_is_subaction:
   assumes "IsAsubmodule(\<N>)" "r\<in>R" "h\<in>\<N>"
   shows "r\<cdot>\<^sub>S h\<in>\<N>"
   using assms unfolding IsAsubmodule_def by auto
+
 
 text\<open>For groups, we need to prove that the inverse function
 is closed in a set to prove that set to be a subgroup. In module, that is not necessary.\<close>
@@ -899,7 +984,7 @@ proof-
     then have "\<forall>g1\<in>\<N>. \<forall>g2\<in>\<N>. restrict(H`r,\<N>)`(restrict(A\<^sub>M,\<N>\<times>\<N>)`\<langle>g1,g2\<rangle>) = restrict(A\<^sub>M,\<N>\<times>\<N>)`\<langle>restrict(H`r,\<N>)`g1,restrict(H`r,\<N>)`g2\<rangle>" by auto
     then have "Homomor(restrict(H`r,\<N>),\<N>,restrict(A\<^sub>M,\<N>\<times>\<N>),\<N>,restrict(A\<^sub>M,\<N>\<times>\<N>))" using HH
       unfolding Homomor_def IsMorphism_def by auto
-    with HH have "restrict(H`r,\<N>)\<in>End(\<N>,restrict(A\<^sub>M,\<N>\<times>\<N>))" unfolding End_def by auto
+    with HH have "restrict(H`r,\<N>)\<in>End(\<N>,restrict(A\<^sub>M,\<N>\<times>\<N>))" unfolding End_def Homomor_def by auto
     then have "t\<in>R\<times>End(\<N>,restrict(A\<^sub>M,\<N>\<times>\<N>))" using t by auto
   }
   then have "{\<langle>r,restrict(H`r,\<N>)\<rangle>. r\<in>R}\<subseteq>R\<times>End(\<N>,restrict(A\<^sub>M,\<N>\<times>\<N>))" by auto moreover
@@ -1089,7 +1174,7 @@ that they are indexed by the elements of the module.\<close>
 
 lemma(in module0) index_module:
   assumes "AAA:X\<rightarrow>R" "BB:X\<rightarrow>\<M>" "D\<in>FinPow(X)"
-  shows "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[D;{AAA,BB}]=\<Sum>[BB``D;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``D. AA`x=\<zero>)"
+  shows "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[D;{AAA,BB}]=\<Sum>[BB``D;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``D. AA`x=\<zero>) \<and> (restrict(BB,D)\<in>inj(D,\<M>) \<longrightarrow> (\<forall>x\<in>D. AA`(BB`x) = AAA`x))"
 proof-
   let ?F="{\<langle>d,CommSetFold(A,AAA,D\<inter>(BB-``({BB`d})))\<rangle>. d\<in>D}"
   let ?f1="{\<langle>d,D\<inter>(BB-``({BB`d}))\<rangle>. d\<in>D}"
@@ -1125,14 +1210,14 @@ proof-
   then have ff2:"\<forall>t\<in>{D\<inter>(BB-``({BB`d})). d\<in>D}. ff ` t \<in>t" by auto
   have "\<forall>x\<in>{D\<inter>(BB-``({BB`d})). d\<in>D}. id({D\<inter>(BB-``({BB`d})). d\<in>D})`x=x" using id_def by auto
   with ff(1) have ff1:"ff\<in>Pi({D\<inter>(BB-``({BB`d})). d\<in>D},\<lambda>t. t)" unfolding Pi_def Sigma_def by auto
-  have case0:"\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[0;{AAA,BB}]=\<Sum>[BB``0;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``0. AA`x=\<zero>)"
+  have case0:"\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[0;{AAA,BB}]=\<Sum>[BB``0;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``0. AA`x=\<zero>) \<and> (restrict(BB,0)\<in>inj(0,\<M>) \<longrightarrow>(\<forall>x\<in>0. AA`(BB`x) = AAA`x))"
     proof
       have "\<Sum>[0;{AAA,BB}]=\<Theta>" using LinearComb_def[OF assms(1,2)] unfolding FinPow_def by auto moreover
       let ?A="ConstantFunction(\<M>,\<zero>)"
       have "\<Sum>[0;{?A,id(\<M>)}]=\<Theta>" using LinearComb_def[OF func1_3_L1[OF Ring_ZF_1_L2(1)], of "id(\<M>)" \<M> 0]
         unfolding id_def FinPow_def by auto moreover
       have "BB``0=0" by auto ultimately
-      show "\<Sum>[0;{AAA,BB}]=\<Sum>[BB``0;{?A,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``0. ?A`x=\<zero>)" using func1_3_L2 by auto
+      show "\<Sum>[0;{AAA,BB}]=\<Sum>[BB``0;{?A,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``0. ?A`x=\<zero>)\<and> (restrict(BB,0)\<in>inj(0,\<M>) \<longrightarrow>(\<forall>x\<in>0. ?A`(BB`x) = AAA`x))" using func1_3_L2 by auto
       then show "?A:\<M>\<rightarrow>R" using func1_3_L1[OF Ring_ZF_1_L2(1), of \<M>] by auto
     qed
   {
@@ -1140,8 +1225,8 @@ proof-
     {
       fix d assume d:"d\<in>E"
       {
-        assume hyp:"\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)"
-        from hyp obtain AA where AA:"AA\<in>\<M>\<rightarrow>R" "\<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}]" "\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>" by auto
+        assume hyp:"\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)\<and> (restrict(BB,E-{d})\<in>inj(E-{d},\<M>) \<longrightarrow> (\<forall>x\<in>E-{d}. AA`(BB`x) = AAA`x))"
+        from hyp obtain AA where AA:"AA\<in>\<M>\<rightarrow>R" "\<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}]" "\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>" "restrict(BB,E-{d})\<in>inj(E-{d},\<M>) \<longrightarrow>(\<forall>x\<in>E-{d}. AA`(BB`x) = AAA`x)" by auto
         have "\<Sum>[E;{AAA,BB}] = (\<Sum>[E-{d};{AAA,BB}])+\<^sub>V({\<langle>e,(AAA`e)\<cdot>\<^sub>S(BB`e)\<rangle>. e\<in>X}`d)" using sum_one_element[OF assms(1,2) E(1) d].
         with AA(2) also have "\<dots>=(\<Sum>[BB``(E-{d});{AA,id(\<M>)}])+\<^sub>V((AAA`d)\<cdot>\<^sub>S(BB`d))" using d E(1) unfolding FinPow_def using apply_equality[OF _
           coordinate_function[OF assms(1,2)]] by auto
@@ -1161,7 +1246,7 @@ proof-
           have res:"restrict(AA,\<M>-{BB`d}):\<M>-{BB`d}\<rightarrow>R" using restrict_fun[OF AA(1)] by auto
           moreover have "AAA`d\<in>R" using apply_type assms(1) d E(1) unfolding FinPow_def by auto
           then have con:"ConstantFunction({BB`d},AAA`d):{BB`d}\<rightarrow>R" using func1_3_L1 by auto
-          moreover have "(G-{BB`d})\<inter>{BB`d}=0" by auto moreover
+          moreover have "(\<M>-{BB`d})\<inter>{BB`d}=0" by auto moreover
           have "R\<union>R=R" by auto moreover
           have "(\<M>-{BB`d})\<union>{BB`d}=\<M>" using apply_type[OF assms(2)] d E(1) unfolding FinPow_def by auto ultimately
           have A_fun:"?A:\<M>\<rightarrow>R" using fun_disjoint_Un[of "restrict(AA,\<M>-{BB`d})" "\<M>-{BB`d}" R "ConstantFunction({BB`d},AAA`d)" "{BB`d}" R] by auto
@@ -1214,8 +1299,44 @@ proof-
             with x x1 have "?A`x=AA`x" using restrict by auto moreover
             from x set have "x\<in>\<M>-BB``(E-{d})" by auto ultimately
             have "?A`x=\<zero>" using AA(3) by auto
+          } moreover
+          {
+            assume inj:"restrict(BB,E)\<in>inj(E,\<M>)"
+            have "E\<inter>(E-{d}) = E-{d}" by auto
+            with inj have "restrict(restrict(BB,E),E-{d}) = restrict(BB,E-{d})"
+              using restrict_restrict[of BB E] by auto
+            then have "restrict(BB,E-{d}): inj(E-{d},\<M>)" using restrict_inj[OF inj, of "E-{d}"] by auto
+            with AA(4) have all:"\<forall>x\<in>E \<setminus> cons(d, \<emptyset>). AA ` (BB ` x) = AAA ` x" by auto
+            {
+              fix x assume x:"x\<in>E"
+              have dom:"domain(ConstantFunction({BB ` d}, AAA ` d)) = {BB ` d}" unfolding ConstantFunction_def by auto
+              {
+                assume xd:"x\<noteq>d"
+                with x all have "AA`(BB`x) = AAA`x" by auto
+                moreover
+                from x have "BB`x\<in>BB``(E-{d})" using func_imagedef[OF assms(2), of "E-{d}"] E(1) xd unfolding FinPow_def by force
+                with as have d:"BB`x \<noteq>BB`d" by auto
+                with x E(1) have "BB`x\<in>\<M>-{BB`d}" using apply_type[OF assms(2), of x] unfolding FinPow_def by auto
+                then have "restrict(AA,\<M>-{BB`d})`(BB`x) = AA`(BB`x)" using restrict by auto
+                ultimately have "restrict(AA,\<M>-{BB`d})`(BB`x) = AAA`x" by auto
+                moreover note dom ultimately have "?A`(BB`x) = AAA`x" using fun_disjoint_apply1[of "BB`x" "ConstantFunction(cons(BB ` d, \<emptyset>), AAA ` d)" "restrict(AA,\<M>-{BB`d})"]
+                  d by auto
+              } moreover
+              {
+                assume xd:"x=d"
+                then have "BB`x\<in>{BB`d}" by auto
+                with xd have "ConstantFunction({BB`d},AAA ` d)`(BB`x) = AAA`x"
+                  using func1_3_L2 by auto
+                then have "?A`(BB`x) = AAA`x" using fun_disjoint_apply2[of "BB`x" "restrict(AA,\<M>-{BB`d})" "ConstantFunction(cons(BB ` d, \<emptyset>), AAA ` d)"]
+                  dom xd by auto
+              } ultimately
+              have "?A`(BB`x) = AAA`x" by auto
+            }
+            then have "\<forall>x\<in>E. ?A`(BB`x) = AAA`x" by auto
           }
-          with set eq A_fun have "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``E;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-(BB``E). AA`x=\<zero>)" by auto
+          then have "restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. ?A`(BB`x) = AAA`x)" by auto
+          moreover
+          note set eq A_fun ultimately have "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``E;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-(BB``E). AA`x=\<zero>) \<and> (restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. AA`(BB`x) = AAA`x))" by auto
         }
         moreover
         {
@@ -1299,26 +1420,89 @@ proof-
               unfolding ConstantFunction_def by blast
             with x1 have "?A`x=AA`x" using restrict by auto
             with x im_eq have "?A`x=\<zero>" using AA(3) by auto
-          }
-          with sol A_fun im_eq have "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``(E);{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)" by auto
+          } moreover
+          {
+            assume inj:"restrict(BB,E)\<in>inj(E,\<M>)"
+            from E(1) have "E-{d} \<subseteq> X" unfolding FinPow_def by auto
+            with as obtain y where "y\<in>E-{d}" "BB`d = BB`y" using func_imagedef[OF assms(2), of "E-{d}"]
+              unfolding FinPow_def by auto
+            then have "y\<in>E" "d\<in>E" "BB`d = BB`y" "y\<noteq>d" using d by auto
+            then have "y\<in>E" "d\<in>E" "restrict(BB,E)`d = restrict(BB,E)`y" "y\<noteq>d" using restrict by auto
+            with inj have False unfolding inj_def by auto
+          } moreover
+          note sol A_fun im_eq ultimately have "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``(E);{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>) \<and> (restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. AA`(BB`x) = AAA`x))" by auto
         }
-        ultimately have "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``E;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)" by auto
+        ultimately have "\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``E;{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)\<and> (restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. AA`(BB`x) = AAA`x))" by auto
       }
-      then have "( \<exists>AA\<in>\<M>\<rightarrow>R. (\<Sum>[E-{d};{AAA,BB}])=(\<Sum>[BB``(E-{d});{AA,id(\<M>)}]) \<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)) \<longrightarrow> (\<exists>AA\<in>\<M>\<rightarrow>R. (\<Sum>[E;{AAA,BB}])=(\<Sum>[BB``E;{AA,id(\<M>)}]) \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>))" by auto
+      then have "( \<exists>AA\<in>\<M>\<rightarrow>R. (\<Sum>[E-{d};{AAA,BB}])=(\<Sum>[BB``(E-{d});{AA,id(\<M>)}]) \<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)\<and> (restrict(BB,E-{d})\<in>inj(E-{d},\<M>) \<longrightarrow> (\<forall>x\<in>E-{d}. AA`(BB`x) = AAA`x))) \<longrightarrow> (\<exists>AA\<in>\<M>\<rightarrow>R. (\<Sum>[E;{AAA,BB}])=(\<Sum>[BB``E;{AA,id(\<M>)}]) \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)\<and> (restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. AA`(BB`x) = AAA`x)))" by auto
     }
-    then have "\<exists>d\<in>E. (( \<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)) \<longrightarrow> (\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``(E);{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)))"
+    then have "\<exists>d\<in>E. (( \<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)\<and> (restrict(BB,E-{d})\<in>inj(E-{d},\<M>) \<longrightarrow> (\<forall>x\<in>E-{d}. AA`(BB`x) = AAA`x))) \<longrightarrow> (\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``(E);{AA,id(\<M>)}] \<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)\<and> (restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. AA`(BB`x) = AAA`x))))"
       using E(2) by auto
   }
-  then have "\<forall>E\<in>FinPow(X). E\<noteq>0 \<longrightarrow> (\<exists>d\<in>E. ((\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}]\<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)) \<longrightarrow> (\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``(E);{AA,id(\<M>)}]\<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>))))"
+  then have "\<forall>E\<in>FinPow(X). E\<noteq>0 \<longrightarrow> (\<exists>d\<in>E. ((\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E-{d};{AAA,BB}]=\<Sum>[BB``(E-{d});{AA,id(\<M>)}]\<and> (\<forall>x\<in>\<M>-BB``(E-{d}). AA`x=\<zero>)\<and> (restrict(BB,E-{d})\<in>inj(E-{d},\<M>) \<longrightarrow> (\<forall>x\<in>E-{d}. AA`(BB`x) = AAA`x)))
+     \<longrightarrow> (\<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``(E);{AA,id(\<M>)}]\<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)\<and> (restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. AA`(BB`x) = AAA`x)))))"
     by auto
-  then show ?thesis using FinPow_ind_rem_one[where ?P="\<lambda>E. \<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``E;{AA,id(\<M>)}]\<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)", OF case0 _ assms(3)] by auto
+  then show ?thesis using FinPow_ind_rem_one[where ?P="\<lambda>E. \<exists>AA\<in>\<M>\<rightarrow>R. \<Sum>[E;{AAA,BB}]=\<Sum>[BB``E;{AA,id(\<M>)}]\<and> (\<forall>x\<in>\<M>-BB``E. AA`x=\<zero>)\<and> (restrict(BB,E)\<in>inj(E,\<M>) \<longrightarrow> (\<forall>x\<in>E. AA`(BB`x) = AAA`x))", OF case0 _ assms(3)] by auto
 qed
+
+lemma (in module0) zero_lin_comb:
+  assumes "N: X \<rightarrow> R" "M: X \<rightarrow> \<M>" "D \<in> FinPow(X)" "\<forall>x\<in>D. N`x = \<zero>"
+  shows "\<Sum>[D;{N,M}]=\<Theta>"
+proof-
+  have "(\<forall>x\<in>D. N`x = \<zero>) \<longrightarrow> (\<Sum>[D;{N,M}]=\<Theta>)" 
+  proof(rule FinPow_induct[of "\<lambda>D. ((\<forall>x\<in>D. N`x = \<zero>) \<longrightarrow> (\<Sum>[D;{N,M}]=\<Theta>))"])
+    from assms(3) show "D\<in>FinPow(X)" by auto
+    show "(\<forall>x\<in>0. N`x = \<zero>) \<longrightarrow> (\<Sum>[\<emptyset>;{N,M}] = \<Theta>)" using LinearComb_def[OF assms(1-2), of 0]
+      nat_into_Finite[OF nat_0I]
+      unfolding FinPow_def  by auto
+    {
+      fix Z assume Z:"Z\<in>FinPow(X)" "(\<forall>x\<in>Z. N ` x = \<zero>) \<longrightarrow> \<Sum>[Z;{N,M}] = \<Theta>"
+      {
+        fix z assume z:"z\<in>X" "\<forall>x\<in>Z \<union> {z}. N ` x = \<zero>"
+        from z(2) have "\<forall>x\<in>Z. N ` x = \<zero>" by auto
+        with Z(2) have Q:"\<Sum>[Z;{N,M}] = \<Theta>" by auto
+        {
+          assume "z\<in>Z"
+          then have "Z\<union>{z} = Z" by auto
+          moreover note Q
+          ultimately have "\<Sum>[Z\<union>{z};{N,M}] = \<Theta>" using Z(2) by auto
+        } moreover
+        {
+          assume "z\<notin>Z"
+          then have D:"(Z\<union>{z})\<setminus>{z} = Z" by auto
+          have "\<Sum>[Z\<union>{z};{N,M}] = \<Sum>[(Z\<union>{z})\<setminus>{z};{N,M}] +\<^sub>V (N`z)\<cdot>\<^sub>S(M`z)"
+            using sum_one_element[OF assms(1,2) union_finpow[OF Z(1) singleton_in_finpow[OF z(1)]], of z]
+            apply_equality[OF _ coordinate_function[OF assms(1,2)], of z] z(1) by auto
+          with D have "\<Sum>[Z\<union>{z};{N,M}] = \<Sum>[Z;{N,M}] +\<^sub>V (N`z)\<cdot>\<^sub>S(M`z)" by auto
+          with Q have "\<Sum>[Z\<union>{z};{N,M}] = \<Theta> +\<^sub>V (N`z)\<cdot>\<^sub>S(M`z)" by auto
+          then have "\<Sum>[Z\<union>{z};{N,M}] = (N`z)\<cdot>\<^sub>S(M`z)" using zero_neutral(2) apply_type[OF H_val_type(2)[OF
+            apply_type[OF assms(1) z(1)]]] apply_type[OF assms(2) z(1)] by auto
+          then have "\<Sum>[Z\<union>{z};{N,M}] = \<zero>\<cdot>\<^sub>S(M`z)" using z(2) by auto
+          then have "\<Sum>[Z\<union>{z};{N,M}] =\<Theta>" using mult_zero apply_type[OF assms(2) z(1)] by auto
+        } ultimately have "\<Sum>[Z\<union>{z};{N,M}] = \<Theta>" by auto
+      }
+      then have "\<forall>z\<in>X. (\<forall>x\<in>Z \<union> {z}. N ` x = \<zero>) \<longrightarrow> \<Sum>[Z \<union>{z};{N,M}] = \<Theta>" by auto
+    }
+    then show "\<forall>Z\<in>FinPow(X).
+       ((\<forall>x\<in>Z. N ` x = \<zero>) \<longrightarrow> \<Sum>[Z;{N,M}] = \<Theta>) \<longrightarrow>
+       (\<forall>z\<in>X. (\<forall>x\<in>Z \<union> {z}. N ` x = \<zero>) \<longrightarrow> \<Sum>[Z \<union> {z};{N,M}] = \<Theta>)" by auto
+  qed
+  with assms(4) show ?thesis by auto
+qed
+          
 
 text\<open>A span over a set is the collection over all linear combinations on those elements.\<close>
 
 definition(in module0)
   Span("{span of}_")
   where "T\<subseteq>\<M> \<Longrightarrow> {span of}T \<equiv> if T=0 then {\<Theta>} else {\<Sum>[F;{AA,id(T)}]. \<langle>F,AA\<rangle>\<in>{\<langle>FF,B\<rangle>\<in>FinPow(T)\<times>(T\<rightarrow>R). \<forall>m\<in>T-FF. B`m=\<zero>}}"
+
+
+text\<open>A base is a generating linearly dependent set\<close>
+
+definition(in module0)
+  ModBase ("_{is a base for}_" 89)
+  where "\<T>\<subseteq>\<M> \<Longrightarrow> \<T>{is a base for}\<N> \<equiv> \<T>{is linearly independent} \<and> ({span of}\<T>) = \<N>"
 
 text\<open>The span of a subset is then a submodule and contains the original set.\<close>
 

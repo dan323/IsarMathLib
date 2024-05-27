@@ -66,13 +66,13 @@ text\<open>An endomorphism is a homomorphism from a group to the same group. In 
 the group is abelian, it has a nice structure.\<close>
 
 definition
-  "End(G,P) \<equiv> {f\<in>G\<rightarrow>G. Homomor(f,G,P,G,P)}"
+  "End(G,P) \<equiv> {f\<in>G\<rightarrow>G. IsMorphism(G,P,P,f)}"
 
 text\<open>The defining property of an endomorphism written in notation used in \<open>group0\<close> context:\<close>
 
 lemma (in group0) endomor_eq: assumes "f \<in> End(G,P)" "g\<^sub>1\<in>G" "g\<^sub>2\<in>G"
   shows "f`(g\<^sub>1\<cdot>g\<^sub>2) = f`(g\<^sub>1)\<cdot>f`(g\<^sub>2)"
-  using assms homomor_eq unfolding End_def by auto
+  using assms homomor_eq unfolding End_def Homomor_def by auto
 
 text\<open>A function that maps a group $G$ into itself and satisfies 
   $f(g_1\cdot g2) = f(g_1)\cdot f(g_2)$ is an endomorphism.\<close>
@@ -237,7 +237,7 @@ proof -
       with groupAssum assms(1) AS \<open>g\<in>G\<close> have 
         "(b O (F`\<langle>c,d\<rangle>))`(g) = (F`\<langle>b O c,b O d\<rangle>)`(g)"
         using Group_ZF_2_1_L3 apply_type homomor_eq comp_fun 
-        unfolding End_def by auto
+        unfolding End_def Homomor_def by auto
     } hence "\<forall>g\<in>G. (b O (F`\<langle>c,d\<rangle>))`(g) = (F`\<langle>b O c,b O d\<rangle>)`(g)" by simp
     with comp1fun comp2fun ig1 ig2 have 
       "?C\<^sub>G`\<langle>b,F`\<langle>c, d\<rangle>\<rangle> = F`\<langle>?C\<^sub>G`\<langle>b , c\<rangle>,?C\<^sub>G`\<langle>b,d\<rangle>\<rangle>"

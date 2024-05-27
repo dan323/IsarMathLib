@@ -226,7 +226,7 @@ lemma (in module0) zero_fixed: assumes "r\<in>R"
   shows "r \<cdot>\<^sub>S \<Theta> = \<Theta>"
 proof-
   have "Homomor(H`r,\<M>,A\<^sub>M,\<M>,A\<^sub>M)"
-    using assms H_val_type(1) unfolding End_def by simp_all
+    using assms H_val_type(1) unfolding End_def Homomor_def by simp_all
   with image_neutral mAbGr have "(H`r)`TheNeutralElement(\<M>,A\<^sub>M) = TheNeutralElement(\<M>,A\<^sub>M)" by auto
   then show ?thesis by auto
 qed
