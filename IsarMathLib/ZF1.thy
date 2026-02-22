@@ -489,18 +489,43 @@ proof
     by blast
 qed 
 
+text\<open>Composition of reflexive relations is reflexive.\<close>
+
+lemma refl_comp_refl: 
+  assumes "U \<subseteq> X\<times>X" "id(X) \<subseteq> U" "V \<subseteq> X\<times>X" "id(X) \<subseteq> V"
+  shows "id(X) \<subseteq> U O V" using assms by blast
+
 text\<open>Square of a reflexive relation contains the relation.
   Recall that in ZF the identity function on $X$ is the same as the diagonal
   of $X\times X$, i.e. $id(X) = \{\langle x,x\rangle : x\in X\}$ 
   (see also lemma \<open>id_diagonal\<close> in \<open>func_ZF\<close> theory). \<close>
 
 lemma refl_square_greater: assumes "r \<subseteq> X\<times>X" "id(X) \<subseteq> r"
-  shows "r \<subseteq> r O r" using assms by auto
+  shows "r \<subseteq> r O r" using assms by blast
 
 text\<open>The cube of a reflexive relation contains the relation.\<close>
 
 lemma refl_cube_greater: assumes "r \<subseteq> X\<times>X" "id(X) \<subseteq> r"
   shows "r \<subseteq> r O r O r" using assms by blast 
+
+text\<open>The cube of a reflexive relation contains the square of the relation.\<close>
+
+lemma refl_cube_greater_square: assumes "r \<subseteq> X\<times>X" "id(X) \<subseteq> r"
+  shows "r O r \<subseteq> r O r O r" using assms by blast
+
+text\<open>Composition of two reflexive relations is reflexive and greater than each of them.
+  In particular this implies that if $V\subseteq X\times X$ is a reflexive relation
+  then repeatedly composing it with itself forms a sequence of reflexive 
+  relations that is increasing in the inclusion order. 
+  It's not proven here, but we may prove that one day.\<close>
+
+lemma refl_comp_greater_inter: 
+  assumes "U \<subseteq> X\<times>X" "id(X) \<subseteq> U" "V \<subseteq> X\<times>X" "id(X) \<subseteq> V"
+  shows "id(X) \<subseteq> U O V" and "U\<inter>V \<subseteq> U O V" 
+proof -
+  from assms show "U\<inter>V \<subseteq> U O V" by auto
+  with assms(2,4) show "id(X) \<subseteq> U O V" by blast
+qed
 
 text\<open>A reflexive relation is contained in the union of products of its singleton images. \<close>
 

@@ -787,4 +787,85 @@ proof -
     unfolding IsPartOrder_def IsPreorder_def by blast
 qed
 
+text\<open>We aim at proving that under the standard assumptions the image of the thirding sequence
+  is a a fundamental system of entourages. The next lemma shows the first condition we need:
+  for two sets in a thirding sequence image there is a third one that is contained in both.\<close>
+
+lemma div3_seq_base_1st_cond: 
+  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" "\<V>:nat\<rightarrow>\<Phi>"
+  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
+  assumes "B\<^sub>1\<in>T``(nat)" "B\<^sub>2\<in>T``(nat)"
+  shows "\<exists>B\<in>T``(nat). B\<subseteq>B\<^sub>1\<inter>B\<^sub>2"
+proof -
+  let ?r = "InclusionOn(\<Phi>)"
+  from assms have "\<langle>B\<^sub>1,B\<^sub>2\<rangle> \<in> ?r \<or> \<langle>B\<^sub>2,B\<^sub>1\<rangle> \<in> ?r"
+    using div3_seq_decr(2) unfolding IsTotal_def by simp
+  with assms(5,6) show ?thesis unfolding InclusionOn_def 
+    by auto
+qed
+
+text\<open>Sets in the thirding sequence image of natural numbers contain the diagonal, 
+  are symmetric and for every such set $B$ there is another one contained in the converse of the
+  first one and another one $B_2$ such that $B_2\circ B_2\subseteq B_1$.\<close>
+
+lemma div3_seq_base_2_3_4_conds: 
+  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" "\<V>:nat\<rightarrow>\<Phi>"
+  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
+  assumes "B\<in>T``(nat)"
+  shows 
+    "id(X)\<subseteq>B" "B = converse(B)" 
+    "\<exists>B\<^sub>1\<in>T``(nat). B\<^sub>1 \<subseteq> converse(B)" 
+    "\<exists>B\<^sub>2\<in>T``(nat). B\<^sub>2 O B\<^sub>2 \<subseteq> B"
+proof -
+  from assms have "T:nat\<rightarrow>\<Phi>"
+    unfolding Div3Seq_def using seq_div_cube(1) by simp
+  with assms(1,5) show "id(X)\<subseteq>B" using entourage_props(2) func1_1_L6(2)
+    by blast
+  from assms(5) \<open>T:nat\<rightarrow>\<Phi>\<close> obtain n where "n\<in>nat" and "B=T`(n)"
+    using func_imagedef by auto
+  with assms(1,2,3,4) show "B = converse(B)"
+    using seq_div_cube(3) unfolding Div3Seq_def by simp
+  with assms(5) show "\<exists>B\<^sub>1\<in>T``(nat). B\<^sub>1 \<subseteq> converse(B)" by auto
+  from assms \<open>n\<in>nat\<close> \<open>T:nat\<rightarrow>\<Phi>\<close> have 
+    I: "T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n) \<inter> \<V>`(n)"
+    and "T`(n #+ 1)\<in>T``(nat)" "T`(n #+ 1) \<in> \<Phi>"
+    using seq_div_cube(3) func_imagedef apply_funtype 
+    unfolding Div3Seq_def by auto
+  from assms(1) \<open>T`(n #+ 1) \<in> \<Phi>\<close> I have "T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
+    using entourage_props(1,2) refl_cube_greater_square by blast
+  with \<open>T`(n #+ 1)\<in>T``(nat)\<close> \<open>B=T`(n)\<close> show "\<exists>B\<^sub>2\<in>T``(nat). B\<^sub>2 O B\<^sub>2 \<subseteq> B"
+    by auto
+qed
+
+text\<open>The thirding sequence image of natural numbers is contained 
+  in the powerset of $X\times X$ and is not empty.\<close>
+
+lemma div3_seq_base_5_and_6th_cond: 
+  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" "\<V>:nat\<rightarrow>\<Phi>"
+  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
+  shows "T``(nat) \<subseteq> Pow(X\<times>X)" and "T``(nat) \<noteq> \<emptyset>"
+proof -
+  from assms have "T:nat\<rightarrow>\<Phi>"
+    unfolding Div3Seq_def using seq_div_cube(1) by simp
+  then have "T``(nat) \<subseteq> \<Phi>" using func1_1_L6(2) by simp
+  with assms(1) show "T``(nat) \<subseteq> Pow(X\<times>X)" 
+    using unif_filter unfolding IsFilter_def by blast
+  from \<open>T:nat\<rightarrow>\<Phi>\<close> show "T``(nat) \<noteq> \<emptyset>" using func_imagedef
+    by auto
+qed
+
+text\<open>If $\Phi$ is a uniformity on $X$, $t$ maps $\Phi$ into itself so that
+  $t(U)$ is symmetric and $t(U)\circ t(U)\circ T(U)\subseteq U$ for all $U\in\Phi$, 
+  and $\mathcal(V):\mathbb{N}\rightarrow\Phi$ is any sequence of entourages from $\Phi$
+  then the image of the sequence defined inductively by 
+  $T_0 = X\times X,\  T_{n+1} = t(T_n\cap\mathcal{V}_n)$ is a fundamental system of entourages.\<close>
+
+theorem div3_seq_base:
+  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" "\<V>:nat\<rightarrow>\<Phi>"
+  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
+  shows "(T``(nat)) {is a uniform base on} X"
+  using assms div3_seq_base_1st_cond div3_seq_base_2_3_4_conds
+    div3_seq_base_5_and_6th_cond
+  unfolding IsUniformityBaseOn_def by simp
+
 end
