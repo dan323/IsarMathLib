@@ -754,6 +754,35 @@ text\<open>To shorten the notation we will call the sequence denoted as $\mathca
 
 definition "Div3Seq(X,\<Phi>,\<V>,t) \<equiv> InductiveSeqVarF(X\<times>X,\<Phi>,SeqInter(\<Phi>,\<V>,t))"
 
+text\<open>A couple of other properties of the thirding sequence in addition to what is shown
+  in \<open>seq_div_cube\<close>: 
+  Under the same assumptions and additionaly that $n$ is a natural number 
+  and denoting the thirding sequence as $T$ the composition cube of the $(n+1)$'th element of the 
+  thirding sequence and the $(n+1)$'th element itself are contained in the $n$'th element, 
+  and also the the $(n+1)$'th element is contained in $\mathcal{V}_n$. \<close>
+
+lemma div3_seq_props:
+  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" "\<V>:nat\<rightarrow>\<Phi>" "n\<in>nat"
+  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
+  shows "T`(n #+ 1) \<subseteq> T`(n)" "T`(n #+ 1) \<subseteq> \<V>`(n)" and 
+    "T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
+proof -
+  from assms have 
+    I: "T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)\<inter>\<V>`(n)"
+    using seq_div_cube(3) unfolding Div3Seq_def by simp
+  thus II: "T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)" by auto
+  from assms have "T:nat\<rightarrow>\<Phi>" using seq_div_cube(1)
+    unfolding Div3Seq_def by simp
+  with assms(4) have "T`(n #+ 1) \<in> \<Phi>" using apply_funtype 
+    by simp
+  with assms(1) have "T`(n #+ 1) \<subseteq> X\<times>X" and "id(X) \<subseteq> T`(n #+ 1)"
+    using uni_domain(1) unfolding IsUniformity_def by simp_all
+  then have "T`(n #+ 1) \<subseteq> T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1)"
+    using refl_cube_greater by simp
+  with I II show "T`(n #+ 1) \<subseteq> T`(n)" and "T`(n #+ 1) \<subseteq> \<V>`(n)"
+    by auto
+qed
+
 text\<open>With the assumptions of \<open>seq_div_third_pow\<close> the thirding sequence is decreasing 
   in the inclusion order on $\Phi$ hence the inclusion order on $\Phi$ is total on 
   the sequence's image of the natural numbers.\<close>
@@ -764,25 +793,14 @@ lemma div3_seq_decr:
     "IsDecreasingSeq(\<Phi>,InclusionOn(\<Phi>),Div3Seq(X,\<Phi>,\<V>,t))"
     "InclusionOn(\<Phi>) {is total on} (Div3Seq(X,\<Phi>,\<V>,t)``(nat))"
 proof -
-  let ?\<U> = "Div3Seq(X,\<Phi>,\<V>,t)"
+  let ?T = "Div3Seq(X,\<Phi>,\<V>,t)"
   let ?r = "InclusionOn(\<Phi>)"
-  from assms(1,2,3) have "?\<U>:nat\<rightarrow>\<Phi>" using seq_div_cube(1)
+  from assms(1,2,3) have "?T:nat\<rightarrow>\<Phi>" using seq_div_cube(1)
     unfolding Div3Seq_def by simp
-  { fix n assume "n\<in>nat"  
-    with \<open>?\<U>:nat\<rightarrow>\<Phi>\<close> have "?\<U>`(n) \<in> \<Phi>" and "?\<U>`(n #+ 1) \<in> \<Phi>" 
-      using apply_funtype by simp_all
-    with assms(1) have "?\<U>`(n #+ 1) \<subseteq> X\<times>X" and "id(X) \<subseteq> ?\<U>`(n #+ 1)"
-      using uni_domain(1) unfolding IsUniformity_def by simp_all
-    then have "?\<U>`(n #+ 1) \<subseteq> ?\<U>`(n #+ 1) O ?\<U>`(n #+ 1) O ?\<U>`(n #+ 1)"
-      using refl_cube_greater by simp
-    with assms(1,2,3) \<open>n\<in>nat\<close> have "?\<U>`(n #+ 1) \<subseteq> ?\<U>`(n)"
-      using seq_div_cube(3) unfolding Div3Seq_def by blast
-    with \<open>?\<U>`(n)\<in>\<Phi>\<close> \<open>?\<U>`(n #+ 1)\<in>\<Phi>\<close> have "\<langle>?\<U>`(n #+ 1),?\<U>`(n)\<rangle> \<in> ?r"
-      unfolding InclusionOn_def by simp
-  } hence "\<forall>n\<in>nat. \<langle>?\<U>`(n #+ 1),?\<U>`(n)\<rangle> \<in> ?r" by simp
-  with \<open>?\<U>:nat\<rightarrow>\<Phi>\<close> show "IsDecreasingSeq(\<Phi>,InclusionOn(\<Phi>),?\<U>)"
-    unfolding IsDecreasingSeq_def by simp
-  then show "?r {is total on} ?\<U>``(nat)"
+  with assms(1,2,3) show "IsDecreasingSeq(\<Phi>,InclusionOn(\<Phi>),?T)"
+    using apply_funtype div3_seq_props(1) 
+    unfolding InclusionOn_def IsDecreasingSeq_def by simp
+  then show "?r {is total on} ?T``(nat)"
     using incl_is_partorder decr_seq_total 
     unfolding IsPartOrder_def IsPreorder_def by blast
 qed
@@ -827,11 +845,12 @@ proof -
     using seq_div_cube(3) unfolding Div3Seq_def by simp
   with assms(5) show "\<exists>B\<^sub>1\<in>T``(nat). B\<^sub>1 \<subseteq> converse(B)" by auto
   from assms \<open>n\<in>nat\<close> \<open>T:nat\<rightarrow>\<Phi>\<close> have 
-    I: "T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n) \<inter> \<V>`(n)"
+    I: "T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
     and "T`(n #+ 1)\<in>T``(nat)" "T`(n #+ 1) \<in> \<Phi>"
-    using seq_div_cube(3) func_imagedef apply_funtype 
+    using div3_seq_props(3) func_imagedef apply_funtype 
     unfolding Div3Seq_def by auto
-  from assms(1) \<open>T`(n #+ 1) \<in> \<Phi>\<close> I have "T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
+  from assms(1) I \<open>T`(n #+ 1) \<in> \<Phi>\<close> have 
+    "T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
     using entourage_props(1,2) refl_cube_greater_square by blast
   with \<open>T`(n #+ 1)\<in>T``(nat)\<close> \<open>B=T`(n)\<close> show "\<exists>B\<^sub>2\<in>T``(nat). B\<^sub>2 O B\<^sub>2 \<subseteq> B"
     by auto
@@ -867,5 +886,39 @@ theorem div3_seq_base:
   using assms div3_seq_base_1st_cond div3_seq_base_2_3_4_conds
     div3_seq_base_5_and_6th_cond
   unfolding IsUniformityBaseOn_def by simp
+
+text\<open>f $\Phi$ is a uniformity on $X$, $t$ maps $\Phi$ into itself so that
+  $t(U)$ is symmetric and $t(U)\circ t(U)\circ T(U)\subseteq U$ for all $U\in\Phi$, 
+  and $\mathcal(V):\mathbb{N}\rightarrow\Phi$ is a sequence of entourages whose image is
+  a fundamental system of entourages of $\Phi$, then the image of the thirding sequence 
+  $T:\mathbb{N}\rightarrow \Phi$  defined by $t$ and $\mathcal{V}$ is a fundamental 
+  system of symmetric entourages of $\Phi$ and $T_{n+1}^3\subseteq T_n$ for all $n\in\mathbb{N}$.\<close>
+
+theorem div3_seq_base_of: 
+  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" and 
+    "\<V>:nat\<rightarrow>\<Phi>" "(\<V>``(nat)) {is a uniform base of} \<Phi>"
+  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
+  shows "(T``(nat)) {is a uniform base of} \<Phi>" and "\<forall>n\<in>nat. 
+    T`(n) = converse(T`(n)) \<and> T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
+proof -
+  let ?\<BB> = "T``(nat)"
+  from assms(1,2,3,5) have "T:nat\<rightarrow>\<Phi>"
+    unfolding Div3Seq_def using seq_div_cube(1) by simp
+  then have "?\<BB> \<subseteq> \<Phi>" using func1_1_L6 by simp
+  { fix U assume "U\<in>\<Phi>"
+    with assms(4) obtain B where "B\<in>\<V>``(nat)" and "B\<subseteq>U"
+      unfolding IsUniformityBase_def by blast
+    from assms(3) \<open>B\<in>\<V>``(nat)\<close> obtain n where "n\<in>nat" and "B=\<V>`(n)"
+      using func_imagedef by auto
+    with assms \<open>B\<subseteq>U\<close> \<open>T:nat\<rightarrow>\<Phi>\<close> have "\<exists>V\<in>?\<BB>. V\<subseteq>U"
+      using div3_seq_props(2) func_imagedef by force
+  } hence "\<forall>U\<in>\<Phi>. \<exists>V\<in>?\<BB>. V\<subseteq>U" by simp
+  with \<open>?\<BB> \<subseteq> \<Phi>\<close> show "(T``(nat)) {is a uniform base of} \<Phi>"
+    unfolding IsUniformityBase_def by simp
+  from assms show "\<forall>n\<in>nat. T`(n) = converse(T`(n)) \<and> 
+    T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
+    using div3_seq_props(3) seq_div_cube(3) unfolding Div3Seq_def 
+    by simp
+qed
 
 end
