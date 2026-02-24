@@ -783,8 +783,42 @@ proof -
     by auto
 qed
 
-text\<open>With the assumptions of \<open>seq_div_third_pow\<close> the thirding sequence is decreasing 
-  in the inclusion order on $\Phi$ hence the inclusion order on $\Phi$ is total on 
+text\<open>If $\Phi$ is a uniformity on $X$, $t$ maps $\Phi$ into itself so that
+  $t(U)$ is symmetric and $t(U)\circ t(U)\circ t(U)\subseteq U$ for all $U\in\Phi$, 
+  and $\mathcal(V):\mathbb{N}\rightarrow\Phi$ is a sequence of entourages whose image is
+  a fundamental system of entourages of $\Phi$, then the image of the thirding sequence 
+  $T:\mathbb{N}\rightarrow \Phi$ defined by $t$ and $\mathcal{V}$ is a fundamental 
+  system of entourages (a uniform base) of $\Phi$.\<close>
+
+theorem div3_seq_base_of: 
+  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" and 
+    "\<V>:nat\<rightarrow>\<Phi>" "(\<V>``(nat)) {is a uniform base of} \<Phi>"
+  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
+  shows "(T``(nat)) {is a uniform base of} \<Phi>"
+proof -
+  let ?\<BB> = "T``(nat)"
+  from assms(1,2,3,5) have "T:nat\<rightarrow>\<Phi>"
+    unfolding Div3Seq_def using seq_div_cube(1) by simp
+  then have "?\<BB> \<subseteq> \<Phi>" using func1_1_L6 by simp
+  { fix U assume "U\<in>\<Phi>"
+    with assms(4) obtain B where "B\<in>\<V>``(nat)" and "B\<subseteq>U"
+      unfolding IsUniformityBase_def by blast
+    from assms(3) \<open>B\<in>\<V>``(nat)\<close> obtain n where "n\<in>nat" and "B=\<V>`(n)"
+      using func_imagedef by auto
+    with assms \<open>B\<subseteq>U\<close> \<open>T:nat\<rightarrow>\<Phi>\<close> have "\<exists>V\<in>?\<BB>. V\<subseteq>U"
+      using div3_seq_props(2) func_imagedef by force
+  } hence "\<forall>U\<in>\<Phi>. \<exists>V\<in>?\<BB>. V\<subseteq>U" by simp
+  with \<open>?\<BB> \<subseteq> \<Phi>\<close> show "(T``(nat)) {is a uniform base of} \<Phi>"
+    unfolding IsUniformityBase_def by simp
+qed
+
+text\<open>The rest of this section aims at showing that With the assumptions of \<open>seq_div_cube\<close> 
+  (i.e. when $\mathcal{V}$ is any sequence of entourages of $\Phi$) 
+  the image of the thirding sequence is a fundamental system of entourages. 
+  This is a mildly interesting fact proven by a mistake that is unlikely to be ever used,
+  but will stay here as a curiosity.
+  We start with the claim that the thirding sequence is decreasing in the inclusion order 
+  on $\Phi$ hence the inclusion order on $\Phi$ is total on 
   the sequence's image of the natural numbers.\<close>
 
 lemma div3_seq_decr: 
@@ -805,8 +839,7 @@ proof -
     unfolding IsPartOrder_def IsPreorder_def by blast
 qed
 
-text\<open>We aim at proving that under the standard assumptions the image of the thirding sequence
-  is a a fundamental system of entourages. The next lemma shows the first condition we need:
+text\<open>The next lemma shows the first condition we need:
   for two sets in a thirding sequence image there is a third one that is contained in both.\<close>
 
 lemma div3_seq_base_1st_cond: 
@@ -886,39 +919,4 @@ theorem div3_seq_base:
   using assms div3_seq_base_1st_cond div3_seq_base_2_3_4_conds
     div3_seq_base_5_and_6th_cond
   unfolding IsUniformityBaseOn_def by simp
-
-text\<open>f $\Phi$ is a uniformity on $X$, $t$ maps $\Phi$ into itself so that
-  $t(U)$ is symmetric and $t(U)\circ t(U)\circ T(U)\subseteq U$ for all $U\in\Phi$, 
-  and $\mathcal(V):\mathbb{N}\rightarrow\Phi$ is a sequence of entourages whose image is
-  a fundamental system of entourages of $\Phi$, then the image of the thirding sequence 
-  $T:\mathbb{N}\rightarrow \Phi$  defined by $t$ and $\mathcal{V}$ is a fundamental 
-  system of symmetric entourages of $\Phi$ and $T_{n+1}^3\subseteq T_n$ for all $n\in\mathbb{N}$.\<close>
-
-theorem div3_seq_base_of: 
-  assumes "\<Phi> {is a uniformity on} X" "IsDiv3Function(\<Phi>,t)" and 
-    "\<V>:nat\<rightarrow>\<Phi>" "(\<V>``(nat)) {is a uniform base of} \<Phi>"
-  defines "T \<equiv> Div3Seq(X,\<Phi>,\<V>,t)"
-  shows "(T``(nat)) {is a uniform base of} \<Phi>" and "\<forall>n\<in>nat. 
-    T`(n) = converse(T`(n)) \<and> T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
-proof -
-  let ?\<BB> = "T``(nat)"
-  from assms(1,2,3,5) have "T:nat\<rightarrow>\<Phi>"
-    unfolding Div3Seq_def using seq_div_cube(1) by simp
-  then have "?\<BB> \<subseteq> \<Phi>" using func1_1_L6 by simp
-  { fix U assume "U\<in>\<Phi>"
-    with assms(4) obtain B where "B\<in>\<V>``(nat)" and "B\<subseteq>U"
-      unfolding IsUniformityBase_def by blast
-    from assms(3) \<open>B\<in>\<V>``(nat)\<close> obtain n where "n\<in>nat" and "B=\<V>`(n)"
-      using func_imagedef by auto
-    with assms \<open>B\<subseteq>U\<close> \<open>T:nat\<rightarrow>\<Phi>\<close> have "\<exists>V\<in>?\<BB>. V\<subseteq>U"
-      using div3_seq_props(2) func_imagedef by force
-  } hence "\<forall>U\<in>\<Phi>. \<exists>V\<in>?\<BB>. V\<subseteq>U" by simp
-  with \<open>?\<BB> \<subseteq> \<Phi>\<close> show "(T``(nat)) {is a uniform base of} \<Phi>"
-    unfolding IsUniformityBase_def by simp
-  from assms show "\<forall>n\<in>nat. T`(n) = converse(T`(n)) \<and> 
-    T`(n #+ 1) O T`(n #+ 1) O T`(n #+ 1) \<subseteq> T`(n)"
-    using div3_seq_props(3) seq_div_cube(3) unfolding Div3Seq_def 
-    by simp
-qed
-
 end

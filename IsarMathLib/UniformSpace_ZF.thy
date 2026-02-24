@@ -826,7 +826,35 @@ proof -
   ultimately show ?thesis unfolding IsUniformity_def by simp
 qed
 
-text\<open>The assumption that $X$ is not empty in \<open>uniformity_base_is_base\<close> above is neccessary
+text\<open>A fundamental system of entourages is a uniform base of its supersets.\<close>
+
+lemma uniform_base_supersets: 
+  assumes "X\<noteq>\<emptyset>" and "\<BB> {is a uniform base on} X"
+  shows "\<BB> {is a uniform base of} (Supersets(X\<times>X,\<BB>))"
+proof -
+  let ?\<Phi> = "Supersets(X\<times>X,\<BB>)"
+  { fix U assume "U\<in>\<BB>"
+    with assms(2) have "U\<subseteq>X\<times>X" using uniformity_base_props(5)
+      by auto
+    with \<open>U\<in>\<BB>\<close> have "U\<in>?\<Phi>" using superset_gen by simp
+  } hence "\<BB>\<subseteq>?\<Phi>" by auto
+  then show "\<BB> {is a uniform base of} ?\<Phi>"
+    unfolding Supersets_def IsUniformityBase_def by simp
+qed
+
+text\<open>A uniform base of a uniformity is a fundamental system of entourages.\<close>
+
+lemma uniform_base_of_is_on: 
+  assumes "\<Phi> {is a uniformity on} X" "\<BB> {is a uniform base of} \<Phi>" 
+  shows "\<BB> {is a uniform base on} X"
+proof -
+  from assms have "\<BB>\<subseteq>Pow(X\<times>X)" using entourage_props(1) 
+    unfolding IsUniformityBase_def by auto
+  with assms show "\<BB> {is a uniform base on} X"
+    using uniformity_from_base base_is_uniform_base by simp
+qed
+    
+text\<open>The assumption that $X$ is not empty in \<open>uniformity_base_is_base\<close> above is necessary
   as the assertion is false if $X$ is empty.\<close>
 
 lemma uniform_space_empty: assumes "\<BB> {is a uniform base on} \<emptyset>"
