@@ -2,7 +2,7 @@
     This file is a part of IsarMathLib - 
     a library of formalized mathematics written for Isabelle/Isar.
 
-    Copyright (C) 2008  Slawomir Kolodynski
+    Copyright (C) 2008-2026  Slawomir Kolodynski
 
     This program is free software Redistribution and use in source and binary forms, 
     with or without modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,7 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 section \<open>Partitions of sets\<close>
 
-theory Partitions_ZF imports Finite_ZF FiniteSeq_ZF
+theory Partitions_ZF imports Finite_ZF InductiveSeq_ZF
 
 begin
 
@@ -185,7 +185,7 @@ text\<open>This sections covers the situation when we have an arbitrary number
   of sets we want to partition into.\<close>
 
 text\<open>We define a notion of a partition as a set valued function 
-  such that the values for different arguments are disjoint.
+  such that the values for different arguments are nonempty and disjoint.
   The name is derived from the fact that such 
   function "partitions" the union of its arguments. 
   Please let me know if you have 
@@ -252,5 +252,121 @@ proof -
   } with \<open>domain(?p) = X\<close> show "{\<langle>x, {b`(x)}\<rangle>. x \<in> X} {is partition}"
     using Partition_def by simp
 qed
+
+subsection\<open>Collections of pairwise disjoint sets\<close>
+
+text\<open>The notion of collection of pairwise disjoint sets is similar to a partition 
+  except that we don't require the members to be nonempty.\<close>
+
+text\<open>A set valued function $X$ is pairwise disjoint if for any two different indices 
+  the corresponding sets have empty intersection.\<close>
+
+definition 
+  IsPairwiseDisjoint ("_ {is pairwise disjoint}" [60] 61) where
+  "X {is pairwise disjoint} \<equiv> \<forall>i\<in>domain(X). \<forall>j\<in>domain(X). i\<noteq>j \<longrightarrow> X`(i)\<inter>X`(j)=\<emptyset>" 
+
+text\<open>Suppose that $X:I\rightarrow Y$ is pairwise disjoint collection of sets and 
+  we know that $x$ is a member of a set in the collection. Then the index of
+  that set can be expressed as $\bigcup\{ j in I: x\in X(j)\}$.\<close>
+
+lemma get_the_one: 
+  assumes "X:I\<rightarrow>Y" "X {is pairwise disjoint}" "i\<in>I" "x\<in>X`(i)"
+  shows "i = \<Union>{j\<in>I. x\<in>X`(j)}"
+proof -
+  from assms have U: "\<exists>!i. i\<in>I \<and> x\<in>X`(i)"
+    using func1_1_L1 unfolding IsPairwiseDisjoint_def by auto
+  with assms(3,4) show ?thesis using ZF1_1_L9(2,3) by force
+qed 
+
+text\<open>A kind of inverse of \<open>get_the_one\<close>: if $X:I\rightarrow Y$ is pairwise disjoint 
+  collection of sets and $x\in\bigcup_{i\in I} X(i)$ 
+  then $i:=\bigcup\{ j\in I: x\in X(j)\}$ is an index and $x\in X(i)$.\<close>
+
+lemma one_is_the_one: 
+  assumes "X:I\<rightarrow>Y" "X {is pairwise disjoint}" "x\<in>(\<Union>j\<in>I. X`(j))"
+  defines "i \<equiv> \<Union>{j\<in>I. x\<in>X`(j)}"
+  shows "i\<in>I" "x\<in>X`(i)" using assms get_the_one by auto  
+
+text\<open>A special case of pairwise disjoint collection is the sequence of set differences
+  of consecutive elements of sequence of sets that is monotonic in the inclusion order.
+  The next lemma shows that if a sequence $\{\mathcal{U}_i\}_{i\in\mathbb{N}}$ of subsets of $X$ 
+  is decreasing in the inclusion order on the powerset of $X$ then the sequence 
+  $\{\mathcal{U}_i\setminus \mathcal{U}_{i+1}\}_{i\in\mathbb{N}}$ is pairwise disjoint.\<close>
+
+lemma decr_pair_disj: 
+  assumes "IsDecreasingSeq(Pow(X),InclusionOn(Pow(X)),\<U>)"
+  shows "{\<langle>n,\<U>`(n)\<setminus>\<U>`(n #+ 1)\<rangle>. n\<in>nat} {is pairwise disjoint}"
+proof -
+  let ?r = "InclusionOn(Pow(X))"
+  let ?F = "{\<langle>n,\<U>`(n)\<setminus>\<U>`(n #+ 1)\<rangle>. n\<in>nat}"
+  have "domain(?F) = nat" and "IsPreorder(Pow(X),?r)"
+    using incl_is_partorder(2) by auto
+  { fix i j assume "i\<in>nat" "j\<in>nat" "i\<noteq>j"
+    then have "i < j \<or> j < i" using nat_mem_total by simp
+    moreover
+    { assume "i < j"
+      with assms \<open>j\<in>nat\<close> have "\<langle>\<U>`(j), \<U>`(i #+ 1)\<rangle> \<in> ?r"
+        using nat_less_succ_leq incl_is_partorder(2) 
+          decreasing_seq_mono1 by blast
+      then have "(\<U>`(i)\<setminus>\<U>`(i #+ 1)) \<inter> (\<U>`(j)\<setminus>\<U>`(j #+ 1)) = \<emptyset>"
+        unfolding InclusionOn_def by auto
+    }
+    moreover
+    { assume "j < i"
+      with assms \<open>i\<in>nat\<close> have "\<langle>\<U>`(i), \<U>`(j #+ 1)\<rangle> \<in> ?r"
+        using nat_less_succ_leq incl_is_partorder(2) 
+          decreasing_seq_mono1 by blast
+      then have "(\<U>`(i)\<setminus>\<U>`(i #+ 1)) \<inter> (\<U>`(j)\<setminus>\<U>`(j #+ 1)) = \<emptyset>"
+        unfolding InclusionOn_def by auto
+    }
+    ultimately have "(\<U>`(i)\<setminus>\<U>`(i #+ 1)) \<inter> (\<U>`(j)\<setminus>\<U>`(j #+ 1)) = \<emptyset>"
+      by auto
+    with \<open>i\<in>nat\<close> \<open>j\<in>nat\<close> have "?F`(i) \<inter> ?F`(j) = \<emptyset>" 
+      using  ZF_fun_from_tot_val2 by simp_all
+  } hence "\<forall>i\<in>nat. \<forall>j\<in>nat. i\<noteq>j \<longrightarrow> ?F`(i) \<inter> ?F`(j) = \<emptyset>"
+    by simp
+  with \<open>domain(?F) = nat\<close> show ?thesis 
+    unfolding IsPairwiseDisjoint_def by simp
+qed
+
+text\<open>If a sequence $\{\mathcal{U}_i\}_{i\in\mathbb{N}}$ of subsets of $X$ 
+  is increasing in the inclusion order on the powerset of $X$ then the sequence 
+  $\{\mathcal{U}_{i+1}\setminus \mathcal{U}_{i}\}_{i\in\mathbb{N}}$ is pairwise disjoint. \<close>
+
+lemma incr_pair_disj:   assumes "IsIncreasingSeq(Pow(X),InclusionOn(Pow(X)),\<U>)"
+  shows "{\<langle>n,\<U>`(n #+ 1)\<setminus>\<U>`(n)\<rangle>. n\<in>nat} {is pairwise disjoint}"
+proof -
+  let ?r = "InclusionOn(Pow(X))"
+  let ?F = "{\<langle>n,\<U>`(n #+ 1)\<setminus>\<U>`(n)\<rangle>. n\<in>nat}"
+  have "domain(?F) = nat" and "IsPreorder(Pow(X),?r)"
+    using incl_is_partorder(2) by auto
+  { fix i j assume "i\<in>nat" "j\<in>nat" "i\<noteq>j"
+    then have "i < j \<or> j < i" using nat_mem_total by simp
+    moreover
+    { assume "i < j"
+      with assms \<open>j\<in>nat\<close> have "\<langle>\<U>`(i #+ 1), \<U>`(j)\<rangle> \<in> ?r"
+        using incl_is_partorder(2) increasing_seq_mono1 
+          nat_less_succ_leq by blast
+      then have "(\<U>`(i #+ 1)\<setminus>\<U>`(i)) \<inter> (\<U>`(j #+ 1)\<setminus>\<U>`(j)) = \<emptyset>"
+        unfolding InclusionOn_def by auto
+    }
+    moreover
+    { assume "j < i"
+      with assms \<open>i\<in>nat\<close> have "\<langle>\<U>`(j #+ 1), \<U>`(i)\<rangle> \<in> ?r"
+        using incl_is_partorder(2) increasing_seq_mono1 
+          nat_less_succ_leq by blast
+      then have "(\<U>`(i #+ 1)\<setminus>\<U>`(i)) \<inter> (\<U>`(j #+ 1)\<setminus>\<U>`(j)) = \<emptyset>"
+        unfolding InclusionOn_def by auto
+    }
+    ultimately have "(\<U>`(i #+ 1)\<setminus>\<U>`(i)) \<inter> (\<U>`(j #+ 1)\<setminus>\<U>`(j)) = \<emptyset>"
+      by auto
+    with \<open>i\<in>nat\<close> \<open>j\<in>nat\<close> have "?F`(i) \<inter> ?F`(j) = \<emptyset>" 
+      using  ZF_fun_from_tot_val2 by simp_all
+  } hence "\<forall>i\<in>nat. \<forall>j\<in>nat. i\<noteq>j \<longrightarrow> ?F`(i) \<inter> ?F`(j) = \<emptyset>"
+    by simp
+  with \<open>domain(?F) = nat\<close> show ?thesis 
+    unfolding IsPairwiseDisjoint_def by simp
+qed
+
 
 end

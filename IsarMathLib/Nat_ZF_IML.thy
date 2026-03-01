@@ -293,6 +293,16 @@ lemma nat_mem_lt: assumes "n\<in>nat"
   shows "k<n \<longleftrightarrow> k\<in>n" and "k\<le>n \<longleftrightarrow> k \<in> succ(n)"
   using assms nat_into_Ord Ord_mem_iff_lt by auto
 
+text\<open>If $n$ is a natural number and $k < n$ then $k+1\leq n$.\<close>
+
+lemma nat_less_succ_leq: assumes "n\<in>nat" and "k < n"
+  shows "k #+ 1 \<le> n"
+proof -
+  from assms have "k #+ 1 \<in> succ(n)"
+    using succ_ineq1(2) nat_mem_lt(1) succ_add_one(1) by simp
+  with assms(1) show "k #+ 1 \<le> n" using nat_mem_lt(2) by auto
+qed
+
 text\<open>If $n$ is a natural number and $k\leq n$, then k is a natural number.\<close>
 
 lemma leq_nat_is_nat: assumes "n\<in>nat" "k\<le>n" shows "k\<in>nat"

@@ -232,11 +232,12 @@ lemma bounded_below: assumes "r\<subseteq>X\<times>X" "A\<noteq>\<emptyset>" "Is
   shows "\<exists>u\<in>X. \<forall>x\<in>A. \<langle>u,x\<rangle> \<in> r"
   using assms unfolding IsBoundedBelow_def by blast
 
-text\<open>Inclusion relation is a partial order on the powerset of $X$.\<close>
+text\<open>Inclusion relation is a partial order hence a preorder on the powerset of $X$.\<close>
 
-lemma incl_is_partorder: shows "IsPartOrder(X,InclusionOn(X))"
-  unfolding InclusionOn_def IsPartOrder_def refl_def antisym_def trans_def
-  by auto
+lemma incl_is_partorder: 
+  shows "IsPartOrder(X,InclusionOn(X))" and "IsPreorder(X,InclusionOn(X))"
+  unfolding InclusionOn_def IsPartOrder_def IsPreorder_def 
+    refl_def antisym_def trans_def by auto
 
 text\<open>If a relation down-directs a set, then a larger one does as well.\<close>
 
