@@ -2,7 +2,7 @@
     This file is a part of IsarMathLib - 
     a library of formalized mathematics for Isabelle/Isar.
 
-    Copyright (C) 2005, 2006  Slawomir Kolodynski
+    Copyright (C) 2005-2026  Slawomir Kolodynski
 
     This program is free software; Redistribution and use in source and binary forms, 
     with or without modification, are permitted provided that the following conditions are met:
@@ -104,26 +104,34 @@ locale ring0 =
   fixes rnat_mult (infix "\<nm>" 95)
   defines nat_mult_def [simp]: "n\<nm>x \<equiv> \<Sum>{\<langle>k,x\<rangle>. k\<in>n}"
 
+  fixes listprod ("\<Prod> _" 70)
+  defines listprod_def [simp]: "\<Prod>s \<equiv> Fold(M,\<one>,s)"
+
+  fixes pow
+  defines pow_def [simp]: "pow(n,x) \<equiv> \<Prod>{\<langle>k,x\<rangle>. k\<in>n}"
+
+
 text\<open>In the \<open>ring0\<close> context we can use theorems proven in some 
   other contexts.\<close>
 
 lemma (in ring0) Ring_ZF_1_L1: shows 
   "monoid0(R,M)"
+  "monoid1(R,M)"
   "group0(R,A)" 
   "A {is commutative on} R"
-  using ringAssum IsAring_def group0_def monoid0_def by auto
+  using ringAssum IsAring_def group0_def monoid0_def monoid1_def by auto
 
 text\<open>The theorems proven in in \<open>group0\<close> context (locale) are valid
   in the \<open>ring0\<close> context when applied to the additive group of the ring. \<close>
 
 sublocale ring0 < add_group: group0 R A ringzero ringa ringminus rlistsum rnat_mult
-  using Ring_ZF_1_L1(2) unfolding ringa_def ringminus_def ringzero_def by auto
+  using Ring_ZF_1_L1(3) unfolding ringa_def ringminus_def ringzero_def by auto
 
-text\<open>The theorem proven in the \<open>monoid0\<close> context are valid in the \<open>ring0\<close> context 
+text\<open>The theorems proven in the \<open>monoid0\<close> context are valid in the \<open>ring0\<close> context 
   when applied to the multiplicative monoid of the ring.  \<close>
 
-sublocale ring0 < mult_monoid: monoid0 R M ringm
-  using Ring_ZF_1_L1(1) unfolding ringm_def by auto
+sublocale ring0 < mult_monoid: monoid1 R M ringm ringone listprod pow
+  using Ring_ZF_1_L1(2) unfolding ringm_def by auto
 
 text\<open>The additive operation in a ring is distributive with respect to the
   multiplicative operation.\<close>
@@ -170,7 +178,7 @@ lemma (in ring0) Ring_ZF_1_L4: assumes A1: "a\<in>R" "b\<in>R"
   "a\<rs>b \<in> R" 
   "a\<cdot>b \<in> R" 
   "a\<ra>b = b\<ra>a"
-  using assms Ring_ZF_1_L1(3) Ring_ZF_1_L3 
+  using assms Ring_ZF_1_L1(4) Ring_ZF_1_L3 
     add_group.monoid.group0_1_L1 
     mult_monoid.group0_1_L1
     unfolding IsCommutative_def
@@ -273,7 +281,7 @@ lemma (in ring0) Ring_ZF_1_L9: assumes "a\<in>R"  "b\<in>R"
   "(\<rm>(a\<ra>b)) = (\<rm>a)\<rs>b"  
   "(\<rm>(a\<rs>b)) = ((\<rm>a)\<ra>b)"
   "a\<rs>(\<rm>b) = a\<ra>b"
-  using assms Ring_ZF_1_L1(3) add_group.group0_4_L4 add_group.group_inv_of_inv
+  using assms Ring_ZF_1_L1(4) add_group.group0_4_L4 add_group.group_inv_of_inv
   by auto
 
 text\<open>If the difference of two element is zero, then those elements
@@ -292,7 +300,7 @@ lemma (in ring0) Ring_ZF_1_L10:
   (*"a\<ra>(b\<rs>c) = a\<ra>b\<rs>c"*)
   "a\<rs>(b\<ra>c) = a\<rs>b\<rs>c"
   "a\<rs>(b\<rs>c) = a\<rs>b\<ra>c"
-  using assms Ring_ZF_1_L1(3) add_group.group_oper_assoc 
+  using assms Ring_ZF_1_L1(4) add_group.group_oper_assoc 
     add_group.group0_4_L4A by auto
 
 text\<open>Another property with three elements.\<close>
@@ -312,14 +320,24 @@ lemma (in ring0) Ring_ZF_1_L11:
   using assms add_group.group_oper_assoc mult_monoid.sum_associative
   by auto
 
-text\<open>An interpretation of what it means that a ring has 
-  no zero divisors.\<close>
+text\<open>An interpretation of what it means that a ring has  no zero divisors.\<close>
 
 lemma (in ring0) Ring_ZF_1_L12: 
   assumes "HasNoZeroDivs(R,A,M)"
   and "a\<in>R"  "a\<noteq>\<zero>"  "b\<in>R"  "b\<noteq>\<zero>"
   shows "a\<cdot>b\<noteq>\<zero>" 
   using assms HasNoZeroDivs_def by auto
+
+text\<open>If ring has no zero divisors then the set of nonzero elements
+  is closed with respect to multiplication, hence with respect 
+  to multiplication restricted to that set.\<close>
+
+lemma (in ring0) nozerodivs_nonzero_closed: 
+  assumes "HasNoZeroDivs(R,A,M)"
+  shows "(R\<setminus>{\<zero>}) {is closed under} M" and
+    "(R\<setminus>{\<zero>}) {is closed under} restrict(M,(R\<setminus>{\<zero>})\<times>(R\<setminus>{\<zero>}))"
+  using assms Ring_ZF_1_L4(3) Ring_ZF_1_L12 func_ZF_4_L5
+  unfolding IsOpClosed_def by auto
 
 text\<open>In rings with no zero divisors we can cancel nonzero factors.\<close>
 
@@ -461,7 +479,7 @@ lemma (in ring0) Ring_ZF_2_L1A: assumes "a\<in>R" "b\<in>R"
   "(\<rm>a)\<ra>(b\<ra>a) = b"
   "a\<ra>(b\<rs>a) = b"
   using assms add_group.inv_cancel_two add_group.group0_4_L6A
-    Ring_ZF_1_L1(3) by auto
+    Ring_ZF_1_L1(4) by auto
 
 text\<open>In rings $a-(b+1)c = (a-d-c)+(d-bc)$ and $a+b+(c+d) = a+(b+c)+d$.\<close>
 
@@ -549,7 +567,7 @@ lemma (in ring0) Ring_ZF_2_L5:
   "a \<ra> b \<ra> c \<rs> d = a \<rs> d \<ra> b \<ra> c"
   "a \<ra> b \<rs> c \<rs> d = a \<rs> c \<ra> (b \<rs> d)"
   "a \<ra> b \<ra> c \<ra> d = a \<ra> c \<ra> (b \<ra> d)"
-  using assms Ring_ZF_1_L1(3) add_group.rearr_ab_gr_4_elemB
+  using assms Ring_ZF_1_L1(4) add_group.rearr_ab_gr_4_elemB
     add_group.rearr_ab_gr_4_elemA by auto
 
 text\<open>Two big rearranegements with six elements, useful for

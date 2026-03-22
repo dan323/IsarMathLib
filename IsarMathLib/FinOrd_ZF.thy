@@ -2,7 +2,7 @@
     This file is a part of IsarMathLib - 
     a library of formalized mathematics for Isabelle/Isar.
 
-    Copyright (C) 2008-2025  Slawomir Kolodynski
+    Copyright (C) 2008-2026  Slawomir Kolodynski
 
     This program is free software; Redistribution and use in source and binary forms, 
     with or without modification, are permitted provided that the following conditions are met:
@@ -45,67 +45,192 @@ subsection\<open>Finite vs. bounded sets\<close>
 text\<open>The goal of this section is to show that finite sets are bounded and 
   have maxima and minima.\<close>
 
-text\<open>For total and transitive relations 
-  nonempty finite set has a maximum.\<close>
+text\<open>For total and transitive relations nonempty finite set has a maximum.\<close>
 
 theorem fin_has_max: 
   assumes A1: "r {is total on} X" and A2: "trans(r)"
   and A3: "B \<in> FinPow(X)" and A4: "B \<noteq> 0"
   shows "HasAmaximum(r,B)"
 proof -
-  have "0=0 \<or> HasAmaximum(r,0)" by simp
+  have "\<emptyset>=\<emptyset> \<or> HasAmaximum(r,\<emptyset>)" by simp
   moreover have 
-    "\<forall>A \<in> FinPow(X). A=0 \<or> HasAmaximum(r,A) \<longrightarrow>
-    (\<forall>x\<in>X. (A \<union> {x}) = 0 \<or> HasAmaximum(r,A \<union> {x}))"
+    "\<forall>A \<in> FinPow(X). A=\<emptyset> \<or> HasAmaximum(r,A) \<longrightarrow>
+    (\<forall>x\<in>X. (A \<union> {x}) = \<emptyset> \<or> HasAmaximum(r,A \<union> {x}))"
   proof -
     { fix A 
-      assume "A \<in> FinPow(X)"  "A = 0 \<or> HasAmaximum(r,A)"
-      have "\<forall>x\<in>X. (A \<union> {x}) = 0 \<or> HasAmaximum(r,A \<union> {x})"
+      assume "A \<in> FinPow(X)"  "A = \<emptyset> \<or> HasAmaximum(r,A)"
+      have "\<forall>x\<in>X. (A \<union> {x}) = \<emptyset> \<or> HasAmaximum(r,A \<union> {x})"
       proof -
-	{ fix x assume "x\<in>X"
-	  note \<open>A = 0 \<or> HasAmaximum(r,A)\<close>
-	  moreover
-	  { assume "A = 0"
-	    then have "A\<union>{x} = {x}" by simp
-	    from A1 have "refl(X,r)" using total_is_refl 
-	      by simp
-	    with \<open>x\<in>X\<close> \<open>A\<union>{x} = {x}\<close> have "HasAmaximum(r,A\<union>{x})"
-	      using Order_ZF_4_L8 by simp }
-	  moreover
-	  { assume "HasAmaximum(r,A)"
-	    with A1 A2 \<open>A \<in> FinPow(X)\<close>  \<open>x\<in>X\<close> 
-	    have "HasAmaximum(r,A\<union>{x})" 
-	      using FinPow_def Order_ZF_4_L9 by simp }
-	  ultimately  have "A \<union> {x} = 0 \<or> HasAmaximum(r,A \<union> {x})"
-	    by auto
-	} thus "\<forall>x\<in>X. (A \<union> {x}) = 0 \<or> HasAmaximum(r,A \<union> {x})"
-	  by simp
+        { fix x assume "x\<in>X"
+          note \<open>A = \<emptyset> \<or> HasAmaximum(r,A)\<close>
+          moreover
+          { assume "A = \<emptyset>"
+            then have "A\<union>{x} = {x}" by simp
+            from A1 have "refl(X,r)" using total_is_refl 
+              by simp
+            with \<open>x\<in>X\<close> \<open>A\<union>{x} = {x}\<close> have "HasAmaximum(r,A\<union>{x})"
+              using Order_ZF_4_L8 by simp }
+          moreover
+          { assume "HasAmaximum(r,A)"
+            with A1 A2 \<open>A \<in> FinPow(X)\<close>  \<open>x\<in>X\<close> 
+            have "HasAmaximum(r,A\<union>{x})" 
+              using FinPow_def Order_ZF_4_L9 by simp }
+          ultimately  have "A \<union> {x} = \<emptyset> \<or> HasAmaximum(r,A \<union> {x})"
+            by auto
+        } thus "\<forall>x\<in>X. (A \<union> {x}) = 0 \<or> HasAmaximum(r,A \<union> {x})"
+          by simp
       qed
     } thus ?thesis by simp
   qed
   moreover note A3
-  ultimately have "B = 0 \<or>  HasAmaximum(r,B)"
+  ultimately have "B = \<emptyset> \<or>  HasAmaximum(r,B)"
     by (rule FinPow_induct)
   with A4 show "HasAmaximum(r,B)" by simp
+qed
+text\<open>For total and transitive relations nonempty finite set has a minimum.\<close>
+
+theorem fin_has_min:
+  assumes "r {is total on} X" "trans(r)" "B \<in> FinPow(X)" "B\<noteq>0"
+  shows "HasAminimum(r,B)"
+proof -
+  from assms(1) have "refl(X,r)" using total_is_refl 
+    by simp
+  with assms(1,2,3) have "\<emptyset>=\<emptyset> \<or> HasAminimum(r,\<emptyset>)" and 
+    "\<forall>A \<in> FinPow(X). A=\<emptyset> \<or> HasAminimum(r,A) \<longrightarrow>
+    (\<forall>x\<in>X. (A \<union> {x}) = \<emptyset> \<or> HasAminimum(r,A \<union> {x}))" and
+    "B \<in> FinPow(X)"
+    using Order_ZF_4_L8(2) Order_ZF_4_L10 
+    unfolding FinPow_def by auto
+  then have "B = \<emptyset> \<or> HasAminimum(r,B)" by (rule FinPow_induct)
+  with assms(4) show "HasAminimum(r,B)" by simp
 qed
 
 text\<open>For linearly ordered nonempty finite sets the 
   maximum is in the set and indeed it is the greatest
   element of the set.\<close>
 
-lemma linord_max_props: assumes A1: "IsLinOrder(X,r)" and
-  A2: "A \<in> FinPow(X)" "A \<noteq> 0"
+lemma linord_min_max_props: 
+  assumes "IsLinOrder(X,r)" "A \<in> FinPow(X)" "A\<noteq>\<emptyset>"
   shows
-  "Maximum(r,A) \<in> A"
-  "Maximum(r,A) \<in> X"
-  "\<forall>a\<in>A. \<langle>a,Maximum(r,A)\<rangle> \<in> r"
+  "Maximum(r,A) \<in> A" "\<forall>a\<in>A. \<langle>a,Maximum(r,A)\<rangle> \<in> r" 
+  "Minimum(r,A) \<in> A" "\<forall>a\<in>A. \<langle>Minimum(r,A),a\<rangle> \<in> r"
+  "Maximum(r,A) \<in> X" "Minimum(r,A) \<in> X"
 proof -
-  from A1 A2 show 
-    "Maximum(r,A) \<in> A" and "\<forall>a\<in>A. \<langle>a,Maximum(r,A)\<rangle> \<in> r"
-    using IsLinOrder_def fin_has_max Order_ZF_4_L3
+  from assms show 
+    "Maximum(r,A) \<in> A" "\<forall>a\<in>A. \<langle>a,Maximum(r,A)\<rangle> \<in> r" and
+    "Minimum(r,A) \<in> A" "\<forall>a\<in>A. \<langle>Minimum(r,A),a\<rangle> \<in> r"
+    using fin_has_max fin_has_min Order_ZF_4_L3 Order_ZF_4_L4
+    unfolding IsLinOrder_def by auto
+  with assms(2,3) show "Maximum(r,A) \<in> X" and "Minimum(r,A) \<in> X"
+    unfolding FinPow_def by auto
+qed
+
+text\<open>Suppose we have a linear relation $r$ on $X$
+  and a subset $B\subseteq X$ with an element $x\in B$ 
+  such that there is only finite number of elements $y$ of $B$
+  for which $\langle y,x\rangle\in r$. Then $B$ has a minimum
+  with the usual properties.\<close>
+
+lemma leq_fin_has_min: 
+  assumes "IsLinOrder(X,r)" "B\<subseteq>X" "x\<in>B" and
+    "{y\<in>B. \<langle>y,x\<rangle> \<in> r} \<in> FinPow(X)"
+  shows 
+    "HasAminimum(r,B)"
+    "Minimum(r,B) \<in> B"
+    "\<forall>y\<in>B. \<langle>Minimum(r,B),y\<rangle> \<in> r"
+proof -
+  let ?A = "{y\<in>B. \<langle>y,x\<rangle> \<in> r}"
+  let ?k = "Minimum(r,?A)"
+  from assms(1,2,3) have "x\<in>X" "x\<in>?A" and
+    "antisym(r)" "trans(r)" "r {is total on} X"
+    using total_is_refl unfolding IsLinOrder_def refl_def 
     by auto
-  with A2 show "Maximum(r,A) \<in> X" using FinPow_def
+  with assms(4) have "HasAminimum(r,?A)" using fin_has_min 
     by auto
+  with \<open>antisym(r)\<close> have "?k\<in>B" "\<langle>?k,x\<rangle>\<in>r" and "\<forall>y\<in>?A. \<langle>?k,y\<rangle>\<in>r" 
+    using Order_ZF_4_L4 by auto
+  { fix y assume "y\<in>B"
+    from \<open>\<forall>y\<in>?A. \<langle>?k,y\<rangle>\<in>r\<close> have "y\<in>?A \<longrightarrow> \<langle>?k,y\<rangle>\<in>r" by simp
+    moreover
+    { assume "y\<notin>?A" 
+      with assms(2) \<open>y\<in>B\<close> \<open>r {is total on} X\<close> \<open>x\<in>X\<close> have "\<langle>x,y\<rangle>\<in>r"
+        unfolding IsTotal_def by auto
+      with \<open>trans(r)\<close> \<open>\<langle>?k,x\<rangle>\<in>r\<close> have "\<langle>?k,y\<rangle>\<in>r"
+        unfolding trans_def by simp
+    }
+    ultimately have "\<langle>?k,y\<rangle>\<in>r" by auto
+  } hence "\<forall>y\<in>B. \<langle>?k,y\<rangle>\<in>r" by simp
+  with \<open>?k\<in>B\<close> show "HasAminimum(r,B)" unfolding HasAminimum_def
+    by auto
+  with \<open>antisym(r)\<close> show "Minimum(r,B) \<in> B" "\<forall>y\<in>B. \<langle>Minimum(r,B),y\<rangle> \<in> r" 
+    using Order_ZF_4_L4 by simp_all
+qed
+
+text\<open>Suppose we have a linear relation $r$ on $X$
+  and a subset $B\subseteq X$ with an element $x\in B$ 
+  such that there is only a finite number of elements $y$ of $B$
+  for which $\langle x,y\rangle\in r$. Then $B$ has a maximum with 
+  the usual properties.\<close>
+
+lemma leq_fin_has_max: 
+  assumes "IsLinOrder(X,r)" "B\<subseteq>X" "x\<in>B" and
+    "{y\<in>B. \<langle>x,y\<rangle> \<in> r} \<in> FinPow(X)"
+  shows 
+    "HasAmaximum(r,B)"
+    "Maximum(r,B) \<in> B"
+    "\<forall>y\<in>B. \<langle>y,Maximum(r,B)\<rangle> \<in> r"
+proof -
+  let ?A = "{y\<in>B. \<langle>x,y\<rangle> \<in> r}"
+  let ?k = "Maximum(r,?A)"
+  from assms(1,2,3) have "x\<in>X" "x\<in>?A" and
+    "antisym(r)" "trans(r)" "r {is total on} X"
+    using total_is_refl unfolding IsLinOrder_def refl_def 
+    by auto
+  with assms(4) have "HasAmaximum(r,?A)" using fin_has_max 
+    by auto
+  with \<open>antisym(r)\<close> have "?k\<in>B" "\<langle>x,?k\<rangle>\<in>r" and "\<forall>y\<in>?A. \<langle>y,?k\<rangle>\<in>r" 
+    using Order_ZF_4_L3 by auto
+  { fix y assume "y\<in>B"
+    from \<open>\<forall>y\<in>?A. \<langle>y,?k\<rangle>\<in>r\<close> have "y\<in>?A \<longrightarrow> \<langle>y,?k\<rangle>\<in>r" by simp
+    moreover
+    { assume "y\<notin>?A" 
+      with assms(2) \<open>y\<in>B\<close> \<open>r {is total on} X\<close> \<open>x\<in>X\<close> have "\<langle>y,x\<rangle>\<in>r"
+        unfolding IsTotal_def by auto
+      with \<open>trans(r)\<close> \<open>\<langle>x,?k\<rangle>\<in>r\<close> have "\<langle>y,?k\<rangle>\<in>r"
+        unfolding trans_def by blast
+    }
+    ultimately have "\<langle>y,?k\<rangle>\<in>r" by auto
+  } hence "\<forall>y\<in>B. \<langle>y,?k\<rangle>\<in>r" by simp
+  with \<open>?k\<in>B\<close> show "HasAmaximum(r,B)" unfolding HasAmaximum_def
+    by auto
+  with \<open>antisym(r)\<close> show "Maximum(r,B) \<in> B" "\<forall>y\<in>B. \<langle>y,Maximum(r,B)\<rangle> \<in> r"
+    using Order_ZF_4_L3 by simp_all
+qed
+
+text\<open>Every nonempty set of natural numbers has a minimum with 
+  the usual  properties.\<close>
+
+theorem subset_nat_has_min: assumes "B\<subseteq>nat" "B\<noteq>\<emptyset>" 
+  shows 
+    "HasAminimum(Le,B)"
+    "Minimum(Le,B) \<in> B"
+    "\<forall>n\<in>B. Minimum(Le,B) \<le> n"
+proof - 
+  from assms(2) obtain n where "n\<in>B" by auto
+  let ?A = "{k\<in>B. \<langle>k,n\<rangle> \<in> Le}"
+  from assms(1) \<open>n\<in>B\<close> have "?A \<subseteq> n #+ 1"
+    using succ_add_one(1) nat_mem_lt(2) unfolding Le_def 
+    by auto
+  then have "?A \<in> FinPow(nat)"
+    using nat_finpow_nat subset_finpow by blast
+  with assms(1) \<open>n\<in>B\<close> show 
+    "HasAminimum(Le,B)" and "Minimum(Le,B) \<in> B" 
+    using NatOrder_ZF_1_L2(4) leq_fin_has_min(1,2) by simp_all
+  from assms(1) \<open>n\<in>B\<close> \<open>?A \<in> FinPow(nat)\<close> have
+    "\<forall>y\<in>B. \<langle>Minimum(Le,B),y\<rangle> \<in> Le"
+    using NatOrder_ZF_1_L2(4) leq_fin_has_min(3) by blast
+  then show "\<forall>n\<in>B. Minimum(Le,B) \<le> n" unfolding Le_def
+    by simp
 qed
 
 text\<open>Every nonempty subset of a natural number has a maximum with expected properties.\<close>
@@ -121,9 +246,9 @@ proof -
   with assms(3) show 
     "Maximum(Le,A) \<in> A"
     "Maximum(Le,A) \<in> nat"
-    using NatOrder_ZF_1_L2(4) linord_max_props(1,2) by simp_all
+    using NatOrder_ZF_1_L2(4) linord_min_max_props(1,5) by simp_all
   from assms(3) \<open>A \<in> FinPow(nat)\<close> have "\<forall>k\<in>A. \<langle>k,Maximum(Le,A)\<rangle> \<in> Le"
-    using linord_max_props NatOrder_ZF_1_L2(4) by blast
+    using linord_min_max_props(2) NatOrder_ZF_1_L2(4) by blast
   then show  "\<forall>k\<in>A. k \<le> Maximum(Le,A)" by simp
 qed
 
@@ -287,7 +412,7 @@ proof -
 	  using fin_rem_point_fin by simp
 	moreover from A1 \<open>C \<in> FinPow(X)\<close> \<open>C \<noteq> 0\<close> have 
 	  "?x \<in> C" and "?x \<in> X - ?A" and "\<forall>a\<in>?A. \<langle>a,?x\<rangle> \<in> r"
-	  using linord_max_props by auto
+	  using linord_min_max_props(1,2,5) by auto
 	moreover note A3
 	ultimately have "P(?A \<union> {?x})" by auto
 	moreover from \<open>?x \<in> C\<close> have "?A \<union> {?x} = C"

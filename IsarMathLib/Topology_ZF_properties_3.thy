@@ -471,7 +471,8 @@ proof
   from N(3) have "N\<noteq>0" by auto
   then have nE:"{m\<in>nat. LeftRayX(nat,Le,m)\<in>N}\<noteq>0" using N(1) by auto
   let ?M="Maximum(Le,{m\<in>nat. LeftRayX(nat,Le,m)\<in>N})"
-  have M:"?M\<in>nat" "LeftRayX(nat,Le,?M)\<in>N" "\<forall>\<xx>\<in>{m\<in>nat. LeftRayX(nat,Le,m)\<in>N}. \<langle>\<xx>,?M\<rangle>\<in>Le" using fin linord_max_props(1,3)[OF Le_directs_nat(1) _ nE]
+  have M:"?M\<in>nat" "LeftRayX(nat,Le,?M)\<in>N" "\<forall>\<xx>\<in>{m\<in>nat. LeftRayX(nat,Le,m)\<in>N}. \<langle>\<xx>,?M\<rangle>\<in>Le" 
+    using fin linord_min_max_props(1,2)[OF Le_directs_nat(1) _ nE]
     unfolding FinPow_def by auto
   {
     fix V \<xx> assume V:"V\<in>N" "\<xx>\<in>V"
@@ -1159,12 +1160,13 @@ proof
     ultimately have fin:"Finite(nat-U)" using subset_Finite by auto
     moreover have lin:"IsLinOrder(nat,Le)" using Le_directs_nat(1) by auto
     then have "IsLinOrder(nat-U,Le)" using ord_linear_subset[of "nat" "Le" "nat-U"] by auto
-    ultimately have r:"nat-U=0 \<or> (\<forall>r\<in>nat-U. \<langle>r,Maximum(Le,nat-U)\<rangle>\<in>Le)" using linord_max_props(3)[of "nat-U""Le""nat-U"]
+    ultimately have r:"nat-U=0 \<or> (\<forall>r\<in>nat-U. \<langle>r,Maximum(Le,nat-U)\<rangle>\<in>Le)" 
+      using linord_min_max_props(2)[of "nat-U""Le""nat-U"]
       unfolding FinPow_def by auto
     {
       assume reg:"\<forall>s\<in>nat. \<exists>r\<in>nat. \<langle>s,r\<rangle>\<in>Le \<and> ?N`r\<notin>U"
       with r have s:"(\<forall>r\<in>nat-U. \<langle>r,Maximum(Le,nat-U)\<rangle>\<in>Le)" "nat-U\<noteq>0" using apply_type[OF f] by auto
-      have "Maximum(Le,nat-U)\<in>nat" using linord_max_props(2)[OF lin _ s(2)] fin
+      have "Maximum(Le,nat-U)\<in>nat" using linord_min_max_props(5)[OF lin _ s(2)] fin
         unfolding FinPow_def by auto
       then have "succ(Maximum(Le,nat-U))\<in>nat" using nat_succI by auto
       with reg have "\<exists>r\<in>nat. \<langle>succ(Maximum(Le,nat-U)),r\<rangle>\<in>Le \<and> ?N`r\<notin>U" by auto

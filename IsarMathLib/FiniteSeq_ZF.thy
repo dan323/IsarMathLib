@@ -2,7 +2,7 @@
     This file is a part of IsarMathLib - 
     a library of formalized mathematics for Isabelle/Isar.
 
-    Copyright (C) 2007-2023  Slawomir Kolodynski
+    Copyright (C) 2007-2026  Slawomir Kolodynski
 
     This program is free software Redistribution and use in source and binary forms, 
     with or without modification, are permitted provided that the following conditions are met:
@@ -1184,5 +1184,65 @@ proof -
   }
   ultimately show ?thesis by blast
 qed
+
+subsection\<open>Chains\<close>
+
+text\<open>In this section we define chains and operations on them. Chains 
+  are essentially lists that are parametrized by the first and last element.\<close>
+
+text\<open>Chains of elements of $X$ connesting $x$ and $y$ are lists (i.e. functions)
+  $c:\{0,1,...,n\}\rightarrow X$ for some $n\in \mathbb{N}$ such that the first element 
+  (i.e. $c(0)$) is $x$ and the last (i.e. $c(n)$) element is $y$. 
+  In informal comments we will say that the chain has length $n$ when it consists of $n+1$
+  elements of $X$.\<close>
+
+definition "Chains(X,n,x,y) \<equiv> {c \<in> n #+ 1\<rightarrow>X. c`(0) = x \<and> c`(n) = y}"
+
+text\<open>One operation that we can do on a chain $x=c_0,c_1,...,c_n=y$ is converting it
+  to a list of pairs $\langle c_i, c_{i+1}\rangle, 0 \leq i < n$. 
+  I don't have a good name for this operation, let's call it \<open>ChainIntervals\<close> for now.\<close>
+
+definition "ChainIntervals(c) \<equiv> {\<langle>i,\<langle>c`(i),c`(i #+ 1)\<rangle>\<rangle>. i \<in> (domain(c) #- 1)}"
+
+text\<open>If $c$ is a chain in $X$ of length $n+1$ then chain intervals of $c$ form a list of 
+  elements of $X\times X$ of length $n$.\<close>
+
+lemma chain_intervals_fun: assumes "n\<in>nat" "c\<in>Chains(X,n,x,y)"
+  shows "domain(c )#- 1 = n" and "ChainIntervals(c):n\<rightarrow>X\<times>X"
+  using assms func1_1_L1 ZF_fun_from_total succ_ineq1(2,3) apply_funtype
+  unfolding Chains_def ChainIntervals_def by auto
+
+text\<open>If $c$ is a chain in $X$ connecting $x$ and $y$ of length $n$ and "k<n" (i.e. $k\in n$)
+  then the value of the $k$'th element of the derived chain intervals is 
+  $\langle c(k),c(k+1)\rangle$.\<close>
+
+lemma chain_intervals_val: assumes "n\<in>nat" "c\<in>Chains(X,n,x,y)" "k\<in>n"
+  shows "ChainIntervals(c)`(k) = \<langle>c`(k),c`(k #+ 1)\<rangle>"
+  using assms chain_intervals_fun(1) ZF_fun_from_tot_val1 
+  unfolding ChainIntervals_def by simp
+
+text\<open>If $c$ is a chain in $X$ connecting $x$ and $y$ of a non-zero length $n$ 
+  then the first component of the first element of the derived chain intervals 
+  is $x$ and the second component of the last element of the derived chain intervals is equal 
+  to $y$.\<close>
+
+lemma chain_intervals_ends: 
+  assumes "n\<in>nat" "n\<noteq>0" "c\<in>Chains(X,n,x,y)"
+  shows 
+    "fst(ChainIntervals(c)`(0)) = x" and 
+    "snd(ChainIntervals(c)`(n #- 1)) = y"
+  using assms empty_in_non_empty nat_subtr_add1 func1_1_L1 nat_subtr_add1 
+    pred_minus_one(2) ZF_fun_from_tot_val1
+  unfolding ChainIntervals_def Chains_def by auto
+
+text\<open>If $c$ is a chain in $X$ connecting $x$ and $y$ of length $n$ and $k$ is a natural number 
+  such that $k+1\in n$ then the second component of the $k$'th element of the derived chain intervals
+  is the same as the first component of the $k+1$'th element of the derived chain intervals.\<close>
+
+lemma chain_inervals_connected:
+  assumes "n\<in>nat" "c\<in>Chains(X,n,x,y)" "k\<in>nat" "k #+ 1 \<in> n"
+  shows "snd(ChainIntervals(c)`(k)) = fst(ChainIntervals(c)`(k #+ 1))"
+  using assms succ_mem_mem(2) chain_intervals_fun(1) ZF_fun_from_tot_val1
+    unfolding ChainIntervals_def by simp
 
 end

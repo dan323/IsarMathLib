@@ -736,7 +736,7 @@ text\<open>A pair $(H,P)$ is a subgroup if $H$ forms a group with the
   see lemma \<open>group0_3_L2\<close>.\<close>
 
 definition
-  "IsAsubgroup(H,P) \<equiv> IsAgroup(H, restrict(P,H\<times>H))"
+  "IsAsubgroup(H,P) \<equiv> IsAgroup(H,restrict(P,H\<times>H))"
 
 text\<open>The group is its own subgroup.\<close>
 
@@ -927,7 +927,7 @@ text\<open>The next theorem states that a nonempty subset of
   taking the inverse is a subgroup of the group.\<close>
 
 theorem (in group0) group0_3_T3:
-  assumes A1: "H\<noteq>0"
+  assumes A1: "H\<noteq>\<emptyset>"
   and A2: "H\<subseteq>G"
   and A3: "H {is closed under} P"
   and A4: "\<forall>x\<in>H. x\<inverse> \<in> H"

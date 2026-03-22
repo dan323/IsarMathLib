@@ -98,6 +98,9 @@ locale reals =
   defines inv_def[simp]: 
     "x\<inverse> \<equiv> GroupInv(\<real>\<^sub>0,restrict(Mul,\<real>\<^sub>0\<times>\<real>\<^sub>0))`(x)"
 
+  fixes half ("\<onehalf>")
+  defines half_def [simp]: "\<onehalf> \<equiv> \<two>\<inverse>"
+
   fixes listsum ("\<Sum> _" 70)
   defines listsum_def[simp]: "\<Sum>s \<equiv> Fold(Add,\<zero>,s)"
 
@@ -116,7 +119,13 @@ locale reals =
   fixes rxn ("\<nat>")
   defines rxn_def [simp]: "\<nat> \<equiv> \<Inter> {N \<in> Pow(\<real>). \<one> \<in> N \<and> (\<forall>n. n\<in>N \<longrightarrow> n\<ra>\<one> \<in> N)}"
 
-text\<open> The assumtions of the \<open>field1\<close> locale (that sets the context for ordered fields) 
+  fixes listprod ("\<Prod> _" 70)
+  defines listprod_def [simp]: "\<Prod>s \<equiv> Fold(Mul,\<one>,s)"
+
+  fixes pow
+  defines pow_def [simp]: "pow(n,x) \<equiv> \<Prod>{\<langle>k,x\<rangle>. k\<in>n}"
+
+text\<open> The assumptions of the \<open>field1\<close> locale (that sets the context for ordered fields) 
   hold in the \<open>reals\<close> locale \<close>
 
 lemma (in reals) field1_is_valid: shows "field1(\<real>, Add, Mul,ROrd)"
@@ -132,11 +141,11 @@ qed
   
 text\<open> We can use theorems proven in the  \<open>field1\<close> locale in the \<open>reals\<close> locale. 
   Note that since the the \<open>field1\<close> locale is an extension of the \<open>ring1\<close> locale, which is an 
-  extension of \<open>ring0\<close> locale , this makes available also the theorems proven in 
+  extension of \<open>ring0\<close> locale, this makes available also the theorems proven in 
   the \<open>ring1\<close> and \<open>ring0\<close> locales. \<close>
 
 sublocale reals < field1 Reals Add Mul realadd realminus realsub realmul 
-  zero one two realsq listsum nat_mult ROrd
+  zero one two realsq listsum nat_mult listprod pow ROrd 
   using field1_is_valid by auto
 
 text\<open> The \<open>group3\<close> locale from the \<open>OrderedGroup_ZF\<close> theory defines context for theorems about 

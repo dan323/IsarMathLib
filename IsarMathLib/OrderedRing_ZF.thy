@@ -2,7 +2,7 @@
     This file is a part of IsarMathLib - 
     a library of formalized mathematics for Isabelle/Isar.
 
-    Copyright (C) 2005, 2006  Slawomir Kolodynski
+    Copyright (C) 2005-2026  Slawomir Kolodynski
 
     This program is free software; Redistribution and use in source and binary forms, 
     with or without modification, are permitted provided that the following conditions are met:
@@ -143,7 +143,7 @@ proof -
     by auto
 qed
 
-text\<open>We can express that $x$ is positive by stating that $0<x$ or by writing that $x$ is an
+text\<open>We can express that $x$ is positive by stating that $0 < x$ or by writing that $x$ is an
   element $R_+$.\<close>
 
 lemma (in  ring1) element_pos: shows "a\<in>R\<^sub>+ \<longleftrightarrow> \<zero>\<ls>a"
@@ -593,6 +593,14 @@ subsection\<open>Positivity in ordered rings\<close>
 
 text\<open>This section is about properties of the set of positive
   elements \<open>R\<^sub>+\<close>.\<close>
+
+text\<open>The set of positive elements is a subset of the ring.\<close>
+
+lemma (in ring1) ordring_pos_subset: shows "R\<^sub>+\<subseteq>R" and "R\<^sub>+\<subseteq>R\<setminus>{\<zero>}"
+proof -
+  have "R\<^sub>+ = PositiveSet(R,A,r)" by simp
+  then show "R\<^sub>+\<subseteq>R" and "R\<^sub>+\<subseteq>R\<setminus>{\<zero>}" unfolding PositiveSet_def by auto
+qed
 
 text\<open>The set of positive elements is closed under ring addition. 
   This is a property of ordered groups, we just reference a theorem

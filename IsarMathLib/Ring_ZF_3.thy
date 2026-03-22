@@ -117,6 +117,12 @@ locale ring_homo =
   fixes rnat_mult (infix "\<nm>" 95)
   defines nat_mult_def [simp]: "n\<nm>x \<equiv> \<Sum>{\<langle>k,x\<rangle>. k\<in>n}"
 
+  fixes listprod ("\<Prod> _" 70)
+  defines listprod_def [simp]: "\<Prod>s \<equiv> Fold(M,\<one>\<^sub>R,s)"
+
+  fixes pow
+  defines pow_def [simp]: "pow(n,x) \<equiv> \<Prod>{\<langle>k,x\<rangle>. k\<in>n}"
+
 
 text\<open>We will write \<open>I\<triangleleft>R\<^sub>o\<close> to denote that $I$ is an ideal
   of the ring $R$. Note that in this notation the \<open>R\<^sub>o\<close> part by itself has no meaning,
@@ -159,6 +165,8 @@ sublocale ring_homo < target_ring:ring0 S U V ringas ringminuss
   ringsubs ringms ringzeros ringones ringtwos ringsqs
   "\<lambda>s. Fold(U,\<zero>\<^sub>S,s)"
   "\<lambda>n x. Fold(U,\<zero>\<^sub>S,{\<langle>k,x\<rangle>. k\<in>n})"
+  "\<lambda>s. Fold(V,\<one>\<^sub>S,s)"
+  "\<lambda>n x. Fold(V,\<one>\<^sub>S,{\<langle>k,x\<rangle>. k\<in>n})"
   using target unfolding ring0_def by auto
 
 text\<open>A ring homomorphism is a homomorphism both with respect to
@@ -451,6 +459,8 @@ sublocale ring2 < quotient_ring: ring0 quot qadd qmul
   "\<zero>\<^sub>I" "\<one>\<^sub>I" "\<two>\<^sub>I" "\<lambda>x. (x\<^sup>2\<^sup>I)"
   "\<lambda>s. Fold(A\<^sub>I, \<zero>\<^sub>I, s)"
   "\<lambda>n x.  Fold(A\<^sub>I, \<zero>\<^sub>I, {\<langle>k, x\<rangle> . k \<in> n})"
+  "\<lambda>s. Fold(M\<^sub>I, \<one>\<^sub>I, s)"
+  "\<lambda>n x.  Fold(M\<^sub>I, \<one>\<^sub>I, {\<langle>k, x\<rangle> . k \<in> n})"
   using quotientBy_is_ring idealAssum neutral_quotient 
     one_quotient two_quotient
   unfolding ring0_def  ideal_radd_def ideal_rmin_def

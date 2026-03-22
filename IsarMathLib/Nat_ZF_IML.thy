@@ -302,6 +302,7 @@ proof -
     using succ_ineq1(2) nat_mem_lt(1) succ_add_one(1) by simp
   with assms(1) show "k #+ 1 \<le> n" using nat_mem_lt(2) by auto
 qed
+  
 
 text\<open>If $n$ is a natural number and $k\leq n$, then k is a natural number.\<close>
 
@@ -323,6 +324,16 @@ lemma nat_less_add_one: assumes "n\<in>nat"
   shows "n < n #+ 1" and "n \<in> n #+ 1"
   using assms nat_into_Ord le_refl_iff leq_mem_succ succ_add_one(1)
   by simp_all
+
+text\<open>If $n$ and $k$ are natural numbers and $k + 1\in n$ then also $k < n$, hence $k\in n$.\<close>
+
+lemma succ_mem_mem: assumes "n\<in>nat" "k\<in>nat" "k #+ 1 \<in> n"
+  shows "k < n" and "k\<in>n"
+proof -
+  from assms(2) have "k\<le>k #+ 1" using leI nat_less_add_one(1) by simp
+  with assms show "k < n" using nat_mem_lt(1)  lt_trans1 by blast
+  with assms(1) show "k\<in>n" using nat_mem_lt(1) by simp
+qed
 
 text\<open>If the successor of a natural number $k$ is an element of the successor
   of $n$ then a similar relations holds for the numbers themselves.\<close>
@@ -451,12 +462,12 @@ qed
 text\<open>For non-zero natural numbers $\textrm{pred}(n) = n-1$.\<close>
 
 lemma pred_minus_one: assumes "n\<in>nat" "n\<noteq>0" 
-  shows "n #- 1 = pred(n)"
+  shows "n #- 1 = pred(n)" and "n #- 1 \<in> n"
 proof -
   from assms obtain k where "n=succ(k)" 
     using Nat_ZF_1_L3 by blast
-  with assms show ?thesis
-    using pred_succ_eq eq_succ_imp_eq_m1 by simp
+  with assms show "n #- 1 = pred(n)" and "n #- 1 \<in> n"
+    using pred_succ_eq eq_succ_imp_eq_m1 pred_succ_mem by simp_all
 qed
 
 text\<open>For natural numbers if $k\in n$ then $k+1 \subseteq n$.\<close>
@@ -509,6 +520,7 @@ proof -
   with assms(1) show "P(n)" by simp
 qed
 
+
 subsection\<open>Simplification rules for addition and subtraction of natural numbers\<close>
 
 text\<open>This section collects useful simplification rules involving addition and subtraction
@@ -535,7 +547,18 @@ proof -
   with \<open>n = m #+ 1\<close> show ?thesis using diff_cancel2 by simp
 qed
 
-text\<open>If $k$ is a natural number then $n+k = n + ((n+k) \#- n))$. \<close>
+text\<open>A special case of \<open>nat_subtr_simpl0\<close> when $k=0$:
+  if $n$ is a non-zero natural number then $(n-1)+1=n$.\<close>
+
+lemma nat_subtr_add1: assumes "n\<in>nat" "n\<noteq>0"
+  shows "(n #- 1) #+ 1 = n"
+proof -
+  from assms have "n #- (0 #+ 1) #+ 1 = n #- 0"
+    using empty_in_non_empty nat_subtr_simpl0 by blast
+  with assms(1) show "(n #- 1) #+ 1 = n" by simp
+qed
+
+text\<open>If $k$ is a natural number then $n+k = n + ((n+k) - n))$. \<close>
 
 lemma nat_subtr_simpl1: assumes "k\<in>nat" 
   shows  "n #+ ((n #+ k) #- n) = n #+ k"

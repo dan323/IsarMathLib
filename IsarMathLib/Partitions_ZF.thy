@@ -291,11 +291,15 @@ text\<open>A special case of pairwise disjoint collection is the sequence of set
   of consecutive elements of sequence of sets that is monotonic in the inclusion order.
   The next lemma shows that if a sequence $\{\mathcal{U}_i\}_{i\in\mathbb{N}}$ of subsets of $X$ 
   is decreasing in the inclusion order on the powerset of $X$ then the sequence 
-  $\{\mathcal{U}_i\setminus \mathcal{U}_{i+1}\}_{i\in\mathbb{N}}$ is pairwise disjoint.\<close>
+  $\{\mathcal{U}_i\setminus \mathcal{U}_{i+1}\}_{i\in\mathbb{N}}$ is pairwise disjoint.
+  In addition, the union $\bigcup_{n\in\mathbb{N}}\mathcal{U}_{n}\setminus \mathcal{U}_{n+1}$ 
+  is the same as $\mathcal{U}_0\setminus \bigcap_{n\in\mathbb{N}} \mathcal{U}_n$.\<close>
 
 lemma decr_pair_disj: 
   assumes "IsDecreasingSeq(Pow(X),InclusionOn(Pow(X)),\<U>)"
-  shows "{\<langle>n,\<U>`(n)\<setminus>\<U>`(n #+ 1)\<rangle>. n\<in>nat} {is pairwise disjoint}"
+  shows 
+    "{\<langle>n,\<U>`(n)\<setminus>\<U>`(n #+ 1)\<rangle>. n\<in>nat} {is pairwise disjoint}"
+    "(\<Union>n\<in>nat. \<U>`(n)\<setminus>\<U>`(n #+ 1)) = \<U>`(0)\<setminus>(\<Inter>n\<in>nat. \<U>`(n))"
 proof -
   let ?r = "InclusionOn(Pow(X))"
   let ?F = "{\<langle>n,\<U>`(n)\<setminus>\<U>`(n #+ 1)\<rangle>. n\<in>nat}"
@@ -325,8 +329,37 @@ proof -
       using  ZF_fun_from_tot_val2 by simp_all
   } hence "\<forall>i\<in>nat. \<forall>j\<in>nat. i\<noteq>j \<longrightarrow> ?F`(i) \<inter> ?F`(j) = \<emptyset>"
     by simp
-  with \<open>domain(?F) = nat\<close> show ?thesis 
+  with \<open>domain(?F) = nat\<close> show 
+    "{\<langle>n,\<U>`(n)\<setminus>\<U>`(n #+ 1)\<rangle>. n\<in>nat} {is pairwise disjoint}" 
     unfolding IsPairwiseDisjoint_def by simp
+  show "(\<Union>n\<in>nat. \<U>`(n)\<setminus>\<U>`(n #+ 1)) = \<U>`(0)\<setminus>(\<Inter>n\<in>nat. \<U>`(n))"
+  proof
+    let ?L = "\<Union>n\<in>nat. \<U>`(n)\<setminus>\<U>`(n #+ 1)"
+    let ?R = "\<U>`(0)\<setminus>(\<Inter>n\<in>nat. \<U>`(n))"
+    { fix x assume "x\<in>?L"
+      then obtain n where "n\<in>nat" and "x\<in>\<U>`(n)\<setminus>\<U>`(n #+ 1)"
+        by auto
+      then have "x\<in>\<U>`(n)" and "0\<le>n" by auto
+      with assms \<open>IsPreorder(Pow(X),?r)\<close> \<open>n\<in>nat\<close> have "\<langle>\<U>`(n),\<U>`(0)\<rangle> \<in> ?r"
+        using decreasing_seq_mono1 by simp
+      with \<open>x\<in>\<U>`(n)\<close> have "x\<in>\<U>`(0)"
+        unfolding InclusionOn_def by auto
+      with \<open>n\<in>nat\<close> \<open>x\<in>\<U>`(n)\<setminus>\<U>`(n #+ 1)\<close> have "x\<in>?R" by auto
+    } thus "?L\<subseteq>?R" by auto
+    { fix x assume "x\<in>?R"
+      then have "x\<in>\<U>`(0)" and "x\<notin>(\<Inter>n\<in>nat. \<U>`(n))" by auto
+      let ?B = "{k\<in>nat. x\<notin>\<U>`(k)}"
+      let ?m = "Minimum(Le,?B)"
+      from \<open>x\<notin>(\<Inter>n\<in>nat. \<U>`(n))\<close> have "?B\<subseteq>nat" and "?B\<noteq>\<emptyset>" by auto
+      then have "?m\<in>nat" "?m\<in>?B" and "\<forall>n\<in>?B. ?m \<le> n"
+        using subset_nat_has_min(2,3) by auto
+      from \<open>x\<in>\<U>`(0)\<close> \<open>?m\<in>?B\<close> have "?m\<noteq>0" by auto
+      with \<open>?m\<in>nat\<close> obtain n where "n\<in>nat" and "?m = n #+ 1"
+        using nat_not0_succ by auto
+      with \<open>\<forall>n\<in>?B. ?m\<le>n\<close> \<open>?m\<in>?B\<close> have "\<exists>n\<in>nat. x \<in> \<U>`(n)\<setminus>\<U>`(n #+ 1)"
+        using nat_less_add_one by auto
+    } thus "?R\<subseteq>?L" by auto
+  qed
 qed
 
 text\<open>If a sequence $\{\mathcal{U}_i\}_{i\in\mathbb{N}}$ of subsets of $X$ 

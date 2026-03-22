@@ -74,7 +74,7 @@ proof(rule func_eq)
   with apply_type[OF restrict_fun[OF monoid0.Group_ZF_2_1_L0A, of R A _ R "End(R,A)\<times>End(R,A)"]] 
   show f2:"EndAdd(R, A) `
         \<langle>{\<langle>xa, M ` \<langle>g\<^sub>1, xa\<rangle>\<rangle> . xa \<in> R}, {\<langle>xa, M ` \<langle>g\<^sub>2, xa\<rangle>\<rangle> . xa \<in> R}\<rangle>:R\<rightarrow>R" 
-    unfolding EndAdd_def End_def using Ring_ZF_1_L1(2) unfolding group0_def monoid0_def IsAgroup_def by blast
+    unfolding EndAdd_def End_def using Ring_ZF_1_L1(3) unfolding group0_def monoid0_def IsAgroup_def by blast
   {
     fix x assume x:"x\<in>R"
     then have " {\<langle>xa, M ` \<langle>A ` \<langle>g\<^sub>1, g\<^sub>2\<rangle>, xa\<rangle>\<rangle> . xa \<in> R} ` x = (g\<^sub>1\<ra>g\<^sub>2)\<cdot>x" using apply_equality[OF _ f1] by auto
@@ -82,7 +82,7 @@ proof(rule func_eq)
     from END have "EndAdd(R, A) ` \<langle>{\<langle>xa, M ` \<langle>g\<^sub>1, xa\<rangle>\<rangle> . xa \<in> R}, {\<langle>xa, M ` \<langle>g\<^sub>2, xa\<rangle>\<rangle> . xa \<in> R}\<rangle> ` x = (A {lifted to function space over} R)`\<langle>{\<langle>xa, M ` \<langle>g\<^sub>1, xa\<rangle>\<rangle> . xa \<in> R}, {\<langle>xa, M ` \<langle>g\<^sub>2, xa\<rangle>\<rangle> . xa \<in> R}\<rangle> ` x" using restrict
       unfolding EndAdd_def by auto
     with END have "EndAdd(R, A) ` \<langle>{\<langle>xa, M ` \<langle>g\<^sub>1, xa\<rangle>\<rangle> . xa \<in> R}, {\<langle>xa, M ` \<langle>g\<^sub>2, xa\<rangle>\<rangle> . xa \<in> R}\<rangle> ` x = A`\<langle>{\<langle>xa, M ` \<langle>g\<^sub>1, xa\<rangle>\<rangle> . xa \<in> R}`x, {\<langle>xa, M ` \<langle>g\<^sub>2, xa\<rangle>\<rangle> . xa \<in> R}`x\<rangle>"
-      using group0.Group_ZF_2_1_L3[OF Ring_ZF_1_L1(2) _ _ _ x] unfolding EndAdd_def End_def by auto
+      using group0.Group_ZF_2_1_L3[OF Ring_ZF_1_L1(3) _ _ _ x] unfolding EndAdd_def End_def by auto
     then have "EndAdd(R, A) ` \<langle>{\<langle>xa, M ` \<langle>g\<^sub>1, xa\<rangle>\<rangle> . xa \<in> R}, {\<langle>xa, M ` \<langle>g\<^sub>2, xa\<rangle>\<rangle> . xa \<in> R}\<rangle> ` x = (g\<^sub>1\<cdot>x)\<ra>(g\<^sub>2\<cdot>x)" using apply_equality x
       END unfolding End_def by auto
     moreover
@@ -158,7 +158,7 @@ text\<open>The previous map is an action\<close>
 theorem(in ring0) action_regular:
   shows "IsAction(R,A,M,R,A,{\<langle>r,{\<langle>s,r\<cdot>s\<rangle>. s\<in>R}\<rangle>. r\<in>R})" unfolding IsAction_def IsRingHomomor_def
   IsMorphism_def apply auto using action_regular_map apply simp prefer 3
-  using group0.end_comp_monoid(2)[OF Ring_ZF_1_L1(2)] action_regular_neut unfolding EndMult_def apply simp
+  using group0.end_comp_monoid(2)[OF Ring_ZF_1_L1(3)] action_regular_neut unfolding EndMult_def apply simp
 proof-
   fix g\<^sub>1 g\<^sub>2 assume as: "g\<^sub>1 \<in> R" "g\<^sub>2 \<in> R"
   have "{\<langle>x, {\<langle>xa, M ` \<langle>x, xa\<rangle>\<rangle> . xa \<in> R}\<rangle> . x \<in> R} ` (A ` \<langle>g\<^sub>1, g\<^sub>2\<rangle>) = {\<langle>xa, M ` \<langle>A ` \<langle>g\<^sub>1, g\<^sub>2\<rangle>, xa\<rangle>\<rangle> . xa \<in> R}"

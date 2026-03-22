@@ -120,6 +120,8 @@ sublocale vector_space0 < vspce_mod: module0 K A M
     ringa ringminus ringsub ringm ringzero ringone ringtwo ringsq 
     "\<lambda>s. Fold(A,\<zero>,s)"
     "\<lambda> n x. Fold(A,\<zero>,{\<langle>k,x\<rangle>. k\<in>n})"
+    "\<lambda>s. Fold(M,\<one>,s)"
+    "\<lambda> n x. Fold(M,\<one>,{\<langle>k,x\<rangle>. k\<in>n})"    
     V "A\<^sub>V"
   using vec_spce_mod by auto
 
