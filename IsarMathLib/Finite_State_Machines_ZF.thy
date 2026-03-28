@@ -1546,7 +1546,7 @@ proof-
     fix s a assume sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>"
     have imgS:"t`\<langle>s,a\<rangle> \<subseteq> S"
     proof-
-      have "\<langle>s,a\<rangle>\<in>S\<times>succ(\<Sigma>)" using sa succI2 by auto
+      have "\<langle>s,a\<rangle>\<in>S\<times>succ(\<Sigma>)" using sa by (auto intro: succI2)
       with tT have "t`\<langle>s,a\<rangle>\<in>Pow(S)" using apply_type by auto
       then show ?thesis by auto
     qed
@@ -1564,7 +1564,19 @@ proof-
     then show ?thesis by auto
   qed
   moreover have "function(EpsilonFreeTransition(S,t,\<Sigma>))"
-    unfolding EpsilonFreeTransition_def[OF fin fsa] function_def by auto
+  proof -
+    {
+      fix x y z
+      assume h1:"\<langle>x,y\<rangle>\<in>EpsilonFreeTransition(S,t,\<Sigma>)"
+         and h2:"\<langle>x,z\<rangle>\<in>EpsilonFreeTransition(S,t,\<Sigma>)"
+      from h1 obtain s a where sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>" "x=\<langle>s,a\<rangle>" "y=\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)"
+        unfolding EpsilonFreeTransition_def[OF fin fsa] by auto
+      from h2 sa(2) have "z=\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)"
+        unfolding EpsilonFreeTransition_def[OF fin fsa] by auto
+      with sa(3) have "y=z" by auto
+    }
+    then show ?thesis unfolding function_def by auto
+  qed
   moreover have "S\<times>\<Sigma> \<subseteq> domain(EpsilonFreeTransition(S,t,\<Sigma>))"
     unfolding EpsilonFreeTransition_def[OF fin fsa] domain_def by auto
   ultimately show ?thesis unfolding Pi_def by auto
