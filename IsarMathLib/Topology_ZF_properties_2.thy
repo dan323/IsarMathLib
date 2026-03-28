@@ -2056,7 +2056,7 @@ happens with locally-$T_2$; can distinguish between spaces other properties cann
 
 subsection\<open>Locally-regular spaces\<close>
 
-text\<open>A topological space is locally-regular if every point has an open neighbourhood
+text\<open>A topological space is locally-regular if every point has a base of neighbourhoods
 whose subspace topology is regular.\<close>
 
 definition
