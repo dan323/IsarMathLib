@@ -1637,7 +1637,7 @@ definition concat_eNFSA_states where
 text\<open>The transition function of the product \<open>\<epsilon>\<close>-NFSA.
 A state \<open>\<langle>s,0\<rangle>\<close> in the first component reads \<open>a\<in>\<Sigma>\<close> by following
 \<open>t\<^sub>1\<close>; on the \<open>\<epsilon>\<close>-symbol (encoded as \<open>\<Sigma>\<close>) it jumps to
-\<open>\<langle>s\<^sub>02,1\<rangle>\<close> when \<open>s\<in>F\<^sub>1\<close>, and stays put otherwise.
+\<open>\<langle>s\<^sub>02,1\<rangle>\<close> when \<open>s\<in>F\<^sub>1\<close>, and has no \<open>\<epsilon>\<close>-move otherwise.
 A state \<open>\<langle>s,1\<rangle>\<close> in the second component reads \<open>a\<in>\<Sigma>\<close> by following
 \<open>t\<^sub>2\<close>, and ignores \<open>\<epsilon>\<close>-steps.\<close>
 
