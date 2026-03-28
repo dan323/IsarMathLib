@@ -1770,8 +1770,44 @@ proof-
       then show ?thesis unfolding function_def by auto
     qed
     moreover have "?SS\<times>succ(\<Sigma>) \<subseteq> domain(?tc)"
-      unfolding concat_eNFSA_states_def concat_eNFSA_trans_def[OF fin A1 A2] domain_def
-      by (auto intro: succI1 succI2)
+    proof
+      fix x assume hx:"x\<in>?SS\<times>succ(\<Sigma>)"
+      then obtain p a where pa:"p\<in>?SS" "a\<in>succ(\<Sigma>)" "x=\<langle>p,a\<rangle>" by auto
+      from pa(1) obtain s where ps:
+        "(s\<in>S1 \<and> p=\<langle>s,0\<rangle>) \<or> (s\<in>S2 \<and> p=\<langle>s,1\<rangle>)"
+        unfolding concat_eNFSA_states_def by auto
+      from pa(2) have acase:"a\<in>\<Sigma> \<or> a=\<Sigma>" using succ_iff by auto
+      from ps show "x\<in>domain(?tc)"
+      proof (elim disjE conjE)
+        assume hs1:"s\<in>S1" and hsp1:"p=\<langle>s,0\<rangle>"
+        from acase show ?thesis
+        proof (elim disjE)
+          assume "a\<in>\<Sigma>"
+          with hs1 hsp1 pa(3) have "\<langle>x,{t1`\<langle>s,a\<rangle>}\<times>{0}\<rangle>\<in>?tc"
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+          then show ?thesis unfolding domain_def by auto
+        next
+          assume "a=\<Sigma>"
+          with hs1 hsp1 pa(3) have "\<langle>x,{v\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}\<rangle>\<in>?tc"
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+          then show ?thesis unfolding domain_def by auto
+        qed
+      next
+        assume hs2:"s\<in>S2" and hsp2:"p=\<langle>s,1\<rangle>"
+        from acase show ?thesis
+        proof (elim disjE)
+          assume "a\<in>\<Sigma>"
+          with hs2 hsp2 pa(3) have "\<langle>x,{t2`\<langle>s,a\<rangle>}\<times>{1}\<rangle>\<in>?tc"
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+          then show ?thesis unfolding domain_def by auto
+        next
+          assume "a=\<Sigma>"
+          with hs2 hsp2 pa(3) have "\<langle>x,0\<rangle>\<in>?tc"
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+          then show ?thesis unfolding domain_def by auto
+        qed
+      qed
+    qed
     ultimately show ?thesis unfolding Pi_def by auto
   qed
   show ?thesis unfolding FullNFSA_def[OF fin]
