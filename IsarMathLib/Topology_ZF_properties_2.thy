@@ -2056,9 +2056,8 @@ happens with locally-$T_2$; can distinguish between spaces other properties cann
 
 subsection\<open>Locally-regular spaces\<close>
 
-text\<open>A topological space is locally-regular if every point has a neighbourhood basis of
-regular open sets, i.e.\ open sets $U$ satisfying $U = \mathrm{int}(\mathrm{cl}(U))$.
-Equivalently, every point has an open neighbourhood whose subspace topology is regular.\<close>
+text\<open>A topological space is locally-regular if every point has a base of neighbourhoods
+whose subspace topology is regular.\<close>
 
 definition
   IsLocallyRegular ("_{is locally-regular}" 70)
@@ -2066,7 +2065,7 @@ definition
 
 text\<open>Since regularity is a hereditary property (it passes to every subspace), we can apply
 the general lemma \<open>her_P_is_loc_P\<close>: a space is locally-regular iff every point merely
-has \emph{some} regular open neighbourhood (rather than a full neighbourhood basis of them).\<close>
+has \emph{some} open neighbourhood whose subspace topology is regular (rather than a full neighbourhood basis of them).\<close>
 
 corollary (in topology0) loc_regular:
   shows "(T{is locally-regular}) \<longleftrightarrow> (\<forall>x\<in>\<Union>T. \<exists>A\<in>T. x\<in>A \<and> (T{restricted to}A){is regular})"
@@ -2087,8 +2086,8 @@ proof-
   show ?thesis unfolding IsLocallyRegular_def by auto
 qed
 
-text\<open>Every regular space is locally-regular: the whole space is itself a regular open
-neighbourhood of each of its points.\<close>
+text\<open>Every regular space is locally-regular: the whole space is itself an open
+neighbourhood whose subspace topology is regular, for each of its points.\<close>
 
 lemma (in topology0) regular_imp_locally_regular:
   assumes "T{is regular}"
