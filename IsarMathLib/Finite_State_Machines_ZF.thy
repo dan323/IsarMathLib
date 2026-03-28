@@ -1546,7 +1546,7 @@ proof-
     fix s a assume sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>"
     have imgS:"t`\<langle>s,a\<rangle> \<subseteq> S"
     proof-
-      have "\<langle>s,a\<rangle>\<in>S\<times>succ(\<Sigma>)" using sa mem_imp_not_eq succI1 by auto
+      have "\<langle>s,a\<rangle>\<in>S\<times>succ(\<Sigma>)" using sa succI2 by auto
       with tT have "t`\<langle>s,a\<rangle>\<in>Pow(S)" using apply_type by auto
       then show ?thesis by auto
     qed
@@ -1647,7 +1647,7 @@ definition concat_eNFSA_trans where
    (S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma> \<Longrightarrow>
    concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>) \<equiv>
      {\<langle>\<langle>\<langle>s,0\<rangle>,a\<rangle>, {t1`\<langle>s,a\<rangle>}\<times>{0}\<rangle>. \<langle>s,a\<rangle>\<in>S1\<times>\<Sigma>}
-     \<union> {\<langle>\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>, if s\<in>F1 then {\<langle>s02,1\<rangle>} else 0\<rangle>. s\<in>S1}
+     \<union> {\<langle>\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>, {x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}\<rangle>. s\<in>S1}
      \<union> {\<langle>\<langle>\<langle>s,1\<rangle>,a\<rangle>, {t2`\<langle>s,a\<rangle>}\<times>{1}\<rangle>. \<langle>s,a\<rangle>\<in>S2\<times>\<Sigma>}
      \<union> {\<langle>\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>, 0\<rangle>. s\<in>S2}"
 
@@ -1670,9 +1670,12 @@ proof-
     using A1 A2 unfolding DFSA_def[OF fin] by auto
   let ?SS = "concat_eNFSA_states(S1,S2)"
   let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  have finS10:"Finite(S1\<times>{0})"
+    using Finite1_L12[of S1 "{0}"] Fin_into_Finite Finite_into_Fin S1fin by auto
+  have finS21:"Finite(S2\<times>{1})"
+    using Finite1_L12[of S2 "{1}"] Fin_into_Finite Finite_into_Fin S2fin by auto
   have finSS:"Finite(?SS)" unfolding concat_eNFSA_states_def
-    using Finite1_L12[of "S1\<times>{0}" "S2\<times>{1}"] Fin_into_Finite Finite_into_Fin
-      S1fin S2fin by auto
+    using finS10 finS21 Finite_Un by auto
   have s01SS:"\<langle>s01,0\<rangle>\<in>?SS" unfolding concat_eNFSA_states_def using s01S by auto
   have F2SS:"F2\<times>{1} \<subseteq> ?SS" unfolding concat_eNFSA_states_def using F2S by auto
   have tc_type:"?tc : ?SS\<times>succ(\<Sigma>) \<rightarrow> Pow(?SS)"
@@ -1688,7 +1691,7 @@ proof-
         proof-
           from xy consider
             (a) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> y={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
-            (b) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> y=(if s\<in>F1 then {\<langle>s02,1\<rangle>} else 0)" |
+            (b) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
             (c) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> y={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
             (d) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> y=0"
             unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
@@ -1700,7 +1703,7 @@ proof-
             with sa(2) show ?thesis unfolding concat_eNFSA_states_def by auto
           next
             case b
-            then obtain s where sb:"s\<in>S1" "y=(if s\<in>F1 then {\<langle>s02,1\<rangle>} else 0)" by auto
+            then obtain s where sb:"s\<in>S1" "y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" by auto
             then show ?thesis using s02S F2S unfolding concat_eNFSA_states_def by auto
           next
             case c
@@ -1759,14 +1762,18 @@ theorem concat_language_regular:
 proof-
   from fin assms(2) obtain S1 s01 t1 F1 where
     A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+    and "L1 = DetFinStateAuto.LanguageDFSA(S1,s01,t1,F1,\<Sigma>)"
+    using IsRegularLanguage_def by auto
+  then have A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
     and L1_eq:"L1 = {i\<in>Lists(\<Sigma>). i <-D (S1,s01,t1,F1){in alphabet}\<Sigma>}"
-    unfolding IsRegularLanguage_def[OF fin]
-    using DetFinStateAuto_def fin by auto
+    using DetFinStateAuto_def fin A1 by auto
   from fin assms(3) obtain S2 s02 t2 F2 where
     A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+    and "L2 = DetFinStateAuto.LanguageDFSA(S2,s02,t2,F2,\<Sigma>)"
+    using IsRegularLanguage_def by auto
+  then have A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
     and L2_eq:"L2 = {i\<in>Lists(\<Sigma>). i <-D (S2,s02,t2,F2){in alphabet}\<Sigma>}"
-    unfolding IsRegularLanguage_def[OF fin]
-    using DetFinStateAuto_def fin by auto
+    using DetFinStateAuto_def fin A2 by auto
   let ?SS = "concat_eNFSA_states(S1,S2)"
   let ?s0 = "\<langle>s01,0\<rangle>"
   let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
