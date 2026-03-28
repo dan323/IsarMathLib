@@ -1686,7 +1686,8 @@ proof-
         fix x y assume xy:"\<langle>x,y\<rangle>\<in>?tc"
         have xy_dom:"x\<in>?SS\<times>succ(\<Sigma>)"
           using xy unfolding concat_eNFSA_trans_def[OF fin A1 A2]
-                             concat_eNFSA_states_def by auto
+                             concat_eNFSA_states_def
+          by (auto intro: succI1 succI2)
         have xy_img:"y\<subseteq>?SS"
         proof-
           from xy consider
@@ -1719,9 +1720,48 @@ proof-
       then show ?thesis by auto
     qed
     moreover have "function(?tc)"
-      unfolding concat_eNFSA_trans_def[OF fin A1 A2] function_def by auto
+    proof -
+      {
+        fix x y z
+        assume h1:"\<langle>x,y\<rangle>\<in>?tc" and h2:"\<langle>x,z\<rangle>\<in>?tc"
+        from h1 consider
+          (a1) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> y={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
+          (b1) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
+          (c1) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> y={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
+          (d1) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> y=0"
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+        then have "y=z"
+        proof cases
+          case a1
+          then obtain s aa where sa:"\<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma>" "x=\<langle>\<langle>s,0\<rangle>,aa\<rangle>" "y={t1`\<langle>s,aa\<rangle>}\<times>{0}" by auto
+          from h2 sa(2) sa(1) show ?thesis
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
+            by (auto simp add: mem_irrefl)
+        next
+          case b1
+          then obtain s where sb:"s\<in>S1" "x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>" "y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" by auto
+          from h2 sb(2) sb(1) show ?thesis
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
+            by (auto simp add: mem_irrefl)
+        next
+          case c1
+          then obtain s aa where sa:"\<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma>" "x=\<langle>\<langle>s,1\<rangle>,aa\<rangle>" "y={t2`\<langle>s,aa\<rangle>}\<times>{1}" by auto
+          from h2 sa(2) sa(1) show ?thesis
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
+            by (auto simp add: mem_irrefl)
+        next
+          case d1
+          then obtain s where sb:"s\<in>S2" "x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>" "y=0" by auto
+          from h2 sb(2) sb(1) show ?thesis
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
+            by (auto simp add: mem_irrefl)
+        qed
+      }
+      then show ?thesis unfolding function_def by auto
+    qed
     moreover have "?SS\<times>succ(\<Sigma>) \<subseteq> domain(?tc)"
-      unfolding concat_eNFSA_states_def concat_eNFSA_trans_def[OF fin A1 A2] domain_def by auto
+      unfolding concat_eNFSA_states_def concat_eNFSA_trans_def[OF fin A1 A2] domain_def
+      by (auto intro: succI1 succI2)
     ultimately show ?thesis unfolding Pi_def by auto
   qed
   show ?thesis unfolding FullNFSA_def[OF fin]
