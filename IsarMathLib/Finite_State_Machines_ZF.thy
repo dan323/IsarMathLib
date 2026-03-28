@@ -1529,7 +1529,7 @@ transition with the \<open>\<epsilon>\<close>-closure of the resulting set of st
 definition EpsilonFreeTransition where
   "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow>
    EpsilonFreeTransition(S,t,\<Sigma>) \<equiv>
-     {\<langle>\<langle>s,a\<rangle>, \<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)\<rangle>. \<langle>s,a\<rangle>\<in>S\<times>\<Sigma>}"
+     {\<langle>\<langle>s,x\<rangle>, \<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,x\<rangle>)\<rangle>. \<langle>s,x\<rangle>\<in>S\<times>\<Sigma>}"
 
 text\<open>The \<open>\<epsilon>\<close>-free transition function is a function
 \<open>S\<times>\<Sigma>\<rightarrow>Pow(S)\<close>.\<close>
@@ -1541,23 +1541,23 @@ lemma EpsilonFreeTransition_type:
 proof-
   have tT:"t:S\<times>succ(\<Sigma>)\<rightarrow>Pow(S)"
     using fsa unfolding FullNFSA_def[OF fin] by auto
-  have subS:"\<And>s a. \<langle>s,a\<rangle>\<in>S\<times>\<Sigma> \<Longrightarrow> \<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>) \<subseteq> S"
+  have subS:"\<And>s x. \<langle>s,x\<rangle>\<in>S\<times>\<Sigma> \<Longrightarrow> \<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,x\<rangle>) \<subseteq> S"
   proof-
-    fix s a assume sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>"
-    have imgS:"t`\<langle>s,a\<rangle> \<subseteq> S"
+    fix s x assume sa:"\<langle>s,x\<rangle>\<in>S\<times>\<Sigma>"
+    have imgS:"t`\<langle>s,x\<rangle> \<subseteq> S"
     proof-
-      have "\<langle>s,a\<rangle>\<in>S\<times>succ(\<Sigma>)" using sa by (auto intro: succI2)
-      with tT have "t`\<langle>s,a\<rangle>\<in>Pow(S)" using apply_type by auto
+      have "\<langle>s,x\<rangle>\<in>S\<times>succ(\<Sigma>)" using sa by (auto intro: succI2)
+      with tT have "t`\<langle>s,x\<rangle>\<in>Pow(S)" using apply_type[of t "S\<times>succ(\<Sigma>)" "\<lambda>_. Pow(S)"] by auto
       then show ?thesis by auto
     qed
-    then show "\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>) \<subseteq> S"
+    then show "\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,x\<rangle>) \<subseteq> S"
       unfolding EpsilonClosure_def[OF fin fsa imgS] by auto
   qed
   have pow:"EpsilonFreeTransition(S,t,\<Sigma>) \<in> Pow((S\<times>\<Sigma>)\<times>Pow(S))"
   proof-
     {
       fix x assume "x\<in>EpsilonFreeTransition(S,t,\<Sigma>)"
-      then obtain s a where sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>" "x=\<langle>\<langle>s,a\<rangle>,\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)\<rangle>"
+      then obtain s y where sa:"\<langle>s,y\<rangle>\<in>S\<times>\<Sigma>" "x=\<langle>\<langle>s,y\<rangle>,\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,y\<rangle>)\<rangle>"
         unfolding EpsilonFreeTransition_def[OF fin fsa] by auto
       from subS[OF sa(1)] sa(1) sa(2) have "x\<in>(S\<times>\<Sigma>)\<times>Pow(S)" by auto
     }
@@ -1569,9 +1569,9 @@ proof-
       fix x y z
       assume h1:"\<langle>x,y\<rangle>\<in>EpsilonFreeTransition(S,t,\<Sigma>)"
          and h2:"\<langle>x,z\<rangle>\<in>EpsilonFreeTransition(S,t,\<Sigma>)"
-      from h1 obtain s a where sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>" "x=\<langle>s,a\<rangle>" "y=\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)"
+      from h1 obtain s q where sa:"\<langle>s,q\<rangle>\<in>S\<times>\<Sigma>" "x=\<langle>s,q\<rangle>" "y=\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,q\<rangle>)"
         unfolding EpsilonFreeTransition_def[OF fin fsa] by auto
-      from h2 sa(2) have "z=\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)"
+      from h2 sa(2) have "z=\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,q\<rangle>)"
         unfolding EpsilonFreeTransition_def[OF fin fsa] by auto
       with sa(3) have "y=z" by auto
     }
@@ -1658,9 +1658,9 @@ definition concat_eNFSA_trans where
    (S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma> \<Longrightarrow>
    (S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma> \<Longrightarrow>
    concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>) \<equiv>
-     {\<langle>\<langle>\<langle>s,0\<rangle>,a\<rangle>, {t1`\<langle>s,a\<rangle>}\<times>{0}\<rangle>. \<langle>s,a\<rangle>\<in>S1\<times>\<Sigma>}
+     {\<langle>\<langle>\<langle>s,0\<rangle>,q\<rangle>, {t1`\<langle>s,q\<rangle>}\<times>{0}\<rangle>. \<langle>s,q\<rangle>\<in>S1\<times>\<Sigma>}
      \<union> {\<langle>\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>, {x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}\<rangle>. s\<in>S1}
-     \<union> {\<langle>\<langle>\<langle>s,1\<rangle>,a\<rangle>, {t2`\<langle>s,a\<rangle>}\<times>{1}\<rangle>. \<langle>s,a\<rangle>\<in>S2\<times>\<Sigma>}
+     \<union> {\<langle>\<langle>\<langle>s,1\<rangle>,q\<rangle>, {t2`\<langle>s,q\<rangle>}\<times>{1}\<rangle>. \<langle>s,q\<rangle>\<in>S2\<times>\<Sigma>}
      \<union> {\<langle>\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>, 0\<rangle>. s\<in>S2}"
 
 text\<open>The product automaton is a valid \<open>\<epsilon>\<close>-NFSA.\<close>
