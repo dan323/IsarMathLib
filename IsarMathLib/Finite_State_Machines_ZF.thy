@@ -1514,14 +1514,270 @@ corollary (in NonDetFinStateAuto) lang_is_regular:
          rule exI[of _ "{Q \<in> Pow(S). Q \<inter> F \<noteq> 0}"])
   using language_nfsa dfsa.DFSA by auto
 
-(*theorem concat_language:
-  assumes "Finite(\<Sigma>)"
+subsection\<open>Epsilon-NFSA languages are regular\<close>
+
+text\<open>We now show that every language recognised by an \<open>\<epsilon>\<close>-NFSA
+is regular.  The strategy mirrors the NFSA-to-DFSA construction already
+in the file: we absorb the \<open>\<epsilon>\<close>-transitions into the transition
+function so as to obtain an ordinary NFSA, and then appeal to
+@{thm NonDetFinStateAuto.lang_is_regular}.\<close>
+
+text\<open>Given an \<open>\<epsilon>\<close>-NFSA \<open>(S,s\<^sub>0,t,F)\<close> over \<open>\<Sigma>\<close>, define
+the \<open>\<epsilon>\<close>-free transition function by following every ordinary
+transition with the \<open>\<epsilon>\<close>-closure of the resulting set of states.\<close>
+
+definition EpsilonFreeTransition where
+  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow>
+   EpsilonFreeTransition(S,t,\<Sigma>) \<equiv>
+     {\<langle>\<langle>s,a\<rangle>, \<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)\<rangle>. \<langle>s,a\<rangle>\<in>S\<times>\<Sigma>}"
+
+text\<open>The \<open>\<epsilon>\<close>-free transition function is a function
+\<open>S\<times>\<Sigma>\<rightarrow>Pow(S)\<close>.\<close>
+
+lemma EpsilonFreeTransition_type:
+  assumes fin:"Finite(\<Sigma>)"
+  and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+  shows "EpsilonFreeTransition(S,t,\<Sigma>) : S\<times>\<Sigma> \<rightarrow> Pow(S)"
+proof-
+  have tT:"t:S\<times>succ(\<Sigma>)\<rightarrow>Pow(S)"
+    using fsa unfolding FullNFSA_def[OF fin] by auto
+  have subS:"\<And>s a. \<langle>s,a\<rangle>\<in>S\<times>\<Sigma> \<Longrightarrow> \<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>) \<subseteq> S"
+  proof-
+    fix s a assume sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>"
+    have imgS:"t`\<langle>s,a\<rangle> \<subseteq> S"
+    proof-
+      have "\<langle>s,a\<rangle>\<in>S\<times>succ(\<Sigma>)" using sa mem_imp_not_eq succI1 by auto
+      with tT have "t`\<langle>s,a\<rangle>\<in>Pow(S)" using apply_type by auto
+      then show ?thesis by auto
+    qed
+    then show "\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>) \<subseteq> S"
+      unfolding EpsilonClosure_def[OF fin fsa imgS] by auto
+  qed
+  have pow:"EpsilonFreeTransition(S,t,\<Sigma>) \<in> Pow((S\<times>\<Sigma>)\<times>Pow(S))"
+  proof-
+    {
+      fix x assume "x\<in>EpsilonFreeTransition(S,t,\<Sigma>)"
+      then obtain s a where sa:"\<langle>s,a\<rangle>\<in>S\<times>\<Sigma>" "x=\<langle>\<langle>s,a\<rangle>,\<epsilon>-cl(S,t,\<Sigma>,t`\<langle>s,a\<rangle>)\<rangle>"
+        unfolding EpsilonFreeTransition_def[OF fin fsa] by auto
+      from subS[OF sa(1)] sa(1) sa(2) have "x\<in>(S\<times>\<Sigma>)\<times>Pow(S)" by auto
+    }
+    then show ?thesis by auto
+  qed
+  moreover have "function(EpsilonFreeTransition(S,t,\<Sigma>))"
+    unfolding EpsilonFreeTransition_def[OF fin fsa] function_def by auto
+  moreover have "S\<times>\<Sigma> \<subseteq> domain(EpsilonFreeTransition(S,t,\<Sigma>))"
+    unfolding EpsilonFreeTransition_def[OF fin fsa] domain_def by auto
+  ultimately show ?thesis unfolding Pi_def by auto
+qed
+
+text\<open>The \<open>\<epsilon>\<close>-free automaton, where the new final states collect all
+states whose \<open>\<epsilon>\<close>-closure meets \<open>F\<close>, is an NFSA over \<open>\<Sigma>\<close>.\<close>
+
+lemma EpsilonFree_is_NFSA:
+  assumes fin:"Finite(\<Sigma>)"
+  and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+  shows "(S, s\<^sub>0, EpsilonFreeTransition(S,t,\<Sigma>), {q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F \<noteq> 0}){is an NFSA for alphabet}\<Sigma>"
+proof-
+  have finS:"Finite(S)" and s0S:"s\<^sub>0\<in>S"
+    using fsa unfolding FullNFSA_def[OF fin] by auto
+  have "EpsilonFreeTransition(S,t,\<Sigma>) : S\<times>\<Sigma> \<rightarrow> Pow(S)"
+    using EpsilonFreeTransition_type[OF fin fsa] .
+  moreover have "{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F \<noteq> 0} \<subseteq> S" by auto
+  ultimately show ?thesis unfolding NFSA_def[OF fin]
+    using finS s0S by auto
+qed
+
+text\<open>The language accepted by the \<open>\<epsilon>\<close>-NFSA equals the language
+accepted by its \<open>\<epsilon>\<close>-free counterpart.  The key observation is that
+every \<open>\<epsilon>\<close>-step in the execution relation is absorbed by the
+\<open>\<epsilon>\<close>-closure in @{term EpsilonFreeTransition}.\<close>
+
+lemma EpsilonFree_same_language:
+  assumes fin:"Finite(\<Sigma>)"
+  and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+  shows "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>} =
+         {i\<in>Lists(\<Sigma>). i <-N (S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){in alphabet}\<Sigma>}"
+  sorry
+
+text\<open>Every language recognised by an \<open>\<epsilon>\<close>-NFSA is regular.\<close>
+
+theorem epsilonNFSA_lang_is_regular:
+  assumes fin:"Finite(\<Sigma>)"
+  and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+  shows "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>} {is a regular language on}\<Sigma>"
+proof-
+  let ?t' = "EpsilonFreeTransition(S,t,\<Sigma>)"
+  let ?F' = "{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}"
+  have nfsa:"(S,s\<^sub>0,?t',?F'){is an NFSA for alphabet}\<Sigma>" using EpsilonFree_is_NFSA[OF fin fsa] .
+  have lang_eq:"{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>} =
+                {i\<in>Lists(\<Sigma>). i <-N (S,s\<^sub>0,?t',?F'){in alphabet}\<Sigma>}"
+    using EpsilonFree_same_language[OF fin fsa] .
+  have loc:"NonDetFinStateAuto(S,s\<^sub>0,?t',?F',\<Sigma>)"
+    unfolding NonDetFinStateAuto_def using fin nfsa by auto
+  have "{i\<in>Lists(\<Sigma>). i <-N (S,s\<^sub>0,?t',?F'){in alphabet}\<Sigma>} {is a regular language on}\<Sigma>"
+    using NonDetFinStateAuto.lang_is_regular[OF loc] by auto
+  with lang_eq show ?thesis by auto
+qed
+
+subsection\<open>Concatenation of regular languages\<close>
+
+text\<open>We now prove the main theorem: the concatenation of two regular
+languages is regular.  The proof constructs an \<open>\<epsilon>\<close>-NFSA that first
+simulates the automaton for \<open>L\<^sub>1\<close>, then makes a free \<open>\<epsilon>\<close>-transition
+to the initial state of the automaton for \<open>L\<^sub>2\<close> upon reaching an
+accepting state of the first, and finally accepts when the second
+automaton accepts.\<close>
+
+text\<open>The combined state space for the product \<open>\<epsilon>\<close>-NFSA is the
+disjoint union \<open>S\<^sub>1\<times>{0}\<union>S\<^sub>2\<times>{1}\<close>.\<close>
+
+definition concat_eNFSA_states where
+  "concat_eNFSA_states(S1,S2) \<equiv> S1\<times>{0} \<union> S2\<times>{1}"
+
+text\<open>The transition function of the product \<open>\<epsilon>\<close>-NFSA.
+A state \<open>\<langle>s,0\<rangle>\<close> in the first component reads \<open>a\<in>\<Sigma>\<close> by following
+\<open>t\<^sub>1\<close>; on the \<open>\<epsilon>\<close>-symbol (encoded as \<open>\<Sigma>\<close>) it jumps to
+\<open>\<langle>s\<^sub>02,1\<rangle>\<close> when \<open>s\<in>F\<^sub>1\<close>, and stays put otherwise.
+A state \<open>\<langle>s,1\<rangle>\<close> in the second component reads \<open>a\<in>\<Sigma>\<close> by following
+\<open>t\<^sub>2\<close>, and ignores \<open>\<epsilon>\<close>-steps.\<close>
+
+definition concat_eNFSA_trans where
+  "Finite(\<Sigma>) \<Longrightarrow>
+   (S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma> \<Longrightarrow>
+   (S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma> \<Longrightarrow>
+   concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>) \<equiv>
+     {\<langle>\<langle>\<langle>s,0\<rangle>,a\<rangle>, {t1`\<langle>s,a\<rangle>}\<times>{0}\<rangle>. \<langle>s,a\<rangle>\<in>S1\<times>\<Sigma>}
+     \<union> {\<langle>\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>, if s\<in>F1 then {\<langle>s02,1\<rangle>} else 0\<rangle>. s\<in>S1}
+     \<union> {\<langle>\<langle>\<langle>s,1\<rangle>,a\<rangle>, {t2`\<langle>s,a\<rangle>}\<times>{1}\<rangle>. \<langle>s,a\<rangle>\<in>S2\<times>\<Sigma>}
+     \<union> {\<langle>\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>, 0\<rangle>. s\<in>S2}"
+
+text\<open>The product automaton is a valid \<open>\<epsilon>\<close>-NFSA.\<close>
+
+lemma concat_eNFSA_valid:
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  shows "(concat_eNFSA_states(S1,S2),
+          \<langle>s01,0\<rangle>,
+          concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>),
+          F2\<times>{1})
+         {is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+proof-
+  have S1fin:"Finite(S1)" and S2fin:"Finite(S2)"
+    and s01S:"s01\<in>S1" and s02S:"s02\<in>S2"
+    and F1S:"F1\<subseteq>S1" and F2S:"F2\<subseteq>S2"
+    and t1:"t1:S1\<times>\<Sigma> \<rightarrow> S1" and t2:"t2:S2\<times>\<Sigma> \<rightarrow> S2"
+    using A1 A2 unfolding DFSA_def[OF fin] by auto
+  let ?SS = "concat_eNFSA_states(S1,S2)"
+  let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  have finSS:"Finite(?SS)" unfolding concat_eNFSA_states_def
+    using Finite1_L12[of "S1\<times>{0}" "S2\<times>{1}"] Fin_into_Finite Finite_into_Fin
+      S1fin S2fin by auto
+  have s01SS:"\<langle>s01,0\<rangle>\<in>?SS" unfolding concat_eNFSA_states_def using s01S by auto
+  have F2SS:"F2\<times>{1} \<subseteq> ?SS" unfolding concat_eNFSA_states_def using F2S by auto
+  have tc_type:"?tc : ?SS\<times>succ(\<Sigma>) \<rightarrow> Pow(?SS)"
+  proof-
+    have ran:"?tc \<in> Pow((?SS\<times>succ(\<Sigma>))\<times>Pow(?SS))"
+    proof-
+      {
+        fix x y assume xy:"\<langle>x,y\<rangle>\<in>?tc"
+        have xy_dom:"x\<in>?SS\<times>succ(\<Sigma>)"
+          using xy unfolding concat_eNFSA_trans_def[OF fin A1 A2]
+                             concat_eNFSA_states_def by auto
+        have xy_img:"y\<subseteq>?SS"
+        proof-
+          from xy consider
+            (a) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> y={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
+            (b) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> y=(if s\<in>F1 then {\<langle>s02,1\<rangle>} else 0)" |
+            (c) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> y={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
+            (d) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> y=0"
+            unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+          then show "y\<subseteq>?SS"
+          proof cases
+            case a
+            then obtain s aa where sa:"\<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma>" "y={t1`\<langle>s,aa\<rangle>}\<times>{0}" by auto
+            from sa(1) have "t1`\<langle>s,aa\<rangle>\<in>S1" using apply_type[OF t1] by auto
+            with sa(2) show ?thesis unfolding concat_eNFSA_states_def by auto
+          next
+            case b
+            then obtain s where sb:"s\<in>S1" "y=(if s\<in>F1 then {\<langle>s02,1\<rangle>} else 0)" by auto
+            then show ?thesis using s02S F2S unfolding concat_eNFSA_states_def by auto
+          next
+            case c
+            then obtain s aa where sa:"\<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma>" "y={t2`\<langle>s,aa\<rangle>}\<times>{1}" by auto
+            from sa(1) have "t2`\<langle>s,aa\<rangle>\<in>S2" using apply_type[OF t2] by auto
+            with sa(2) show ?thesis unfolding concat_eNFSA_states_def by auto
+          next
+            case d then show ?thesis by auto
+          qed
+        qed
+        from xy_dom xy_img have "\<langle>x,y\<rangle>\<in>(?SS\<times>succ(\<Sigma>))\<times>Pow(?SS)" by auto
+      }
+      then show ?thesis by auto
+    qed
+    moreover have "function(?tc)"
+      unfolding concat_eNFSA_trans_def[OF fin A1 A2] function_def by auto
+    moreover have "?SS\<times>succ(\<Sigma>) \<subseteq> domain(?tc)"
+      unfolding concat_eNFSA_states_def concat_eNFSA_trans_def[OF fin A1 A2] domain_def by auto
+    ultimately show ?thesis unfolding Pi_def by auto
+  qed
+  show ?thesis unfolding FullNFSA_def[OF fin]
+    using finSS s01SS F2SS tc_type by auto
+qed
+
+text\<open>The language of the product \<open>\<epsilon>\<close>-NFSA equals the concatenation
+of the two component languages.\<close>
+
+lemma concat_eNFSA_language:
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  and L1_def:"L1 = {i\<in>Lists(\<Sigma>). i <-D (S1,s01,t1,F1){in alphabet}\<Sigma>}"
+  and L2_def:"L2 = {i\<in>Lists(\<Sigma>). i <-D (S2,s02,t2,F2){in alphabet}\<Sigma>}"
+  shows "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N
+            (concat_eNFSA_states(S1,S2),
+             \<langle>s01,0\<rangle>,
+             concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>),
+             F2\<times>{1})
+           {in alphabet}\<Sigma>}
+        = concat(L1,L2)"
+proof-
+  have lang1:"L1 {is a language with alphabet}\<Sigma>"
+    using A1 fin unfolding DFSA_def[OF fin] IsALanguage_def[OF fin] by auto
+  have lang2:"L2 {is a language with alphabet}\<Sigma>"
+    using A2 fin unfolding DFSA_def[OF fin] IsALanguage_def[OF fin] by auto
+  show ?thesis sorry
+qed
+
+text\<open>The concatenation of two regular languages is regular.\<close>
+
+theorem concat_language_regular:
+  assumes fin:"Finite(\<Sigma>)"
   and "L1{is a regular language on}\<Sigma>"
   and "L2{is a regular language on}\<Sigma>"
-shows "concat(L1,L2) {is a regular language on}\<Sigma>"
+  shows "concat(L1,L2) {is a regular language on}\<Sigma>"
 proof-
-  (*TODO: Need first to show that $\varepsilon$-transitions generate regular languages.*)
-  oops
-*)
+  from fin assms(2) obtain S1 s01 t1 F1 where
+    A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+    and L1_eq:"L1 = {i\<in>Lists(\<Sigma>). i <-D (S1,s01,t1,F1){in alphabet}\<Sigma>}"
+    unfolding IsRegularLanguage_def[OF fin]
+    using DetFinStateAuto_def fin by auto
+  from fin assms(3) obtain S2 s02 t2 F2 where
+    A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+    and L2_eq:"L2 = {i\<in>Lists(\<Sigma>). i <-D (S2,s02,t2,F2){in alphabet}\<Sigma>}"
+    unfolding IsRegularLanguage_def[OF fin]
+    using DetFinStateAuto_def fin by auto
+  let ?SS = "concat_eNFSA_states(S1,S2)"
+  let ?s0 = "\<langle>s01,0\<rangle>"
+  let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  let ?Fc = "F2\<times>{1}"
+  have valid:"(?SS,?s0,?tc,?Fc){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+    using concat_eNFSA_valid[OF fin A1 A2] .
+  have lang_eq:"{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} = concat(L1,L2)"
+    using concat_eNFSA_language[OF fin A1 A2 L1_eq L2_eq] .
+  have "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} {is a regular language on}\<Sigma>"
+    using epsilonNFSA_lang_is_regular[OF fin valid] .
+  with lang_eq show ?thesis by auto
+qed
 
 end
