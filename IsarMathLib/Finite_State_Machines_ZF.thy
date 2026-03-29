@@ -1938,9 +1938,9 @@ lemma concat_eNFSA_language:
         = concat(L1,L2)"
 proof-
   have lang1:"L1 {is a language with alphabet}\<Sigma>"
-    using A1 fin unfolding DFSA_def[OF fin] IsALanguage_def[OF fin] by auto
+    using L1_def unfolding IsALanguage_def[OF fin] by auto
   have lang2:"L2 {is a language with alphabet}\<Sigma>"
-    using A2 fin unfolding DFSA_def[OF fin] IsALanguage_def[OF fin] by auto
+    using L2_def unfolding IsALanguage_def[OF fin] by auto
   show ?thesis sorry
 qed
 
