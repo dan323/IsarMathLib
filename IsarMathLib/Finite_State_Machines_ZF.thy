@@ -1693,7 +1693,9 @@ proof-
     have ran:"?tc \<in> Pow((?SS\<times>succ(\<Sigma>))\<times>Pow(?SS))"
     proof-
       {
-        fix x y assume xy:"\<langle>x,y\<rangle>\<in>?tc"
+        fix t assume t:"t\<in>?tc"
+        then obtain x y where tt:"\<langle>x,y\<rangle> = t" unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+        with t have xy:"\<langle>x,y\<rangle>\<in>?tc" by auto
         have xy_dom:"x\<in>?SS\<times>succ(\<Sigma>)"
           using xy unfolding concat_eNFSA_trans_def[OF fin A1 A2]
                              concat_eNFSA_states_def
@@ -1726,6 +1728,7 @@ proof-
           qed
         qed
         from xy_dom xy_img have "\<langle>x,y\<rangle>\<in>(?SS\<times>succ(\<Sigma>))\<times>Pow(?SS)" by auto
+        with tt have "t\<in>(?SS\<times>succ(\<Sigma>))\<times>Pow(?SS)" by auto
       }
       then show ?thesis by auto
     qed
@@ -1739,32 +1742,136 @@ proof-
           (b1) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
           (c1) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> y={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
           (d1) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> y=0"
-          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
         then have "y=z"
         proof cases
-          case a1
+          case a1 
           then obtain s aa where sa:"\<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma>" "x=\<langle>\<langle>s,0\<rangle>,aa\<rangle>" "y={t1`\<langle>s,aa\<rangle>}\<times>{0}" by auto
-          from h2 sa(2) sa(1) show ?thesis
-            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
-            by (auto simp add: mem_irrefl)
+          from h2 consider
+            (a2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> z={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
+            (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
+            (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
+            (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          then show ?thesis
+          proof cases
+            case a2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S1\<times>\<Sigma>" "x=\<langle>\<langle>p,0\<rangle>,q\<rangle>" "z={t1`\<langle>p,q\<rangle>}\<times>{0}" by auto
+            from pq(2) sa(2) have "p=s" "q=aa" by auto
+            with sa(3) pq(3) show ?thesis by auto
+            next
+            case b2
+            then obtain p where pq:"p\<in>S1" "x=\<langle>\<langle>p,0\<rangle>,\<Sigma>\<rangle>" "z={x\<in>{\<langle>s02,1\<rangle>}. p\<in>F1}" by auto
+            from pq(2) sa(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case c2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S2\<times>\<Sigma>" "x=\<langle>\<langle>p,1\<rangle>,q\<rangle>" "z={t2`\<langle>p,q\<rangle>}\<times>{1}" by auto
+            from pq(2) sa(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case d2
+            then obtain p where pq:"p\<in>S2" "x=\<langle>\<langle>p,1\<rangle>,\<Sigma>\<rangle>" "z=0" by auto
+            from pq(2) sa(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+          qed
         next
           case b1
-          then obtain s where sb:"s\<in>S1" "x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>" "y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" by auto
-          from h2 sb(2) sb(1) show ?thesis
-            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
-            by (auto simp add: mem_irrefl)
+          then obtain s where sa:"s\<in>S1" "x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>" "y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" by auto
+          from h2 consider
+            (a2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> z={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
+            (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
+            (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
+            (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          then show ?thesis
+          proof cases
+            case a2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S1\<times>\<Sigma>" "x=\<langle>\<langle>p,0\<rangle>,q\<rangle>" "z={t1`\<langle>p,q\<rangle>}\<times>{0}" by auto
+            from pq(1,2) sa(2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case b2
+            then obtain p where pq:"p\<in>S1" "x=\<langle>\<langle>p,0\<rangle>,\<Sigma>\<rangle>" "z={x\<in>{\<langle>s02,1\<rangle>}. p\<in>F1}" by auto
+            from pq(2) sa(1,2) have "p=s" by auto
+            with sa(3) pq(3) show ?thesis by auto
+            next
+            case c2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S2\<times>\<Sigma>" "x=\<langle>\<langle>p,1\<rangle>,q\<rangle>" "z={t2`\<langle>p,q\<rangle>}\<times>{1}" by auto
+            from pq(2) sa(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case d2
+            then obtain p where pq:"p\<in>S2" "x=\<langle>\<langle>p,1\<rangle>,\<Sigma>\<rangle>" "z=0" by auto
+            from pq(2) sa(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+          qed
         next
           case c1
           then obtain s aa where sa:"\<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma>" "x=\<langle>\<langle>s,1\<rangle>,aa\<rangle>" "y={t2`\<langle>s,aa\<rangle>}\<times>{1}" by auto
-          from h2 sa(2) sa(1) show ?thesis
-            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
-            by (auto simp add: mem_irrefl)
+          from h2 consider
+            (a2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> z={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
+            (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
+            (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
+            (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          then show ?thesis
+          proof cases
+            case a2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S1\<times>\<Sigma>" "x=\<langle>\<langle>p,0\<rangle>,q\<rangle>" "z={t1`\<langle>p,q\<rangle>}\<times>{0}" by auto
+            from pq(1,2) sa(2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case b2
+            then obtain p where pq:"p\<in>S1" "x=\<langle>\<langle>p,0\<rangle>,\<Sigma>\<rangle>" "z={x\<in>{\<langle>s02,1\<rangle>}. p\<in>F1}" by auto
+            from pq(2) sa(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case c2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S2\<times>\<Sigma>" "x=\<langle>\<langle>p,1\<rangle>,q\<rangle>" "z={t2`\<langle>p,q\<rangle>}\<times>{1}" by auto
+            from pq(2) sa(1,2) have "p=s" "q=aa" by auto
+            with sa(3) pq(3) show ?thesis by auto
+            next
+            case d2
+            then obtain p where pq:"p\<in>S2" "x=\<langle>\<langle>p,1\<rangle>,\<Sigma>\<rangle>" "z=0" by auto
+            from pq(2) sa(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+          qed
         next
           case d1
           then obtain s where sb:"s\<in>S2" "x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>" "y=0" by auto
-          from h2 sb(2) sb(1) show ?thesis
-            unfolding concat_eNFSA_trans_def[OF fin A1 A2]
-            by (auto simp add: mem_irrefl)
+          from h2 consider
+            (a2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> z={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
+            (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
+            (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
+            (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          then show ?thesis
+          proof cases
+            case a2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S1\<times>\<Sigma>" "x=\<langle>\<langle>p,0\<rangle>,q\<rangle>" "z={t1`\<langle>p,q\<rangle>}\<times>{0}" by auto
+            from pq(1,2) sb(2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case b2
+            then obtain p where pq:"p\<in>S1" "x=\<langle>\<langle>p,0\<rangle>,\<Sigma>\<rangle>" "z={x\<in>{\<langle>s02,1\<rangle>}. p\<in>F1}" by auto
+            from pq(2) sb(1,2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case c2
+            then obtain p q where pq:"\<langle>p,q\<rangle>\<in>S2\<times>\<Sigma>" "x=\<langle>\<langle>p,1\<rangle>,q\<rangle>" "z={t2`\<langle>p,q\<rangle>}\<times>{1}" by auto
+            from pq(1,2) sb(2) have False using mem_irrefl by auto
+            then show ?thesis by auto
+            next
+            case d2
+            then obtain p where pq:"p\<in>S2" "x=\<langle>\<langle>p,1\<rangle>,\<Sigma>\<rangle>" "z=0" by auto
+            from pq(2) sb(1,2) have "p=s" by auto
+            with sb(3) pq(3) show ?thesis by auto
+            next
+          qed
         qed
       }
       then show ?thesis unfolding function_def by auto
@@ -1772,22 +1879,22 @@ proof-
     moreover have "?SS\<times>succ(\<Sigma>) \<subseteq> domain(?tc)"
     proof
       fix x assume hx:"x\<in>?SS\<times>succ(\<Sigma>)"
-      then obtain p a where pa:"p\<in>?SS" "a\<in>succ(\<Sigma>)" "x=\<langle>p,a\<rangle>" by auto
+      then obtain p aa where pa:"p\<in>?SS" "aa\<in>succ(\<Sigma>)" "x=\<langle>p,aa\<rangle>" by auto
       from pa(1) obtain s where ps:
         "(s\<in>S1 \<and> p=\<langle>s,0\<rangle>) \<or> (s\<in>S2 \<and> p=\<langle>s,1\<rangle>)"
         unfolding concat_eNFSA_states_def by auto
-      from pa(2) have acase:"a\<in>\<Sigma> \<or> a=\<Sigma>" using succ_iff by auto
+      from pa(2) have acase:"aa\<in>\<Sigma> \<or> aa=\<Sigma>" using succ_iff by auto
       from ps show "x\<in>domain(?tc)"
       proof (elim disjE conjE)
         assume hs1:"s\<in>S1" and hsp1:"p=\<langle>s,0\<rangle>"
         from acase show ?thesis
         proof (elim disjE)
-          assume "a\<in>\<Sigma>"
-          with hs1 hsp1 pa(3) have "\<langle>x,{t1`\<langle>s,a\<rangle>}\<times>{0}\<rangle>\<in>?tc"
+          assume "aa\<in>\<Sigma>"
+          with hs1 hsp1 pa(3) have "\<langle>x,{t1`\<langle>s,aa\<rangle>}\<times>{0}\<rangle>\<in>?tc"
             unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis unfolding domain_def by auto
         next
-          assume "a=\<Sigma>"
+          assume "aa=\<Sigma>"
           with hs1 hsp1 pa(3) have "\<langle>x,{v\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}\<rangle>\<in>?tc"
             unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis unfolding domain_def by auto
@@ -1796,12 +1903,12 @@ proof-
         assume hs2:"s\<in>S2" and hsp2:"p=\<langle>s,1\<rangle>"
         from acase show ?thesis
         proof (elim disjE)
-          assume "a\<in>\<Sigma>"
-          with hs2 hsp2 pa(3) have "\<langle>x,{t2`\<langle>s,a\<rangle>}\<times>{1}\<rangle>\<in>?tc"
+          assume "aa\<in>\<Sigma>"
+          with hs2 hsp2 pa(3) have "\<langle>x,{t2`\<langle>s,aa\<rangle>}\<times>{1}\<rangle>\<in>?tc"
             unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis unfolding domain_def by auto
         next
-          assume "a=\<Sigma>"
+          assume "aa=\<Sigma>"
           with hs2 hsp2 pa(3) have "\<langle>x,0\<rangle>\<in>?tc"
             unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis unfolding domain_def by auto
