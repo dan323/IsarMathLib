@@ -1338,7 +1338,7 @@ of the automata without $\varepsilon$-transitions.\<close>
 definition
   FullNFSASatisfy ("_ <-\<epsilon>-N '(_,_,_,_'){in alphabet}_") where
   "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow> 
-  i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> s\<^sub>0\<in>F)"
+  i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> \<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>F\<noteq>0)"
 
 text\<open>We define a locale to create some notation\<close>
 
@@ -1604,12 +1604,27 @@ accepted by its \<open>\<epsilon>\<close>-free counterpart.  The key observation
 every \<open>\<epsilon>\<close>-step in the execution relation is absorbed by the
 \<open>\<epsilon>\<close>-closure in @{term EpsilonFreeTransition}.\<close>
 
-lemma EpsilonFree_same_language:
+lemma EpsilonFree_same_language_1:
   assumes fin:"Finite(\<Sigma>)"
   and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
-  shows "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>} =
-         {i\<in>Lists(\<Sigma>). i <-N (S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){in alphabet}\<Sigma>}"
+  and "i\<in>Lists(\<Sigma>)" "i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>"
+  shows "i <-N (S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){in alphabet}\<Sigma>"
   sorry
+
+lemma EpsilonFree_same_language_2:
+  assumes fin:"Finite(\<Sigma>)"
+  and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+  and "i\<in>Lists(\<Sigma>)" "i <-N (S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){in alphabet}\<Sigma>"
+  shows "i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>"
+  sorry
+
+corollary EpsilonFree_same_language:
+  assumes fin:"Finite(\<Sigma>)"
+  and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+  shows "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>}=
+  {i\<in>Lists(\<Sigma>). i <-N (S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){in alphabet}\<Sigma>}"
+  sorry
+
 
 text\<open>Every language recognised by an \<open>\<epsilon>\<close>-NFSA is regular.\<close>
 
@@ -1935,7 +1950,7 @@ lemma concat_eNFSA_language:
              \<langle>s01,0\<rangle>,
              concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>),
              F2\<times>{1}){in alphabet}\<Sigma>}
-        = concat(L1,L2)"
+        = concat(L2,L1)"
 proof-
   have lang1:"L1 {is a language with alphabet}\<Sigma>"
     using L1_def unfolding IsALanguage_def[OF fin] by auto
@@ -1950,7 +1965,7 @@ theorem concat_language_regular:
   assumes fin:"Finite(\<Sigma>)"
   and "L1{is a regular language on}\<Sigma>"
   and "L2{is a regular language on}\<Sigma>"
-  shows "concat(L1,L2) {is a regular language on}\<Sigma>"
+  shows "concat(L2,L1) {is a regular language on}\<Sigma>"
 proof-
   from fin assms(2) obtain S1 s01 t1 F1 where
     A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
@@ -1972,7 +1987,7 @@ proof-
   let ?Fc = "F2\<times>{1}"
   have valid:"(?SS,?s0,?tc,?Fc){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
     using concat_eNFSA_valid[OF fin A1 A2] .
-  have lang_eq:"{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} = concat(L1,L2)"
+  have lang_eq:"{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} = concat(L2,L1)"
     using concat_eNFSA_language[OF fin A1 A2 L1_eq L2_eq] .
   have "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} {is a regular language on}\<Sigma>"
     using epsilonNFSA_lang_is_regular[OF fin valid] .
