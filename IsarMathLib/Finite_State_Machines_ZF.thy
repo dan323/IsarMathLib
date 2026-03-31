@@ -1619,7 +1619,7 @@ proof-
     then show ?thesis by auto
   qed
   from bS have Bin:"B\<in>Pow(S)" by auto
-  then have Brefl:"\<langle>B,B\<rangle>\<in>?R^*" using fieldR rtrancl_refl by auto
+  then have Brefl:"\<langle>B,B\<rangle>\<in>?R^*" using fieldR rtrancl_refl[of B ?R] by auto
   then have "B\<in>{P\<in>Pow(S). \<langle>B,P\<rangle>\<in>?R^*}" using Bin by auto
   then have "B\<subseteq>\<Union>{P\<in>Pow(S). \<langle>B,P\<rangle>\<in>?R^*}" by auto
   then show ?thesis unfolding EpsilonClosure_def[OF fin fsa bS] by simp
@@ -1650,12 +1650,12 @@ proof-
     then show ?thesis by auto
   qed
   from bS have Bin:"B\<in>Pow(S)" by auto
-  have Brefl:"\<langle>B,B\<rangle>\<in>?R^*" using Bin fieldR rtrancl_refl by auto
+  have Brefl:"\<langle>B,B\<rangle>\<in>?R^*" using Bin fieldR rtrancl_refl[of B ?R] by auto
   {
     fix p assume "p \<in> \<epsilon>-cl(S,t,\<Sigma>,A)"
     then obtain PA where PA:"PA\<in>Pow(S)" "\<langle>A,PA\<rangle>\<in>?R^*" "p\<in>PA"
       using Adef by auto
-    have goal:"p \<in> \<epsilon>-cl(S,t,\<Sigma>,B)"
+    have "\<forall>pp\<in>PA. pp\<in>\<epsilon>-cl(S,t,\<Sigma>,B)"
     proof(rule rtrancl_induct[of A PA ?R "\<lambda>Q. \<forall>pp\<in>Q. pp\<in>\<epsilon>-cl(S,t,\<Sigma>,B)"])
       show "\<langle>A,PA\<rangle>\<in>?R^*" using PA(2) .
       show "\<forall>pp\<in>A. pp\<in>\<epsilon>-cl(S,t,\<Sigma>,B)"
@@ -1683,7 +1683,8 @@ proof-
         with step1 \<open>?P1\<in>Pow(S)\<close> have "pp\<in>\<Union>{P\<in>Pow(S). \<langle>B,P\<rangle>\<in>?R^*}" by auto
         then show "pp\<in>\<epsilon>-cl(S,t,\<Sigma>,B)" using Bdef by simp
       qed
-    qed [OF PA(3)]
+    qed
+    then have goal:"p \<in> \<epsilon>-cl(S,t,\<Sigma>,B)" using PA(3) by auto
   }
   then show ?thesis by auto
 qed
@@ -1780,8 +1781,7 @@ lemma epsilon_free_rel_eq:
 proof-
   have tT:"t:S\<times>succ(\<Sigma>)\<rightarrow>Pow(S)"
     using fsa unfolding FullNFSA_def[OF fin] by auto
-  let ?nfsa = "(S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0})"
-  have nfsa:"?nfsa{is an NFSA for alphabet}\<Sigma>" using EpsilonFree_is_NFSA[OF fin fsa] .
+  have nfsa:"(S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){is an NFSA for alphabet}\<Sigma>" using EpsilonFree_is_NFSA[OF fin fsa] .
   {
     fix w Q assume wQ:"\<langle>w,Q\<rangle>\<in>NELists(\<Sigma>)\<times>Pow(S)"
     then have wNE:"w\<in>NELists(\<Sigma>)" and QS:"Q\<in>Pow(S)" by auto
@@ -1820,7 +1820,7 @@ proof-
   }
   then show ?thesis
     unfolding FullNFSAExecutionRelation_def[OF fin fsa]
-              NFSAExecutionRelation_def[OF fin nfsa]
+            using  NFSAExecutionRelation_def[OF fin nfsa]
     by auto
 qed
 
@@ -1843,7 +1843,7 @@ proof-
   have rel_eq:"{reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma> =
                {reduce N-relation}(S,s\<^sub>0,?t'){in alphabet}\<Sigma>"
     using epsilon_free_rel_eq[OF fin fsa] .
-  from assms(4) unfolding FullNFSASatisfy_def[OF fin fsa assms(3)]
+  from assms(4) show ?thesis unfolding FullNFSASatisfy_def[OF fin fsa assms(3)]
   proof(elim disjE exE conjE)
     assume "i=0" and ecl:"(\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0}))\<inter>F\<noteq>0"
     from s0S have "{s\<^sub>0}\<subseteq>S" by auto
@@ -1866,17 +1866,13 @@ proof-
       with g(2) have "g\<in>?F'" using gS by auto
       from g(1) have "g\<in>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})" by auto
       with s0S have "\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>?F'\<noteq>0" using \<open>g\<in>?F'\<close> by auto
-      then show "s\<^sub>0\<in>?F'"
-      proof-
-        have "{s\<^sub>0}\<subseteq>S" using s0S by auto
-        from epsilon_cl_refl_sub[OF fin fsa this] have "s\<^sub>0\<in>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})" by auto
-        with ecl \<open>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>?F'\<noteq>0\<close> show ?thesis by auto
-      qed
+      then show "s\<^sub>0\<in>?F'" using ecl s0S by auto
     qed
     with \<open>i=0\<close> show ?thesis
       unfolding NFSASatisfy_def[OF fin nfsa assms(3)] by auto
   next
-    fix q assume q:"q\<in>Pow(S)" "q\<inter>F\<noteq>0" "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*"
+    assume "\<exists>q\<in>Pow(S). q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*"
+    then obtain q where q:"q\<in>Pow(S)" "q\<inter>F\<noteq>0" "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*" by auto
     from rel_eq q(3) have "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce N-relation}(S,s\<^sub>0,?t'){in alphabet}\<Sigma>)^*" by auto
     moreover from q(1,2) have "q\<inter>?F'\<noteq>0"
     proof-
@@ -1904,7 +1900,7 @@ corollary EpsilonFree_same_language:
   and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
   shows "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>}=
   {i\<in>Lists(\<Sigma>). i <-N (S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){in alphabet}\<Sigma>}"
-  sorry
+  using EpsilonFree_same_language_2[OF assms] EpsilonFree_same_language_1[OF assms] by auto
 
 
 text\<open>Every language recognised by an \<open>\<epsilon>\<close>-NFSA is regular.\<close>
