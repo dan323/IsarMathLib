@@ -1926,12 +1926,15 @@ proof-
         have tT:"t:S\<times>succ(\<Sigma>)\<rightarrow>Pow(S)" using fsa unfolding FullNFSA_def[OF fin] by auto
         have unionS:"\<Union>{t`\<langle>ss,Last(W)\<rangle>. ss\<in>QQ} \<in> Pow(S)"
         proof
-          fix x assume "x \<in> \<Union>{t`\<langle>ss,Last(W)\<rangle>. ss\<in>QQ}"
-          then obtain ss where ss:"ss\<in>QQ" "x\<in>t`\<langle>ss,Last(W)\<rangle>" by auto
-          from WQQ(2) ss(1) have ssS:"ss\<in>S" by auto
-          have lastSig:"Last(W)\<in>succ(\<Sigma>)" using last_type[OF WQQ(1)] by auto
-          have "\<langle>ss,Last(W)\<rangle>\<in>S\<times>succ(\<Sigma>)" using ssS lastSig by auto
-          from apply_type[OF tT this] ss(2) show "x\<in>S" by auto
+          {
+            fix x assume "x \<in> \<Union>{t`\<langle>ss,Last(W)\<rangle>. ss\<in>QQ}"
+            then obtain ss where ss:"ss\<in>QQ" "x\<in>t`\<langle>ss,Last(W)\<rangle>" by auto
+            from WQQ(2) ss(1) have ssS:"ss\<in>S" by auto
+            have lastSig:"Last(W)\<in>succ(\<Sigma>)" using last_type[OF WQQ(1)] by auto
+            have "\<langle>ss,Last(W)\<rangle>\<in>S\<times>succ(\<Sigma>)" using ssS lastSig by auto
+            from apply_type[OF tT this] ss(2) have "x\<in>S" by auto
+          }
+          then show "(\<Union>ss\<in>QQ. t ` \<langle>ss, Last(W)\<rangle>) \<subseteq> S" by auto
         qed
         from epsilon_cl_idem[OF fin fsa unionS] WQQ(3)
           have clq:"\<epsilon>-cl(S,t,\<Sigma>,q) = q" by auto
@@ -1984,6 +1987,7 @@ proof-
     ultimately show ?thesis
       unfolding FullNFSASatisfy_def[OF fin fsa assms(3)] using q(1) by auto
   qed
+qed
 
 corollary EpsilonFree_same_language:
   assumes fin:"Finite(\<Sigma>)"
