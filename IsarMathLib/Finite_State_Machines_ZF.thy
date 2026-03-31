@@ -1338,7 +1338,7 @@ of the automata without $\varepsilon$-transitions.\<close>
 definition
   FullNFSASatisfy ("_ <-\<epsilon>-N '(_,_,_,_'){in alphabet}_") where
   "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow> 
-  i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> \<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>F\<noteq>0)"
+  i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (\<epsilon>-cl(S,t,\<Sigma>,q)\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> \<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>F\<noteq>0)"
 
 text\<open>We define a locale to create some notation\<close>
 
@@ -1756,6 +1756,17 @@ proof-
   qed
 qed
 
+text\<open>The $\varepsilon$-closure is idempotent:
+for $C \in \mathrm{Pow}(S)$ we have
+$\varepsilon$-cl$(S,t,\Sigma,\varepsilon$-cl$(S,t,\Sigma, C) = \varepsilon$-cl$(S,t,\Sigma,C)$.\<close>
+
+lemma epsilon_cl_idem:
+  assumes fin:"Finite(\<Sigma>)"
+  and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+  and cS:"q\<in>Pow(S)"
+  shows "\<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q)) = \<epsilon>-cl(S,t,\<Sigma>,q)"
+oops
+
 text\<open>The value of @{term EpsilonFreeTransition} at $\langle s,x\rangle$ is the
 $\varepsilon$-closure of $t\,`\langle s,x\rangle$.\<close>
 
@@ -1848,36 +1859,16 @@ proof-
     assume "i=0" and ecl:"(\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0}))\<inter>F\<noteq>0"
     from s0S have "{s\<^sub>0}\<subseteq>S" by auto
     from epsilon_cl_refl_sub[OF fin fsa this] have "s\<^sub>0\<in>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})" by auto
-    with ecl obtain f where f:"f\<in>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})" "f\<in>F" by auto
-    from fsa have FS:"F\<subseteq>S" unfolding FullNFSA_def[OF fin] by auto
-    from f(2) FS have fS:"f\<in>S" by auto
-    from f(1) have "f\<in>\<epsilon>-cl(S,t,\<Sigma>,{f})"
-    proof-
-      have "{f}\<subseteq>S" using fS by auto
-      from epsilon_cl_refl_sub[OF fin fsa this] show ?thesis by auto
-    qed
-    with f(2) have "f\<in>?F'" using fS by auto
-    then have "s\<^sub>0\<in>?F'" using s0S \<open>s\<^sub>0\<in>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<close> f(2) fS
-    proof-
-      from ecl obtain g where g:"g\<in>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})" "g\<in>F" by auto
-      from g(2) FS have gS:"g\<in>S" by auto
-      have "{g}\<subseteq>S" using gS by auto
-      from epsilon_cl_refl_sub[OF fin fsa this] have "g\<in>\<epsilon>-cl(S,t,\<Sigma>,{g})" by auto
-      with g(2) have "g\<in>?F'" using gS by auto
-      from g(1) have "g\<in>\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})" by auto
-      with s0S have "\<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>?F'\<noteq>0" using \<open>g\<in>?F'\<close> by auto
-      then show "s\<^sub>0\<in>?F'" using ecl s0S by auto
-    qed
-    with \<open>i=0\<close> show ?thesis
+    with \<open>i=0\<close> s0S ecl show ?thesis
       unfolding NFSASatisfy_def[OF fin nfsa assms(3)] by auto
   next
-    assume "\<exists>q\<in>Pow(S). q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*"
-    then obtain q where q:"q\<in>Pow(S)" "q\<inter>F\<noteq>0" "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*" by auto
+    assume "\<exists>q\<in>Pow(S).  \<epsilon>-cl(S, t, \<Sigma>, q)\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*"
+    then obtain q where q:"q\<in>Pow(S)" " \<epsilon>-cl(S, t, \<Sigma>, q)\<inter>F\<noteq>0" "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*" by auto
     from rel_eq q(3) have "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce N-relation}(S,s\<^sub>0,?t'){in alphabet}\<Sigma>)^*" by auto
     moreover from q(1,2) have "q\<inter>?F'\<noteq>0"
     proof-
-      from q(2) obtain f where f:"f\<in>q" "f\<in>F" by auto
-      from f(1) q(1) have fS:"f\<in>S" by auto
+      from q(2) obtain f where f:"f\<in> \<epsilon>-cl(S, t, \<Sigma>, q)" "f\<in>F" by auto
+      from f(1) q(1) have fS:"f\<in>S" using EpsilonClosure_def[OF assms(1,2), of q] by auto
       have "{f}\<subseteq>S" using fS by auto
       from epsilon_cl_refl_sub[OF fin fsa this] have "f\<in>\<epsilon>-cl(S,t,\<Sigma>,{f})" by auto
       with f(2) have "f\<in>?F'" using fS by auto
@@ -1893,7 +1884,36 @@ lemma EpsilonFree_same_language_2:
   and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
   and "i\<in>Lists(\<Sigma>)" "i <-N (S,s\<^sub>0,EpsilonFreeTransition(S,t,\<Sigma>),{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}){in alphabet}\<Sigma>"
   shows "i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>"
-  sorry
+proof-
+  have s0S:"s\<^sub>0\<in>S" using fsa unfolding FullNFSA_def[OF fin] by auto
+  let ?t' = "EpsilonFreeTransition(S,t,\<Sigma>)"
+  let ?F' = "{q\<in>S. \<epsilon>-cl(S,t,\<Sigma>,{q})\<inter>F\<noteq>0}"
+  have nfsa:"(S,s\<^sub>0,?t',?F'){is an NFSA for alphabet}\<Sigma>"
+    using EpsilonFree_is_NFSA[OF fin fsa] .
+  have rel_eq:"{reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma> =
+               {reduce N-relation}(S,s\<^sub>0,?t'){in alphabet}\<Sigma>"
+    using epsilon_free_rel_eq[OF fin fsa] .
+  from assms(4) show ?thesis unfolding NFSASatisfy_def[OF fin nfsa assms(3)]
+  proof(elim disjE exE conjE)
+    assume "i=0" "s\<^sub>0\<in>?F'"
+    then show ?thesis unfolding FullNFSASatisfy_def[OF fin fsa assms(3)] by auto
+  next
+    assume "\<exists>q\<in>Pow(S). q\<inter>?F'\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce N-relation}(S,s\<^sub>0,?t'){in alphabet}\<Sigma>)^*"
+    then obtain q where q:"q\<in>Pow(S)" "q\<inter>?F'\<noteq>0" "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce N-relation}(S,s\<^sub>0,?t'){in alphabet}\<Sigma>)^*" by auto
+    from rel_eq q(3) have "\<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*" by auto
+    moreover from q(1,2) have "q\<inter>F\<noteq>0"
+    proof-
+      from q(2) obtain f where f:"f\<in>q" "f\<in>?F'" by auto
+      from f(2) have "f\<in>S" "\<epsilon>-cl(S, t, \<Sigma>,{f})\<inter>F\<noteq>0" by auto
+      from f(1) q(1) have fS:"f\<in>S" by auto
+      have "{f}\<subseteq>S" using fS by auto
+      from epsilon_cl_refl_sub[OF fin fsa this] have "f\<in>\<epsilon>-cl(S,t,\<Sigma>,{f})" by auto
+      with f(2) have "f\<in>?F'" using fS by auto
+      with f(1) q(1) show ?thesis by auto
+    qed
+    ultimately show ?thesis
+      unfolding FullNFSASatisfy_def[OF fin fsa assms(3)] using q(1) by auto
+  qed
 
 corollary EpsilonFree_same_language:
   assumes fin:"Finite(\<Sigma>)"
