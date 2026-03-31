@@ -1765,7 +1765,48 @@ lemma epsilon_cl_idem:
   and fsa:"(S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
   and cS:"q\<in>Pow(S)"
   shows "\<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q)) = \<epsilon>-cl(S,t,\<Sigma>,q)"
-oops
+proof(rule equalityI)
+  have qS:"q\<subseteq>S" using cS by auto
+  have clS:"\<epsilon>-cl(S,t,\<Sigma>,q)\<subseteq>S"
+    unfolding EpsilonClosure_def[OF fin fsa qS] by auto
+  from epsilon_cl_refl_sub[OF fin fsa clS]
+  show "\<epsilon>-cl(S,t,\<Sigma>,q) \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q))" .
+  show "\<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q)) \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,q)"
+  proof
+    fix p assume "p \<in> \<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q))"
+    let ?R = "{\<langle>Q,{s\<in>S. \<exists>r\<in>Q. t`\<langle>r,\<Sigma>\<rangle> = s}\<rangle>. Q\<in>Pow(S)}"
+    have cldef:"\<epsilon>-cl(S,t,\<Sigma>,q) = \<Union>{P\<in>Pow(S). \<langle>q,P\<rangle>\<in>?R^*}"
+      unfolding EpsilonClosure_def[OF fin fsa qS] by simp
+    have icldef:"\<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q)) = \<Union>{P\<in>Pow(S). \<langle>\<epsilon>-cl(S,t,\<Sigma>,q),P\<rangle>\<in>?R^*}"
+      unfolding EpsilonClosure_def[OF fin fsa clS] by simp
+    from \<open>p \<in> \<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q))\<close>
+    obtain P where P:"P\<in>Pow(S)" "\<langle>\<epsilon>-cl(S,t,\<Sigma>,q),P\<rangle>\<in>?R^*" "p\<in>P"
+      using icldef by auto
+    have "P \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,q)"
+    proof(rule rtrancl_induct[of "\<epsilon>-cl(S,t,\<Sigma>,q)" P ?R "\<lambda>Q. Q \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,q)"])
+      show "\<langle>\<epsilon>-cl(S,t,\<Sigma>,q),P\<rangle>\<in>?R^*" using P(2) .
+      show "\<epsilon>-cl(S,t,\<Sigma>,q) \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,q)" by auto
+      fix V W
+      assume IH:"V \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,q)" and step:"\<langle>V,W\<rangle>\<in>?R"
+      show "W \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,q)"
+      proof
+        fix pp assume "pp\<in>W"
+        from step obtain V0 where V0:"V0\<in>Pow(S)" "V=V0"
+          "W={s\<in>S. \<exists>r\<in>V0. t`\<langle>r,\<Sigma>\<rangle>=s}" by auto
+        with \<open>pp\<in>W\<close> obtain v where v:"v\<in>V" "t`\<langle>v,\<Sigma>\<rangle>=pp" "pp\<in>S" by auto
+        from v(1) IH obtain P0 where P0:"P0\<in>Pow(S)" "\<langle>q,P0\<rangle>\<in>?R^*" "v\<in>P0"
+          using cldef by auto
+        let ?P1 = "{s\<in>S. \<exists>r\<in>P0. t`\<langle>r,\<Sigma>\<rangle>=s}"
+        have "\<langle>P0,?P1\<rangle>\<in>?R" using P0(1) by auto
+        with P0(2) have "\<langle>q,?P1\<rangle>\<in>?R^*" using rtrancl_into_rtrancl by auto
+        moreover have "?P1\<in>Pow(S)" by auto
+        moreover from v(2,3) P0(3) have "pp\<in>?P1" by auto
+        ultimately show "pp\<in>\<epsilon>-cl(S,t,\<Sigma>,q)" using cldef by auto
+      qed
+    qed
+    with P(3) show "p \<in> \<epsilon>-cl(S,t,\<Sigma>,q)" by auto
+  qed
+qed
 
 text\<open>The value of @{term EpsilonFreeTransition} at $\langle s,x\rangle$ is the
 $\varepsilon$-closure of $t\,`\langle s,x\rangle$.\<close>
