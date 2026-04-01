@@ -2307,6 +2307,52 @@ proof-
     using finSS s01SS F2SS tc_type by auto
 qed
 
+text\<open>The $\varepsilon$-transition of a component-0 state $\langle s,0\rangle$
+is $\{\langle s_{02},1\rangle\}$ when $s\in F_1$, and empty otherwise.\<close>
+
+lemma concat_eNFSA_eps_comp0:
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  and sS1:"s\<in>S1"
+  shows "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)`\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>
+         = {x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}"
+proof-
+  let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  let ?SS = "concat_eNFSA_states(S1,S2)"
+  have fsa:"(?SS,\<langle>s01,0\<rangle>,?tc,F2\<times>{1}){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+    using concat_eNFSA_valid[OF fin A1 A2] .
+  have tT:"?tc : ?SS\<times>succ(\<Sigma>) \<rightarrow> Pow(?SS)"
+    using fsa unfolding FullNFSA_def[OF fin] by auto
+  have pair:"\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<in> ?SS\<times>succ(\<Sigma>)"
+    using sS1 unfolding concat_eNFSA_states_def by (auto intro: succI1)
+  have "\<langle>\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>, {x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}\<rangle> \<in> ?tc"
+    unfolding concat_eNFSA_trans_def[OF fin A1 A2] using sS1 by auto
+  then show ?thesis using apply_equality[OF _ tT, of "\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle>"] pair by auto
+qed
+
+text\<open>The $\varepsilon$-transition of a component-1 state $\langle s,1\rangle$ is empty.\<close>
+
+lemma concat_eNFSA_eps_comp1:
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  and sS2:"s\<in>S2"
+  shows "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)`\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> = 0"
+proof-
+  let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  let ?SS = "concat_eNFSA_states(S1,S2)"
+  have fsa:"(?SS,\<langle>s01,0\<rangle>,?tc,F2\<times>{1}){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+    using concat_eNFSA_valid[OF fin A1 A2] .
+  have tT:"?tc : ?SS\<times>succ(\<Sigma>) \<rightarrow> Pow(?SS)"
+    using fsa unfolding FullNFSA_def[OF fin] by auto
+  have pair:"\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<in> ?SS\<times>succ(\<Sigma>)"
+    using sS2 unfolding concat_eNFSA_states_def by (auto intro: succI1)
+  have "\<langle>\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>, 0\<rangle> \<in> ?tc"
+    unfolding concat_eNFSA_trans_def[OF fin A1 A2] using sS2 by auto
+  then show ?thesis using apply_equality[OF _ tT, of "\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>"] pair by auto
+qed
+
 text\<open>The language of the product \<open>\<epsilon>\<close>-NFSA equals the concatenation
 of the two component languages.\<close>
 
