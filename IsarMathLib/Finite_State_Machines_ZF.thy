@@ -2321,7 +2321,7 @@ lemma concat_eNFSA_language:
              \<langle>s01,0\<rangle>,
              concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>),
              F2\<times>{1}){in alphabet}\<Sigma>}
-        = concat(L1,L2)"
+        = concat(L2,L1)"
 proof-
   have lang1:"L1 {is a language with alphabet}\<Sigma>"
     using L1_def unfolding IsALanguage_def[OF fin] by auto
@@ -2365,14 +2365,17 @@ proof-
   then have A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
     and L2_eq:"L2 = {i\<in>Lists(\<Sigma>). i <-D (S2,s02,t2,F2){in alphabet}\<Sigma>}"
     using DetFinStateAuto_def fin A2 by auto
-  let ?SS = "concat_eNFSA_states(S1,S2)"
-  let ?s0 = "\<langle>s01,0\<rangle>"
-  let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
-  let ?Fc = "F2\<times>{1}"
+  -- "Apply the language lemma with A2 in the first slot and A1 in the second,
+       so that the automaton suffix-component is A2 (accepts L2) and
+       prefix-component is A1 (accepts L1), giving language = concat(L1,L2)."
+  let ?SS = "concat_eNFSA_states(S2,S1)"
+  let ?s0 = "\<langle>s02,0\<rangle>"
+  let ?tc = "concat_eNFSA_trans(S2,s02,t2,F2,S1,s01,t1,F1,\<Sigma>)"
+  let ?Fc = "F1\<times>{1}"
   have valid:"(?SS,?s0,?tc,?Fc){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
-    using concat_eNFSA_valid[OF fin A1 A2] .
+    using concat_eNFSA_valid[OF fin A2 A1] .
   have lang_eq:"{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} = concat(L1,L2)"
-    using concat_eNFSA_language[OF fin A1 A2 L1_eq L2_eq] .
+    using concat_eNFSA_language[OF fin A2 A1 L2_eq L1_eq] .
   have "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} {is a regular language on}\<Sigma>"
     using epsilonNFSA_lang_is_regular[OF fin valid] .
   with lang_eq show ?thesis by auto
