@@ -2321,12 +2321,25 @@ lemma concat_eNFSA_language:
              \<langle>s01,0\<rangle>,
              concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>),
              F2\<times>{1}){in alphabet}\<Sigma>}
-        = concat(L2,L1)"
+        = concat(L1,L2)"
 proof-
   have lang1:"L1 {is a language with alphabet}\<Sigma>"
     using L1_def unfolding IsALanguage_def[OF fin] by auto
   have lang2:"L2 {is a language with alphabet}\<Sigma>"
     using L2_def unfolding IsALanguage_def[OF fin] by auto
+  let ?s\<^sub>0="\<langle>s01,0\<rangle>"
+  let ?S="concat_eNFSA_states(S1,S2)"
+  let ?t="concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  let ?F="F2\<times>{1}"
+  {
+    fix i assume "i\<in>{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N
+            (?S,?s\<^sub>0,?t,?F){in alphabet}\<Sigma>}"
+    then have i:"i\<in>Lists(\<Sigma>)" "i <-\<epsilon>-N (?S,?s\<^sub>0,?t,?F){in alphabet}\<Sigma>" by auto
+    from i(2) have "(\<exists>q\<in>Pow(?S). (\<epsilon>-cl(?S,?t,\<Sigma>,q) \<inter> ?F \<noteq> \<emptyset>) \<and>
+      (\<langle>\<langle>i, {?s\<^sub>0}\<rangle>, \<emptyset>, q\<rangle> \<in>
+      (({reduce \<epsilon>-N-relation}(?S,?s\<^sub>0,?t){in alphabet}\<Sigma>)^*)))\<or>(i=0 \<and> \<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>)"
+      unfolding FullNFSASatisfy_def[OF fin concat_eNFSA_valid[OF fin A1 A2] i(1)] by auto
+  }
   show ?thesis sorry
 qed
 
@@ -2336,7 +2349,7 @@ theorem concat_language_regular:
   assumes fin:"Finite(\<Sigma>)"
   and "L1{is a regular language on}\<Sigma>"
   and "L2{is a regular language on}\<Sigma>"
-  shows "concat(L2,L1) {is a regular language on}\<Sigma>"
+  shows "concat(L1,L2) {is a regular language on}\<Sigma>"
 proof-
   from fin assms(2) obtain S1 s01 t1 F1 where
     A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
@@ -2358,7 +2371,7 @@ proof-
   let ?Fc = "F2\<times>{1}"
   have valid:"(?SS,?s0,?tc,?Fc){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
     using concat_eNFSA_valid[OF fin A1 A2] .
-  have lang_eq:"{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} = concat(L2,L1)"
+  have lang_eq:"{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} = concat(L1,L2)"
     using concat_eNFSA_language[OF fin A1 A2 L1_eq L2_eq] .
   have "{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N (?SS,?s0,?tc,?Fc){in alphabet}\<Sigma>} {is a regular language on}\<Sigma>"
     using epsilonNFSA_lang_is_regular[OF fin valid] .
