@@ -1322,7 +1322,7 @@ with a transition of type @{term \<Sigma>}.\<close>
 definition
   EpsilonClosure ("\<epsilon>-cl") where
   "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow> E\<subseteq>S
-    \<Longrightarrow> \<epsilon>-cl(S,t,\<Sigma>,E) \<equiv> \<Union>{P\<in>Pow(S). \<langle>E,P\<rangle>\<in>({\<langle>Q,{s\<in>S. \<exists>q\<in>Q. t`\<langle>q,\<Sigma>\<rangle> = s}\<rangle>. Q\<in>Pow(S)}^*)}"
+    \<Longrightarrow> \<epsilon>-cl(S,t,\<Sigma>,E) \<equiv> \<Union>{P\<in>Pow(S). \<langle>E,P\<rangle>\<in>({\<langle>Q,{s\<in>S. \<exists>q\<in>Q. s \<in> t`\<langle>q,\<Sigma>\<rangle>}\<rangle>. Q\<in>Pow(S)}^*)}"
 
 text\<open>The reduction relation is then extended
 by considering any such transitions.\<close>
@@ -1607,12 +1607,12 @@ lemma epsilon_cl_refl_sub:
   and bS:"B\<subseteq>S"
   shows "B \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,B)"
 proof-
-  let ?R = "{\<langle>Q,{s\<in>S. \<exists>q\<in>Q. t`\<langle>q,\<Sigma>\<rangle> = s}\<rangle>. Q\<in>Pow(S)}"
+  let ?R = "{\<langle>Q,{s\<in>S. \<exists>q\<in>Q. s \<in> t`\<langle>q,\<Sigma>\<rangle>}\<rangle>. Q\<in>Pow(S)}"
   have fieldR:"Pow(S) \<subseteq> field(?R)"
   proof-
     {
       fix Q assume "Q\<in>Pow(S)"
-      then have "\<langle>Q,{s\<in>S. \<exists>q\<in>Q. t`\<langle>q,\<Sigma>\<rangle> = s}\<rangle>\<in>?R" by auto
+      then have "\<langle>Q,{s\<in>S. \<exists>q\<in>Q. s \<in> t`\<langle>q,\<Sigma>\<rangle>}\<rangle>\<in>?R" by auto
       then have "Q\<in>domain(?R)" by auto
       then have "Q\<in>field(?R)" unfolding field_def by auto
     }
@@ -1634,7 +1634,7 @@ lemma epsilon_cl_mono:
   and aS:"A\<subseteq>S" and bS:"B\<subseteq>S" and sub:"A\<subseteq>B"
   shows "\<epsilon>-cl(S,t,\<Sigma>,A) \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,B)"
 proof-
-  let ?R = "{\<langle>Q,{s\<in>S. \<exists>q\<in>Q. t`\<langle>q,\<Sigma>\<rangle> = s}\<rangle>. Q\<in>Pow(S)}"
+  let ?R = "{\<langle>Q,{s\<in>S. \<exists>q\<in>Q. s \<in> t`\<langle>q,\<Sigma>\<rangle>}\<rangle>. Q\<in>Pow(S)}"
   have Adef:"\<epsilon>-cl(S,t,\<Sigma>,A) = \<Union>{P\<in>Pow(S). \<langle>A,P\<rangle>\<in>?R^*}"
     unfolding EpsilonClosure_def[OF fin fsa aS] by simp
   have Bdef:"\<epsilon>-cl(S,t,\<Sigma>,B) = \<Union>{P\<in>Pow(S). \<langle>B,P\<rangle>\<in>?R^*}"
@@ -1643,7 +1643,7 @@ proof-
   proof-
     {
       fix Q assume "Q\<in>Pow(S)"
-      then have "\<langle>Q,{s\<in>S. \<exists>q\<in>Q. t`\<langle>q,\<Sigma>\<rangle> = s}\<rangle>\<in>?R" by auto
+      then have "\<langle>Q,{s\<in>S. \<exists>q\<in>Q. s \<in> t`\<langle>q,\<Sigma>\<rangle>}\<rangle>\<in>?R" by auto
       then have "Q\<in>domain(?R)" by auto
       then have "Q\<in>field(?R)" unfolding field_def by auto
     }
@@ -1671,11 +1671,11 @@ proof-
       proof
         fix pp assume "pp\<in>P'"
         from step obtain Q0 where Q0:"Q0\<in>Pow(S)" "Q=Q0"
-          "P'={s\<in>S. \<exists>q\<in>Q0. t`\<langle>q,\<Sigma>\<rangle>=s}" by auto
-        with \<open>pp\<in>P'\<close> obtain q where q:"q\<in>Q" "t`\<langle>q,\<Sigma>\<rangle>=pp" "pp\<in>S" by auto
+          "P'={s\<in>S. \<exists>q\<in>Q0. s \<in> t`\<langle>q,\<Sigma>\<rangle>}" by auto
+        with \<open>pp\<in>P'\<close> obtain q where q:"q\<in>Q" "pp \<in> t`\<langle>q,\<Sigma>\<rangle>" "pp\<in>S" by auto
         from q(1) IH obtain PB where PB:"PB\<in>Pow(S)" "\<langle>B,PB\<rangle>\<in>?R^*" "q\<in>PB"
           using Bdef by auto
-        let ?P1 = "{s\<in>S. \<exists>r\<in>PB. t`\<langle>r,\<Sigma>\<rangle>=s}"
+        let ?P1 = "{s\<in>S. \<exists>r\<in>PB. s \<in> t`\<langle>r,\<Sigma>\<rangle>}"
         have "\<langle>PB,?P1\<rangle>\<in>?R" using PB(1) by auto
         with PB(2) have step1:"\<langle>B,?P1\<rangle>\<in>?R^*" using rtrancl_into_rtrancl by auto
         have "?P1\<in>Pow(S)" by auto
@@ -1699,7 +1699,7 @@ lemma epsilon_cl_union:
   and cS:"C\<subseteq>Pow(S)"
   shows "\<epsilon>-cl(S,t,\<Sigma>,\<Union>C) = \<Union>{\<epsilon>-cl(S,t,\<Sigma>,E). E\<in>C}"
 proof-
-  let ?R = "{\<langle>Q,{s\<in>S. \<exists>q\<in>Q. t`\<langle>q,\<Sigma>\<rangle> = s}\<rangle>. Q\<in>Pow(S)}"
+  let ?R = "{\<langle>Q,{s\<in>S. \<exists>q\<in>Q. s \<in> t`\<langle>q,\<Sigma>\<rangle>}\<rangle>. Q\<in>Pow(S)}"
   have UC:"(\<Union>C)\<subseteq>S" using cS by auto
   have UCdef:"\<epsilon>-cl(S,t,\<Sigma>,\<Union>C) = \<Union>{P\<in>Pow(S). \<langle>\<Union>C,P\<rangle>\<in>?R^*}"
     unfolding EpsilonClosure_def[OF fin fsa UC] by simp
@@ -1726,13 +1726,13 @@ proof-
         proof
           fix pp assume "pp\<in>P'"
           from step obtain Q0 where Q0:"Q0\<in>Pow(S)" "Q=Q0"
-            "P'={s\<in>S. \<exists>q\<in>Q0. t`\<langle>q,\<Sigma>\<rangle>=s}" by auto
-          with \<open>pp\<in>P'\<close> obtain q where q:"q\<in>Q" "t`\<langle>q,\<Sigma>\<rangle>=pp" "pp\<in>S" by auto
+            "P'={s\<in>S. \<exists>q\<in>Q0. s \<in> t`\<langle>q,\<Sigma>\<rangle>}" by auto
+          with \<open>pp\<in>P'\<close> obtain q where q:"q\<in>Q" "pp \<in> t`\<langle>q,\<Sigma>\<rangle>" "pp\<in>S" by auto
           from q(1) IH obtain E1 where E1:"E1\<in>C" "q\<in>\<epsilon>-cl(S,t,\<Sigma>,E1)" by auto
           from E1(1) cS have E1S:"E1\<subseteq>S" by auto
           from E1(2) obtain P0 where P0:"P0\<in>Pow(S)" "\<langle>E1,P0\<rangle>\<in>?R^*" "q\<in>P0"
             unfolding EpsilonClosure_def[OF fin fsa E1S] by auto
-          let ?P1 = "{s\<in>S. \<exists>r\<in>P0. t`\<langle>r,\<Sigma>\<rangle>=s}"
+          let ?P1 = "{s\<in>S. \<exists>r\<in>P0. s \<in> t`\<langle>r,\<Sigma>\<rangle>}"
           have "\<langle>P0,?P1\<rangle>\<in>?R" using P0(1) by auto
           with P0(2) have "\<langle>E1,?P1\<rangle>\<in>?R^*" using rtrancl_into_rtrancl by auto
           moreover have "?P1\<in>Pow(S)" by auto
@@ -1774,7 +1774,7 @@ proof(rule equalityI)
   show "\<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q)) \<subseteq> \<epsilon>-cl(S,t,\<Sigma>,q)"
   proof
     fix p assume "p \<in> \<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q))"
-    let ?R = "{\<langle>Q,{s\<in>S. \<exists>r\<in>Q. t`\<langle>r,\<Sigma>\<rangle> = s}\<rangle>. Q\<in>Pow(S)}"
+    let ?R = "{\<langle>Q,{s\<in>S. \<exists>r\<in>Q. s \<in> t`\<langle>r,\<Sigma>\<rangle>}\<rangle>. Q\<in>Pow(S)}"
     have cldef:"\<epsilon>-cl(S,t,\<Sigma>,q) = \<Union>{P\<in>Pow(S). \<langle>q,P\<rangle>\<in>?R^*}"
       unfolding EpsilonClosure_def[OF fin fsa qS] by simp
     have icldef:"\<epsilon>-cl(S,t,\<Sigma>,\<epsilon>-cl(S,t,\<Sigma>,q)) = \<Union>{P\<in>Pow(S). \<langle>\<epsilon>-cl(S,t,\<Sigma>,q),P\<rangle>\<in>?R^*}"
@@ -1792,11 +1792,11 @@ proof(rule equalityI)
       proof
         fix pp assume "pp\<in>W"
         from step obtain V0 where V0:"V0\<in>Pow(S)" "V=V0"
-          "W={s\<in>S. \<exists>r\<in>V0. t`\<langle>r,\<Sigma>\<rangle>=s}" by auto
-        with \<open>pp\<in>W\<close> obtain v where v:"v\<in>V" "t`\<langle>v,\<Sigma>\<rangle>=pp" "pp\<in>S" by auto
+          "W={s\<in>S. \<exists>r\<in>V0. s \<in> t`\<langle>r,\<Sigma>\<rangle>}" by auto
+        with \<open>pp\<in>W\<close> obtain v where v:"v\<in>V" "pp \<in> t`\<langle>v,\<Sigma>\<rangle>" "pp\<in>S" by auto
         from v(1) IH obtain P0 where P0:"P0\<in>Pow(S)" "\<langle>q,P0\<rangle>\<in>?R^*" "v\<in>P0"
           using cldef by auto
-        let ?P1 = "{s\<in>S. \<exists>r\<in>P0. t`\<langle>r,\<Sigma>\<rangle>=s}"
+        let ?P1 = "{s\<in>S. \<exists>r\<in>P0. s \<in> t`\<langle>r,\<Sigma>\<rangle>}"
         have "\<langle>P0,?P1\<rangle>\<in>?R" using P0(1) by auto
         with P0(2) have "\<langle>q,?P1\<rangle>\<in>?R^*" using rtrancl_into_rtrancl by auto
         moreover have "?P1\<in>Pow(S)" by auto
