@@ -2353,6 +2353,53 @@ proof-
   then show ?thesis using apply_equality[OF _ tT, of "\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle>"] pair by auto
 qed
 
+text\<open>The normal transition of a component-0 state $\langle s,0\rangle$
+is a transition of the first DFSA.\<close>
+
+lemma concat_eNFSA_eps_comp0':
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  and sS1:"s\<in>S1" and sig:"q\<in>\<Sigma>"
+  shows "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)`\<langle>\<langle>s,0\<rangle>,q\<rangle>
+         = {t1`\<langle>s,q\<rangle>}\<times>{0}"
+proof-
+  let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  let ?SS = "concat_eNFSA_states(S1,S2)"
+  have fsa:"(?SS,\<langle>s01,0\<rangle>,?tc,F2\<times>{1}){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+    using concat_eNFSA_valid[OF fin A1 A2] .
+  have tT:"?tc : ?SS\<times>succ(\<Sigma>) \<rightarrow> Pow(?SS)"
+    using fsa unfolding FullNFSA_def[OF fin] by auto
+  have pair:"\<langle>\<langle>s,0\<rangle>,q\<rangle> \<in> ?SS\<times>succ(\<Sigma>)"
+    using sS1 sig unfolding concat_eNFSA_states_def by auto
+  have "\<langle>\<langle>\<langle>s,0\<rangle>,q\<rangle>, {t1`\<langle>s,q\<rangle>}\<times>{0}\<rangle> \<in> ?tc"
+    unfolding concat_eNFSA_trans_def[OF fin A1 A2] using sS1 sig by auto
+  then show ?thesis using apply_equality[OF _ tT, of "\<langle>\<langle>s,0\<rangle>,q\<rangle>"] pair by auto
+qed
+
+text\<open>The normal transition of a component-1 state $\langle s,1\rangle$ is 
+a normal transition of the second DFSA.\<close>
+
+lemma concat_eNFSA_eps_comp1':
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  and sS2:"s\<in>S2" and sig:"q\<in>\<Sigma>"
+  shows "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)`\<langle>\<langle>s,1\<rangle>,q\<rangle> = {t2`\<langle>s,q\<rangle>}\<times>{1}"
+proof-
+  let ?tc = "concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  let ?SS = "concat_eNFSA_states(S1,S2)"
+  have fsa:"(?SS,\<langle>s01,0\<rangle>,?tc,F2\<times>{1}){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
+    using concat_eNFSA_valid[OF fin A1 A2] .
+  have tT:"?tc : ?SS\<times>succ(\<Sigma>) \<rightarrow> Pow(?SS)"
+    using fsa unfolding FullNFSA_def[OF fin] by auto
+  have pair:"\<langle>\<langle>s,1\<rangle>,q\<rangle> \<in> ?SS\<times>succ(\<Sigma>)"
+    using sS2 sig unfolding concat_eNFSA_states_def by (auto)
+  have "\<langle>\<langle>\<langle>s,1\<rangle>,q\<rangle>, {t2`\<langle>s,q\<rangle>}\<times>{1}\<rangle> \<in> ?tc"
+    unfolding concat_eNFSA_trans_def[OF fin A1 A2] using sS2 sig by auto
+  then show ?thesis using apply_equality[OF _ tT, of "\<langle>\<langle>s,1\<rangle>,q\<rangle>"] pair by auto
+qed
+
 text\<open>The language of the product \<open>\<epsilon>\<close>-NFSA equals the concatenation
 of the two component languages.\<close>
 
@@ -2381,12 +2428,28 @@ proof-
     fix i assume "i\<in>{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N
             (?S,?s\<^sub>0,?t,?F){in alphabet}\<Sigma>}"
     then have i:"i\<in>Lists(\<Sigma>)" "i <-\<epsilon>-N (?S,?s\<^sub>0,?t,?F){in alphabet}\<Sigma>" by auto
-    from i(2) have "(\<exists>q\<in>Pow(?S). (\<epsilon>-cl(?S,?t,\<Sigma>,q) \<inter> ?F \<noteq> \<emptyset>) \<and>
+    from i(2) have r:"(\<exists>q\<in>Pow(?S). (\<epsilon>-cl(?S,?t,\<Sigma>,q) \<inter> ?F \<noteq> \<emptyset>) \<and>
       (\<langle>\<langle>i, {?s\<^sub>0}\<rangle>, \<emptyset>, q\<rangle> \<in>
       (({reduce \<epsilon>-N-relation}(?S,?s\<^sub>0,?t){in alphabet}\<Sigma>)^*)))\<or>(i=0 \<and> \<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>)"
       unfolding FullNFSASatisfy_def[OF fin concat_eNFSA_valid[OF fin A1 A2] i(1)] by auto
+      {
+        assume "i=0" "\<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>"
+        then have "i:concat(L2,L1)" sorry
+      } moreover
+      {
+        assume "\<not>( i=0 \<and> \<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>)"
+        with r obtain q where q:"q:Pow(?S)" "\<epsilon>-cl(?S,?t,\<Sigma>,q) \<inter> ?F \<noteq> \<emptyset>" "\<langle>\<langle>i, {?s\<^sub>0}\<rangle>, \<emptyset>, q\<rangle> \<in>
+      (({reduce \<epsilon>-N-relation}(?S,?s\<^sub>0,?t){in alphabet}\<Sigma>)^*)" by auto
+        then have "i:concat(L2,L1)" sorry
+      } ultimately
+      have "i:concat(L2,L1)" by auto
+  } moreover
+  {
+    fix i assume "i:concat(L2,L1)"
+    then have "i:{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N
+            (?S,?s\<^sub>0,?t,?F){in alphabet}\<Sigma>}" sorry
   }
-  show ?thesis sorry
+  ultimately show ?thesis sorry
 qed
 
 text\<open>The concatenation of two regular languages is regular.\<close>
@@ -2411,9 +2474,6 @@ proof-
   then have A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
     and L2_eq:"L2 = {i\<in>Lists(\<Sigma>). i <-D (S2,s02,t2,F2){in alphabet}\<Sigma>}"
     using DetFinStateAuto_def fin A2 by auto
-  -- "Apply the language lemma with A2 in the first slot and A1 in the second,
-       so that the automaton suffix-component is A2 (accepts L2) and
-       prefix-component is A1 (accepts L1), giving language = concat(L1,L2)."
   let ?SS = "concat_eNFSA_states(S2,S1)"
   let ?s0 = "\<langle>s02,0\<rangle>"
   let ?tc = "concat_eNFSA_trans(S2,s02,t2,F2,S1,s01,t1,F1,\<Sigma>)"
