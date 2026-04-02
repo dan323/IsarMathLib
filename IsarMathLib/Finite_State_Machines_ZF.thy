@@ -2400,6 +2400,29 @@ proof-
   then show ?thesis using apply_equality[OF _ tT, of "\<langle>\<langle>s,1\<rangle>,q\<rangle>"] pair by auto
 qed
 
+text\<open>Once the only thing left is a word in L2, it passes if s02 is one of the initial
+states.\<close>
+
+lemma concat_FSA_apply_L2:
+  fixes S1 S2 s01 s02 t1 t2 F1 F2 \<Sigma>
+  defines "t \<equiv> concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  defines "S \<equiv> concat_eNFSA_states(S1,S2)"
+  defines "s\<^sub>0 \<equiv> \<langle>s01,0\<rangle>"
+  defines "F \<equiv> F2\<times>{1}"
+  defines "L1 \<equiv> {i\<in>Lists(\<Sigma>). i <-D (S1,s01,t1,F1){in alphabet}\<Sigma>}"
+  defines "L2 \<equiv> {i\<in>Lists(\<Sigma>). i <-D (S2,s02,t2,F2){in alphabet}\<Sigma>}"
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  and j:"j\<in>L2" "s02\<in>Q" "Q\<in>Pow(S)"
+  shows "\<exists>q\<in>Pow(S). ((\<epsilon>-cl(S,t,\<Sigma>,q) \<inter> F \<noteq> \<emptyset>) \<and> (\<langle>\<langle>j,Q\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>(({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)))"
+proof-
+(* Proof by induction that (j,{s02}) are related to a pair (m,U) in the concatenation
+FSA when (j,s02) are related to a pair (j,s) with s\<in>U. After that apply
+induction to the fact that j\<in>L2 to get q*)
+  show ?thesis sorry
+qed
+
 text\<open>The language of the product \<open>\<epsilon>\<close>-NFSA equals the concatenation
 of the two component languages.\<close>
 
