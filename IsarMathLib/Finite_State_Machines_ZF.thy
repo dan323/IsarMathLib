@@ -1,29 +1,29 @@
-(* 
-    This file is a part of IsarMathLib - 
+(*
+    This file is a part of IsarMathLib -
     a library of formalized mathematics written for Isabelle/Isar.
 
     Copyright (C) 2023 Daniel de la Concepcion
 
-    This program is free software; Redistribution and use in source and binary forms, 
+    This program is free software; Redistribution and use in source and binary forms,
     with or without modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
    this list of conditions and the following disclaimer.
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation and/or 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation and/or
    other materials provided with the distribution.
-   3. The name of the author may not be used to endorse or promote products 
+   3. The name of the author may not be used to endorse or promote products
    derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
-OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. *)
 
 section \<open>Formal languages\<close>
@@ -36,7 +36,7 @@ subsection\<open>Introduction\<close>
 
 text\<open>This file deals with finite state machines. The goal
 is to define regular languages and show that they are closed
-by finite union, finite intersection, complements and 
+by finite union, finite intersection, complements and
 concatenation.
 
 We show that the languages defined by deterministic, non-deterministic
@@ -105,7 +105,7 @@ qed
 
 text\<open>A language is a subset of words.\<close>
 
-definition 
+definition
   IsALanguage ("_{is a language with alphabet}_") where
   "Finite(\<Sigma>) \<Longrightarrow> L {is a language with alphabet} \<Sigma> \<equiv> L \<subseteq> Lists(\<Sigma>)"
 
@@ -120,7 +120,7 @@ lemma full_empty_language:
 subsection\<open>Deterministic Finite Automata\<close>
 
 text\<open>A deterministic finite state automaton is defined
-as a finite set of states, an initial state, 
+as a finite set of states, an initial state,
 a transition function from state to state based on
 the word and a set of final states.\<close>
 
@@ -137,7 +137,7 @@ of the transition function.\<close>
 
 definition
   DFSAExecutionRelation ("{reduce D-relation}'(_,_,_'){in alphabet}_") where
-  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an DFSA for alphabet}\<Sigma> \<Longrightarrow> 
+  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an DFSA for alphabet}\<Sigma> \<Longrightarrow>
   {reduce D-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma> \<equiv> {\<langle>\<langle>w,s\<rangle>,\<langle>Init(w),t`\<langle>s,Last(w)\<rangle>\<rangle>\<rangle>. \<langle>w,s\<rangle>\<in>NELists(\<Sigma>)\<times>S}"
 
 text\<open>We define a word to be fully reducible by a finite
@@ -151,7 +151,7 @@ is also a valid transition.\<close>
 
 definition
   DFSASatisfy ("_ <-D '(_,_,_,_'){in alphabet}_") where
-  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an DFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow> 
+  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an DFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow>
   i <-D (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>F. \<langle>\<langle>i,s\<^sub>0\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce D-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*) \<or> (i = 0 \<and> s\<^sub>0\<in>F)"
 
 text\<open>We define a locale for better notation\<close>
@@ -159,7 +159,7 @@ text\<open>We define a locale for better notation\<close>
 locale DetFinStateAuto =
   fixes S and s\<^sub>0 and t and F and \<Sigma>
   assumes finite_alphabet: "Finite(\<Sigma>)"
-  
+
   assumes DFSA: "(S,s\<^sub>0,t,F){is an DFSA for alphabet}\<Sigma>"
 
 text\<open>We abbreviate the reduce relation to a single symbol
@@ -294,8 +294,8 @@ proof-
     then have "pred(domain(y1)) \<subseteq> domain(y1)" using pred_succ_eq by auto
     then have "domain(y1) \<inter> pred(domain(y1)) = pred(domain(y1))" by auto
     with w have "restrict(w,pred(domain(y1))) = Init(y1)" by auto moreover
-    from q z(2) init_props(1)[of _ y1 \<Sigma>] have "domain(Init(y1)) = pred(domain(y1))" 
-      using domain_of_fun[of y1 _ "\<lambda>_. \<Sigma>"] domain_of_fun[of "Init(y1)" _ "\<lambda>_. \<Sigma>"] 
+    from q z(2) init_props(1)[of _ y1 \<Sigma>] have "domain(Init(y1)) = pred(domain(y1))"
+      using domain_of_fun[of y1 _ "\<lambda>_. \<Sigma>"] domain_of_fun[of "Init(y1)" _ "\<lambda>_. \<Sigma>"]
       unfolding NELists_def by auto ultimately
     have "restrict(w,domain(Init(y1))) = Init(y1)" by auto
     with z(1) have "restrict(w,domain(fst(z))) = fst(z)" by auto
@@ -325,8 +325,8 @@ proof-
       then have "pred(domain(y1)) \<subseteq> domain(y1)" using pred_succ_eq by auto
       then have "domain(y1) \<inter> pred(domain(y1)) = pred(domain(y1))" by auto
       with w have "restrict(w,pred(domain(y1))) = Init(y1)" by auto moreover
-      from q z(2) init_props(1)[of _ y1 \<Sigma>] have "domain(Init(y1)) = pred(domain(y1))" 
-        using domain_of_fun[of y1 _ "\<lambda>_. \<Sigma>"] domain_of_fun[of "Init(y1)" _ "\<lambda>_. \<Sigma>"] 
+      from q z(2) init_props(1)[of _ y1 \<Sigma>] have "domain(Init(y1)) = pred(domain(y1))"
+        using domain_of_fun[of y1 _ "\<lambda>_. \<Sigma>"] domain_of_fun[of "Init(y1)" _ "\<lambda>_. \<Sigma>"]
         unfolding NELists_def by auto ultimately
       have "restrict(w,domain(Init(y1))) = Init(y1)" by auto
       with z(1) show "restrict(w,domain(fst(z))) = fst(z)" by auto
@@ -341,7 +341,7 @@ lemma (in DetFinStateAuto) relation_deteministic:
 proof-
   let ?P="\<lambda>y. \<forall>q1 q2. \<langle>\<langle>w,s\<rangle>,\<langle>q1,q2\<rangle>\<rangle>\<in>r\<^sub>D^* \<longrightarrow> fst(y) = q1 \<longrightarrow> snd(y) = q2"
   {
-    fix q1 q2 assume "\<langle>\<langle>w, s\<rangle>, q1, q2\<rangle> \<in> r\<^sub>D^*" "fst(\<langle>w, ss\<rangle>) = q1" 
+    fix q1 q2 assume "\<langle>\<langle>w, s\<rangle>, q1, q2\<rangle> \<in> r\<^sub>D^*" "fst(\<langle>w, ss\<rangle>) = q1"
     then have "\<langle>\<langle>w, s\<rangle>, w, q2\<rangle> \<in> r\<^sub>D^*" by auto
     then have "\<langle>\<langle>w, s\<rangle>, w, q2\<rangle> \<in> id(field(r\<^sub>D)) \<union> (r\<^sub>D^* O r\<^sub>D)" using rtrancl_rev by auto
     then have A:"s=q2 \<or> \<langle>\<langle>w, s\<rangle>, w, q2\<rangle>:(r\<^sub>D^* O r\<^sub>D)" by auto
@@ -489,15 +489,15 @@ proof-
   then have ind:"\<And>k. k\<in>nat \<Longrightarrow> ?P(k) \<Longrightarrow> ?P(succ(k))" by blast
   have dom:"domain(w) \<in> nat" using assms unfolding NELists_def using domain_of_fun by auto
   from ind have "?P(domain(w))" using nat_induct[of _ ?P, OF dom base] by auto
-  with assms have "(\<forall>ss\<in>S. \<exists>q\<in>S. \<langle>\<langle>w, ss\<rangle>, 0, q\<rangle> \<in> r\<^sub>D^*)" 
+  with assms have "(\<forall>ss\<in>S. \<exists>q\<in>S. \<langle>\<langle>w, ss\<rangle>, 0, q\<rangle> \<in> r\<^sub>D^*)"
     using non_zero_List_func_is_NEList by auto
   then show ?thesis using DFSA_dest(1) by auto
 qed
 
-text\<open>Example of Finite Automaton of binary lists 
+text\<open>Example of Finite Automaton of binary lists
 starting with $0$ and ending with $1$\<close>
 
-locale ListFrom0To1 
+locale ListFrom0To1
 begin
 
 text\<open>Empty state\<close>
@@ -536,7 +536,7 @@ definition finalStates where
 
 text\<open>The transition function is defined as follows:
 
-From the @{term empty} state, 
+From the @{term empty} state,
 we transition to state @{term starts1} in case there is a $1$
 and to state @{term ends0} in case there is a $0$.
 
@@ -567,7 +567,7 @@ proof-
   moreover have funT:"transFun:states\<times>2 \<rightarrow> states" unfolding Pi_def function_def by auto
   moreover have "finalStates \<subseteq> states" by auto
   moreover have "empty\<in> states" by auto
-  ultimately show "(states,empty,transFun,finalStates){is an DFSA for alphabet}2" 
+  ultimately show "(states,empty,transFun,finalStates){is an DFSA for alphabet}2"
     unfolding DFSA_def[OF finA] by auto
 qed
 
@@ -586,23 +586,23 @@ lemma invariant_state_3:
   shows "y = ends0"
 proof-
   have finA:"Finite(2)" by auto
-  have funT:"transFun:states\<times>2\<rightarrow> states" 
+  have funT:"transFun:states\<times>2\<rightarrow> states"
     using dfsaFrom0To1.DFSA_dest(3) .
   have "snd(\<langle>u,y\<rangle>) = ends0"
-  proof(rule rtrancl_induct[of "\<langle>w,ends0\<rangle>" 
+  proof(rule rtrancl_induct[of "\<langle>w,ends0\<rangle>"
         "\<langle>u,y\<rangle>" "r{0.*1}" "\<lambda>t. snd(t) = ends0"])
     show "snd(\<langle>w, ends0\<rangle>) = ends0" by auto
     from assms show "\<langle>\<langle>w, ends0\<rangle>, u, y\<rangle> \<in> r{0.*1}^*" .
     {
       fix y z assume as:"\<langle>\<langle>w, ends0\<rangle>, y\<rangle> \<in> r{0.*1}^*" "\<langle>y, z\<rangle> \<in> r{0.*1}" "snd(y) = ends0"
       from as(3,2) obtain y1 where yy:"y=\<langle>y1,ends0\<rangle>" "y1\<in>NELists(2)"
-        "z=\<langle>Init(y1),transFun`\<langle>ends0,Last(y1)\<rangle>\<rangle>" 
+        "z=\<langle>Init(y1),transFun`\<langle>ends0,Last(y1)\<rangle>\<rangle>"
         unfolding DFSAExecutionRelation_def[OF finA dfsaFrom0To1.DFSA]
         by auto
       from yy(2) have "Last(y1)\<in>2" using last_type by auto
       then have "\<langle>\<langle>ends0,Last(y1)\<rangle>,ends0\<rangle>\<in>transFun" by auto
-      then have "transFun`\<langle>ends0,Last(y1)\<rangle> = ends0" 
-        using apply_equality[OF _ funT, of _ ends0] by auto 
+      then have "transFun`\<langle>ends0,Last(y1)\<rangle> = ends0"
+        using apply_equality[OF _ funT, of _ ends0] by auto
       with yy(3) have "z=\<langle>Init(y1),ends0\<rangle>" by auto
       then show "snd(z) = ends0" by auto
     }
@@ -629,9 +629,9 @@ proof-
   then have base:"\<forall>w. w \<in> NELists(2) \<and> w`0 = 0 \<and> domain(w) = 0 \<longrightarrow>
         \<langle>\<langle>w, starts0\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^* \<and> \<langle>\<langle>w, starts1\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^*" by auto
   from w(2) have domN0:"domain(w)\<noteq> 0" using domain_of_fun by auto
-  have finA:"Finite(2)" using nat_into_Finite[of 2] by auto  
+  have finA:"Finite(2)" using nat_into_Finite[of 2] by auto
   have funT:"transFun:states\<times>2\<rightarrow>states" unfolding Pi_def function_def by auto
-  have t00:"transFun`\<langle>starts0,0\<rangle> = starts0" using funT apply_equality[of "\<langle>starts0,0\<rangle>" starts0 transFun "states\<times>2" "\<lambda>_. states"] by auto      
+  have t00:"transFun`\<langle>starts0,0\<rangle> = starts0" using funT apply_equality[of "\<langle>starts0,0\<rangle>" starts0 transFun "states\<times>2" "\<lambda>_. states"] by auto
   have t01:"transFun`\<langle>starts1,0\<rangle> = starts0" using funT apply_equality[of "\<langle>starts1,0\<rangle>" starts0 transFun "states\<times>2" "\<lambda>_. states"] by auto
   have t10:"transFun`\<langle>starts0,1\<rangle> = starts1" using funT apply_equality[of "\<langle>starts0,1\<rangle>" starts1 transFun "states\<times>2" "\<lambda>_. states"] by auto
   have t11:"transFun`\<langle>starts1,1\<rangle> = starts1" using funT apply_equality[of "\<langle>starts1,1\<rangle>" starts1 transFun "states\<times>2" "\<lambda>_. states"] by auto
@@ -648,7 +648,7 @@ proof-
         with y(3) have "pred(domain(y)) = 0" using pred_succ_eq by auto
         then have y00:"y`0 = 0" using y(2) unfolding Last_def by auto
         then have "\<langle>\<langle>y,starts0\<rangle>,\<langle>Init(y),transFun`\<langle>starts0,Last(y)\<rangle>\<rangle>\<rangle>\<in>r{0.*1}" unfolding
-          DFSAExecutionRelation_def[OF finA dfsaFrom0To1.DFSA] 
+          DFSAExecutionRelation_def[OF finA dfsaFrom0To1.DFSA]
           using y(1) by auto
         with last_2 t00 t10 have "\<langle>\<langle>y,starts0\<rangle>,\<langle>Init(y),Last(y)\<rangle>\<rangle>\<in>r{0.*1}" by auto moreover
         from ka y(3) s(1) have "Init(y):0\<rightarrow>2" using init_props(1)[OF s(2,1)]
@@ -675,7 +675,7 @@ proof-
           using domain_of_fun unfolding NELists_def by auto
         moreover from yu have "Init(y)`0 = 0" using init_props(2)[OF nat_succI[OF u(2)], of y 2]
           s(1) `s=succ(u)` empty_in_every_succ[OF u(2)] y(2) by auto
-        moreover note k ultimately have "\<langle>\<langle>Init(y),starts0\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^*" 
+        moreover note k ultimately have "\<langle>\<langle>Init(y),starts0\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^*"
           "\<langle>\<langle>Init(y),starts1\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^*" by auto
         then have A:"\<forall>x\<in>{starts0, starts1}. \<langle>\<langle>Init(y),x\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^*" by auto
         have Q:"\<langle>\<langle>y,starts0\<rangle>,\<langle>Init(y),transFun`\<langle>starts0,Last(y)\<rangle>\<rangle>\<rangle>\<in>r{0.*1}" using y(2)
@@ -714,7 +714,7 @@ proof-
        (\<forall>w. w \<in> NELists(2) \<and> w`0 = 0 \<and> domain(w) = k \<longrightarrow>
             \<langle>\<langle>w, starts0\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^* \<and> \<langle>\<langle>w, starts1\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^*) \<longrightarrow>
        (\<forall>w. w \<in> NELists(2) \<and> w`0 = 0 \<and> domain(w) = succ(k) \<longrightarrow>
-            \<langle>\<langle>w, starts0\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^* \<and> \<langle>\<langle>w, starts1\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^*)" by blast 
+            \<langle>\<langle>w, starts0\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^* \<and> \<langle>\<langle>w, starts1\<rangle>, 0, starts0\<rangle> \<in> r{0.*1}^*)" by blast
   from ind_on_nat[of "domain(w)" "\<lambda>t . \<forall>w. w\<in>NELists(2) \<and> w`0 =0 \<and> domain(w) = t \<longrightarrow> (\<langle>\<langle>w,starts0\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^* \<and> \<langle>\<langle>w,starts1\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^*)", OF dom base rule]
   show R:"\<langle>\<langle>w,starts0\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^*" "\<langle>\<langle>w,starts1\<rangle>,\<langle>0,starts0\<rangle>\<rangle>\<in>r{0.*1}^*" using assms(2,1) by auto
 qed
@@ -742,7 +742,7 @@ proof-
   }
   with domNat t(1) obtain y where y:"domain(i) = succ(y)" "y\<in>nat" using Nat_ZF_1_L3 by auto
   with domNat t(2) have iList:"i\<in>NELists(2)" unfolding NELists_def by auto
-  have finA:"Finite(2)" using nat_into_Finite[of 2] by auto  
+  have finA:"Finite(2)" using nat_into_Finite[of 2] by auto
   have funT:"transFun:states\<times>2\<rightarrow>states" unfolding Pi_def function_def by auto
   have "\<langle>\<langle>i,empty\<rangle>,\<langle>Init(i),transFun`\<langle>empty,Last(i)\<rangle>\<rangle>\<rangle>:r{0.*1}" using iList unfolding
       DFSAExecutionRelation_def[OF finA dfsaFrom0To1.DFSA] by auto
@@ -784,9 +784,9 @@ theorem starts1ends0_DFSA_reduce_rev:
   assumes "i\<in>Lists(2)" and "i {reduces in 0.*1}"
   shows "i`0=0" and "Last(i) = 1"
 proof-
-  have finA:"Finite(2)" using nat_into_Finite[of 2] by auto  
+  have finA:"Finite(2)" using nat_into_Finite[of 2] by auto
   have funT:"transFun:states\<times>2\<rightarrow>states" unfolding Pi_def function_def by auto
-  from assms(2) have "\<langle>\<langle>i,empty\<rangle>,\<langle>0,starts0\<rangle>\<rangle> \<in> r{0.*1}^*" 
+  from assms(2) have "\<langle>\<langle>i,empty\<rangle>,\<langle>0,starts0\<rangle>\<rangle> \<in> r{0.*1}^*"
     unfolding DFSASatisfy_def[OF finA dfsaFrom0To1.DFSA assms(1)]
     by auto
   then have "\<langle>\<langle>i,empty\<rangle>,\<langle>0,starts0\<rangle>\<rangle> \<in> id(field(r{0.*1})) \<union> (r{0.*1} O r{0.*1}^*)" using rtrancl_unfold[of "r{0.*1}"] by auto
@@ -804,7 +804,7 @@ proof-
   then obtain q1 q2 where qq:"q=\<langle>q1,q2\<rangle>" "q1\<in>NELists(2)" "q2\<in>states" by auto
   from q(1) qq(1) have A:"0 = Init(q1)" "0 = transFun`\<langle>q2,Last(q1)\<rangle>"
     unfolding DFSAExecutionRelation_def[OF finA dfsaFrom0To1.DFSA] by auto
-  from qq(1) q(2) have "restrict(i,domain(q1)) = q1" 
+  from qq(1) q(2) have "restrict(i,domain(q1)) = q1"
     using dfsaFrom0To1.seq_is_restriction
     by auto
   then have iRes:"restrict(i,domain(q1))`0 = q1`0" by auto
@@ -832,7 +832,7 @@ proof-
   from z(2) have "z\<in>field(r{0.*1})" using rtrancl_type[of "r{0.*1}"] by auto
   then obtain z1 z2 where zz:"z=\<langle>z1,z2\<rangle>" "z1\<in>Lists(2)" "z2\<in>states" using dfsaFrom0To1.reduce_field(1)
     by blast
-  from zz(1) z(1) have zzz:"z1=Init(i)" "z2=transFun`\<langle>2,Last(i)\<rangle>" 
+  from zz(1) z(1) have zzz:"z1=Init(i)" "z2=transFun`\<langle>2,Last(i)\<rangle>"
     unfolding DFSAExecutionRelation_def[OF finA dfsaFrom0To1.DFSA] by auto
   {
     assume "Last(i) = 0"
@@ -840,7 +840,7 @@ proof-
     with zz(1) z(2) have "q2= succ(2)" using invariant_state_3 by auto
     with `q2\<in>2` have False by auto
   }
-  with z(1) show "Last(i) = 1" using last_type[of i 2] 
+  with z(1) show "Last(i) = 1" using last_type[of i 2]
     unfolding DFSAExecutionRelation_def[OF finA dfsaFrom0To1.DFSA]
     by auto
 qed
@@ -894,16 +894,16 @@ theorem regular_intersect:
   and "L2{is a regular language on}\<Sigma>"
 shows "(L1\<inter>L2) {is a regular language on}\<Sigma>"
 proof-
-  from assms(1,2) obtain S1 s1 t1 F1 where l1:"(S1,s1,t1,F1){is an DFSA for alphabet}\<Sigma>" 
+  from assms(1,2) obtain S1 s1 t1 F1 where l1:"(S1,s1,t1,F1){is an DFSA for alphabet}\<Sigma>"
     "L1 = DetFinStateAuto.LanguageDFSA(S1,s1,t1,F1,\<Sigma>)"
     using IsRegularLanguage_def by auto
-  then have l1:"(S1,s1,t1,F1){is an DFSA for alphabet}\<Sigma>" 
+  then have l1:"(S1,s1,t1,F1){is an DFSA for alphabet}\<Sigma>"
     "L1 = {i\<in>Lists(\<Sigma>). i <-D (S1,s1,t1,F1){in alphabet}\<Sigma>}"
     using DetFinStateAuto_def assms(1) l1(1) by auto
-  from assms(1,3) obtain S2 s2 t2 F2 where l2:"(S2,s2,t2,F2){is an DFSA for alphabet}\<Sigma>" 
+  from assms(1,3) obtain S2 s2 t2 F2 where l2:"(S2,s2,t2,F2){is an DFSA for alphabet}\<Sigma>"
     "L2= DetFinStateAuto.LanguageDFSA(S2,s2,t2,F2,\<Sigma>)"
     using IsRegularLanguage_def by auto
-  then have l2:"(S2,s2,t2,F2){is an DFSA for alphabet}\<Sigma>" 
+  then have l2:"(S2,s2,t2,F2){is an DFSA for alphabet}\<Sigma>"
     "L2 = {i\<in>Lists(\<Sigma>). i <-D (S2,s2,t2,F2){in alphabet}\<Sigma>}"
     using DetFinStateAuto_def assms(1) l2(1) by auto
   let ?S = "S1\<times>S2"
@@ -1117,13 +1117,13 @@ qed
 
 text\<open>The complement of a regular language
 is a regular language.\<close>
-    
+
 theorem regular_opp:
   assumes "Finite(\<Sigma>)"
   and "L{is a regular language on}\<Sigma>"
   shows "(Lists(\<Sigma>)-L) {is a regular language on}\<Sigma>"
 proof-
-  from assms(1,2) obtain S s t F where l:"(S,s,t,F){is an DFSA for alphabet}\<Sigma>" 
+  from assms(1,2) obtain S s t F where l:"(S,s,t,F){is an DFSA for alphabet}\<Sigma>"
     "L=DetFinStateAuto.LanguageDFSA(S,s,t,F,\<Sigma>)" unfolding IsRegularLanguage_def[OF assms(1)] by auto
   then have l:"(S,s,t,F){is an DFSA for alphabet}\<Sigma>"
     "L={i\<in>Lists(\<Sigma>). i <-D (S,s,t,F){in alphabet}\<Sigma>}"
@@ -1169,9 +1169,9 @@ proof-
         with sf have False by auto
       }
       then have m0:"m\<noteq>0" by auto
-      with MM obtain q1 where q1:"q1\<in>F" "\<langle>\<langle>m, s\<rangle>, 0, q1\<rangle> \<in> ?r^*" 
+      with MM obtain q1 where q1:"q1\<in>F" "\<langle>\<langle>m, s\<rangle>, 0, q1\<rangle> \<in> ?r^*"
         unfolding DFSASatisfy_def[OF assms(1) l(1) M(1)] by auto
-      from m0 M(2) obtain q2 where q2:"q2\<in>S-F" "\<langle>\<langle>m, s\<rangle>, 0, q2\<rangle> \<in> ?r^*" 
+      from m0 M(2) obtain q2 where q2:"q2\<in>S-F" "\<langle>\<langle>m, s\<rangle>, 0, q2\<rangle> \<in> ?r^*"
         unfolding DFSASatisfy_def[OF assms(1) D M(1)] by auto
       from q1(2) q2(2) have "q1=q2" using DetFinStateAuto.relation_deteministic[OF D0,
             of m s 0] by auto
@@ -1184,8 +1184,8 @@ proof-
     fix m assume "m\<in>Lists(\<Sigma>)-L"
     then have m:"m\<in>Lists(\<Sigma>)" "m <-D (S,s,t,F){in alphabet}\<Sigma> \<Longrightarrow> False" using l(2)
       by auto
-    from this(1) have R:"m = 0 \<or> (\<exists>q\<in>S. \<langle>\<langle>m,s\<rangle>,0,q\<rangle> \<in> ?r^*)" 
-      using non_zero_List_func_is_NEList 
+    from this(1) have R:"m = 0 \<or> (\<exists>q\<in>S. \<langle>\<langle>m,s\<rangle>,0,q\<rangle> \<in> ?r^*)"
+      using non_zero_List_func_is_NEList
         DetFinStateAuto.endpoint_exists[OF D0] by auto
     {
       assume as:"m=0" "s\<in>F"
@@ -1223,7 +1223,7 @@ qed
 
 text\<open>The union of two regular languages
 is a regular language.\<close>
-        
+
 theorem regular_union:
   assumes "Finite(\<Sigma>)"
   and "L1{is a regular language on}\<Sigma>"
@@ -1242,7 +1242,7 @@ qed
 
 text\<open>Another natural operation on words is concatenation,
 hence we can defined the concatenated language as
-the set of concatenations of words of one language 
+the set of concatenations of words of one language
 with words of another.\<close>
 
 definition concat where
@@ -1293,7 +1293,7 @@ all possible steps the transition function returns.\<close>
 
 definition
   NFSAExecutionRelation ("{reduce N-relation} '(_,_,_'){in alphabet}_") where
-  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an NFSA for alphabet}\<Sigma> \<Longrightarrow> 
+  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an NFSA for alphabet}\<Sigma> \<Longrightarrow>
   {reduce N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma> \<equiv> {\<langle>\<langle>w,Q\<rangle>,\<langle>Init(w),\<Union>{t`\<langle>s,Last(w)\<rangle>. s\<in>Q}\<rangle>\<rangle>. \<langle>w,Q\<rangle>\<in>NELists(\<Sigma>)\<times>Pow(S)}"
 
 text\<open>The full reduction is conceived as one of those possible
@@ -1301,7 +1301,7 @@ paths reaching a final state.\<close>
 
 definition
   NFSASatisfy ("_ <-N '(_,_,_,_'){in alphabet}_") where
-  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an NFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow> 
+  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an NFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow>
   i <-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (q\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> s\<^sub>0\<in>F)"
 
 text\<open>An extra generalization can be consider
@@ -1329,7 +1329,7 @@ by considering any such transitions.\<close>
 
 definition
   FullNFSAExecutionRelation ("{reduce \<epsilon>-N-relation} '(_,_,_'){in alphabet}_") where
-  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow> 
+  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow>
   {reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma> \<equiv> {\<langle>\<langle>w,Q\<rangle>,\<langle>Init(w),\<epsilon>-cl(S,t,\<Sigma>,\<Union>{t`\<langle>s,Last(w)\<rangle>. s\<in>Q})\<rangle>\<rangle>. \<langle>w,Q\<rangle>\<in>NELists(\<Sigma>)\<times>Pow(S)}"
 
 text\<open>The full reduction of a word is similar to that
@@ -1337,7 +1337,7 @@ of the automata without $\varepsilon$-transitions.\<close>
 
 definition
   FullNFSASatisfy ("_ <-\<epsilon>-N '(_,_,_,_'){in alphabet}_") where
-  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow> 
+  "Finite(\<Sigma>) \<Longrightarrow> (S,s\<^sub>0,t,F){is an \<epsilon>-NFSA for alphabet}\<Sigma> \<Longrightarrow> i\<in>Lists(\<Sigma>) \<Longrightarrow>
   i <-\<epsilon>-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma> \<equiv> (\<exists>q\<in>Pow(S). (\<epsilon>-cl(S,t,\<Sigma>,q)\<inter>F\<noteq>0 \<and> \<langle>\<langle>i,{s\<^sub>0}\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in> ({reduce \<epsilon>-N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>)^*)) \<or> (i = 0 \<and> \<epsilon>-cl(S,t,\<Sigma>,{s\<^sub>0})\<inter>F\<noteq>0)"
 
 text\<open>We define a locale to create some notation\<close>
@@ -1345,7 +1345,7 @@ text\<open>We define a locale to create some notation\<close>
 locale NonDetFinStateAuto =
   fixes S and s\<^sub>0 and t and F and \<Sigma>
   assumes finite_alphabet: "Finite(\<Sigma>)"
-  
+
   assumes NFSA: "(S,s\<^sub>0,t,F){is an NFSA for alphabet}\<Sigma>"
 
 text\<open>Notation for the transition relation\<close>
@@ -1353,7 +1353,7 @@ text\<open>Notation for the transition relation\<close>
 abbreviation (in NonDetFinStateAuto) nd_rel ("r\<^sub>N")
   where "r\<^sub>N \<equiv> {reduce N-relation}(S,s\<^sub>0,t){in alphabet}\<Sigma>"
 
-text\<open>Notation for the language generated by the 
+text\<open>Notation for the language generated by the
 non-deterministic automaton\<close>
 
 abbreviation (in NonDetFinStateAuto) LanguageNFSA
@@ -1381,7 +1381,7 @@ definition (in NonDetFinStateAuto) rPow where
 
 text\<open>We show that we do have a deterministic automaton\<close>
 
-sublocale NonDetFinStateAuto < dfsa:DetFinStateAuto "Pow(S)" "{s\<^sub>0}" tPow "{Q\<in>Pow(S). Q\<inter>F \<noteq> 0}" \<Sigma> 
+sublocale NonDetFinStateAuto < dfsa:DetFinStateAuto "Pow(S)" "{s\<^sub>0}" tPow "{Q\<in>Pow(S). Q\<inter>F \<noteq> 0}" \<Sigma>
   unfolding DetFinStateAuto_def DFSA_def[OF finite_alphabet] unfolding tPow_def
   apply safe using finite_alphabet apply simp
   using NFSA unfolding NFSA_def[OF finite_alphabet]
@@ -1390,7 +1390,7 @@ sublocale NonDetFinStateAuto < dfsa:DetFinStateAuto "Pow(S)" "{s\<^sub>0}" tPow 
 proof-
   fix b y x v assume as:"y \<in> \<Sigma>" "b \<subseteq> S" "v \<in> b" "x \<in> t ` \<langle>v, y\<rangle>"
   from as(2,3) have v:"v\<in>S" by auto
-  have "t \<in> S \<times> \<Sigma> \<rightarrow> Pow(S)" using NFSA 
+  have "t \<in> S \<times> \<Sigma> \<rightarrow> Pow(S)" using NFSA
     unfolding NFSA_def[OF finite_alphabet] by auto
   with as(1,4) v show "x\<in>S" using apply_type[of t "S\<times>\<Sigma>" "\<lambda>_. Pow(S)" "\<langle>v,y\<rangle>"]
     by auto
@@ -1428,7 +1428,7 @@ lemma (in NonDetFinStateAuto) det_impl_nd:
 proof-
   from assms have w:"w\<in>NELists(\<Sigma>)" "u=Init(w)" "Q\<in>Pow(S)" "G=tPow ` \<langle>Q, Last(w)\<rangle>"
     unfolding DFSAExecutionRelation_def[OF finite_alphabet dfsa.DFSA] rPow_def by auto
-  then have "tPow`\<langle>Q,Last(w)\<rangle> = (\<Union>s\<in>Q. t`\<langle>s,Last(w)\<rangle>) \<Longrightarrow> ?thesis" 
+  then have "tPow`\<langle>Q,Last(w)\<rangle> = (\<Union>s\<in>Q. t`\<langle>s,Last(w)\<rangle>) \<Longrightarrow> ?thesis"
     unfolding NFSAExecutionRelation_def[OF finite_alphabet NFSA] by auto
   moreover have "\<langle>\<langle>Q,Last(w)\<rangle>,\<Union>s\<in>Q. t`\<langle>s,Last(w)\<rangle>\<rangle>:tPow" unfolding tPow_def using last_type[OF w(1)] w(3) by auto
   ultimately show ?thesis using apply_equality[OF _ dfsa.DFSA_dest(3), of "\<langle>Q,Last(w)\<rangle>" "\<Union>s\<in>Q. t`\<langle>s,Last(w)\<rangle>"]
@@ -1458,12 +1458,12 @@ proof-
     {
       assume "i=0" "?s\<in>?F"
       then have "i=0" "s\<^sub>0\<in>F" by auto
-      then have "i <-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>" 
+      then have "i <-N (S,s\<^sub>0,t,F){in alphabet}\<Sigma>"
         unfolding NFSASatisfy_def[OF finite_alphabet NFSA i(1)] by auto
     } moreover
     {
       assume "\<not>(i=0 \<and> ?s\<in>?F)"
-      with i(2) obtain q where q:"q\<in>?F" "\<langle>\<langle>i,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>rPow^*" 
+      with i(2) obtain q where q:"q\<in>?F" "\<langle>\<langle>i,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>rPow^*"
         using DFSASatisfy_def[OF finite_alphabet dfsa.DFSA i(1)]
         unfolding rPow_def tPow_def by auto
       then have "\<langle>\<langle>i,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>r\<^sub>N^*" using relation_NFSA_to_DFSA
@@ -1481,13 +1481,13 @@ proof-
       assume "i=0" "s\<^sub>0\<in>F"
       then have "i=0" "?s\<in>?F" using NFSA
         unfolding NFSA_def[OF finite_alphabet] by auto
-      then have "i <-D (?S,?s,?f,?F){in alphabet}\<Sigma>" 
+      then have "i <-D (?S,?s,?f,?F){in alphabet}\<Sigma>"
         using DFSASatisfy_def[OF finite_alphabet dfsa.DFSA i(1)]
         unfolding tPow_def rPow_def by auto
     } moreover
     {
       assume "\<not>(i=0 \<and> s\<^sub>0\<in>F)"
-      with i(2) obtain q where q:"q\<in>Pow(S)" "q\<inter>F\<noteq>0" "\<langle>\<langle>i,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>r\<^sub>N^*" 
+      with i(2) obtain q where q:"q\<in>Pow(S)" "q\<inter>F\<noteq>0" "\<langle>\<langle>i,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>r\<^sub>N^*"
         unfolding NFSASatisfy_def[OF finite_alphabet NFSA i(1)] by auto
       then have "\<langle>\<langle>i,?s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>rPow^*" using relation_NFSA_to_DFSA
         by auto
@@ -2055,7 +2055,7 @@ lemma concat_eNFSA_valid:
   assumes fin:"Finite(\<Sigma>)"
   and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
   and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
-  shows "(concat_eNFSA_states(S1,S2), \<langle>s01,0\<rangle>, 
+  shows "(concat_eNFSA_states(S1,S2), \<langle>s01,0\<rangle>,
   concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>), F2\<times>{1}
   ){is an \<epsilon>-NFSA for alphabet}\<Sigma>"
 proof-
@@ -2128,17 +2128,17 @@ proof-
           (b1) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> y={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
           (c1) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> y={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
           (d1) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> y=0"
-          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
         then have "y=z"
         proof cases
-          case a1 
+          case a1
           then obtain s aa where sa:"\<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma>" "x=\<langle>\<langle>s,0\<rangle>,aa\<rangle>" "y={t1`\<langle>s,aa\<rangle>}\<times>{0}" by auto
           from h2 consider
             (a2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S1\<times>\<Sigma> \<and> x=\<langle>\<langle>s,0\<rangle>,aa\<rangle> \<and> z={t1`\<langle>s,aa\<rangle>}\<times>{0}" |
             (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
             (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
             (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
-          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis
           proof cases
             case a2
@@ -2170,7 +2170,7 @@ proof-
             (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
             (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
             (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
-          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis
           proof cases
             case a2
@@ -2202,7 +2202,7 @@ proof-
             (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
             (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
             (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
-          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis
           proof cases
             case a2
@@ -2234,7 +2234,7 @@ proof-
             (b2) "\<exists>s. s\<in>S1 \<and> x=\<langle>\<langle>s,0\<rangle>,\<Sigma>\<rangle> \<and> z={x\<in>{\<langle>s02,1\<rangle>}. s\<in>F1}" |
             (c2) "\<exists>s aa. \<langle>s,aa\<rangle>\<in>S2\<times>\<Sigma> \<and> x=\<langle>\<langle>s,1\<rangle>,aa\<rangle> \<and> z={t2`\<langle>s,aa\<rangle>}\<times>{1}" |
             (d2) "\<exists>s. s\<in>S2 \<and> x=\<langle>\<langle>s,1\<rangle>,\<Sigma>\<rangle> \<and> z=0"
-          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto 
+          unfolding concat_eNFSA_trans_def[OF fin A1 A2] by auto
           then show ?thesis
           proof cases
             case a2
@@ -2377,7 +2377,7 @@ proof-
   then show ?thesis using apply_equality[OF _ tT, of "\<langle>\<langle>s,0\<rangle>,q\<rangle>"] pair by auto
 qed
 
-text\<open>The normal transition of a component-1 state $\langle s,1\rangle$ is 
+text\<open>The normal transition of a component-1 state $\langle s,1\rangle$ is
 a normal transition of the second DFSA.\<close>
 
 lemma concat_eNFSA_eps_comp1':
@@ -2433,8 +2433,26 @@ proof-
       (({reduce \<epsilon>-N-relation}(?S,?s\<^sub>0,?t){in alphabet}\<Sigma>)^*)))\<or>(i=0 \<and> \<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>)"
       unfolding FullNFSASatisfy_def[OF fin concat_eNFSA_valid[OF fin A1 A2] i(1)] by auto
       {
-        assume "i=0" "\<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>"
-        then have "i:concat(L2,L1)" sorry
+        assume i0:"i=0" and ecl:"\<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>"
+        from ecl obtain e where e:"e\<in>\<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0})" "e\<in>?F" by auto
+        (* The ε-closure of {⟨s01,0⟩} only contains ⟨s02,1⟩ (when s01∈F1),
+           so the intersection forces s01∈F1 and f2=s02. *)
+        have s01F1:"s01\<in>F1" and fs02:"f2=s02"
+          using e(1) hf2 sorry
+        have s02F2:"s02\<in>F2" using hf2(1) fs02 by auto
+        from i(1) i0 have zero_L:"(0:Lists(\<Sigma>))" by auto
+        have "0 <-D (S1,s01,t1,F1){in alphabet}\<Sigma>"
+          unfolding DFSASatisfy_def[OF fin A1 zero_L] using s01F1 by auto
+        then have zero_L1:"(0:L1)" unfolding L1_def using zero_L by auto
+        have "0 <-D (S2,s02,t2,F2){in alphabet}\<Sigma>"
+          unfolding DFSASatisfy_def[OF fin A2 zero_L] using s02F2 by auto
+        then have zero_L2:"(0:L2)" unfolding L2_def using zero_L by auto
+        have concat00:"Concat(0,0) = 0"
+          unfolding Concat_def ShiftedSeq_def NatInterval_def by auto
+        have "(0:concat(L2,L1))"
+          unfolding concat_def[OF lang2 lang1]
+          using zero_L2 zero_L1 concat00 by blast
+        with i0 have "i:concat(L2,L1)" by auto
       } moreover
       {
         assume "\<not>( i=0 \<and> \<epsilon>-cl(?S,?t,\<Sigma>,{?s\<^sub>0}) \<inter> ?F \<noteq> \<emptyset>)"
@@ -2449,7 +2467,7 @@ proof-
     then have "i:{i\<in>Lists(\<Sigma>). i <-\<epsilon>-N
             (?S,?s\<^sub>0,?t,?F){in alphabet}\<Sigma>}" sorry
   }
-  ultimately show ?thesis sorry
+  ultimately show ?thesis by blast
 qed
 
 text\<open>The concatenation of two regular languages is regular.\<close>
