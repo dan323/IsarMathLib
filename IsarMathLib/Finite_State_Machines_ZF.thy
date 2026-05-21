@@ -3132,7 +3132,7 @@ proof-
   have "?P(\<langle>v,Q\<rangle>)"
   proof(rule rtrancl_induct[of "\<langle>w,{\<langle>s01,0\<rangle>}\<rangle>" "\<langle>v,Q\<rangle>" ?r ?P])
     show "\<langle>\<langle>w,{\<langle>s01,0\<rangle>}\<rangle>,\<langle>v,Q\<rangle>\<rangle>\<in>?r^*" using run .
-    \<comment> \<open>base case: initial state set {\<langle>s01,0\<rangle>} has the form with q1=s01, Q2=\<emptyset>\<close>
+    \<comment> \<open>base case: initial state set ${\<langle>s01,0\<rangle>}$ has the form with q1=s01, Q2=\<emptyset>\<close>
     show "?P(\<langle>w,{\<langle>s01,0\<rangle>}\<rangle>)"
       using rtrancl_refl[OF wfield] s01S1 by auto
   next
@@ -3140,7 +3140,7 @@ proof-
     assume IH_run:"\<langle>\<langle>w,{\<langle>s01,0\<rangle>}\<rangle>,y\<rangle>\<in>?r^*"
       and step:"\<langle>y,z\<rangle>\<in>?r"
       and IH:"?P(y)"
-    \<comment> \<open>unpack the \<epsilon>-NFSA step: first rewrite the hypothesis, then extract\<close>
+    \<comment> \<open>unpack the $\<epsilon>$-NFSA step: first rewrite the hypothesis, then extract\<close>
     from step have step_unf:"\<langle>y,z\<rangle>\<in>{\<langle>\<langle>w,Q\<rangle>,\<langle>Init(w),\<epsilon>-cl(S,t,\<Sigma>,\<Union>{t`\<langle>ss,Last(w)\<rangle>. ss\<in>\<epsilon>-cl(S,t,\<Sigma>,Q)})\<rangle>\<rangle>. \<langle>w,Q\<rangle>\<in>NELists(\<Sigma>)\<times>Pow(S)}"
       unfolding FullNFSAExecutionRelation_def[OF fin fsa] by simp
     from step_unf obtain yl R where yz:
@@ -3170,7 +3170,7 @@ proof-
       unfolding DFSAExecutionRelation_def[OF fin A1] using yz(1) IHd(1) by auto
     have newDfa:"\<langle>\<langle>w,s01\<rangle>,\<langle>Init(yl),t1`\<langle>q1,Last(yl)\<rangle>\<rangle>\<rangle>\<in>?rD^*"
       using rtrancl_into_rtrancl[OF IHd(4) dfaStep] .
-    \<comment> \<open>conclude: P(z) holds with q1next=t1`\<langle>q1,Last(yl)\<rangle> and Q2n\<close>
+    \<comment> \<open>conclude: P(z) holds with $q1next=t1`\<langle>q1,Last(yl)\<rangle>$ and Q2n\<close>
     show "?P(z)" using zform t1S1 Q2n(1) newDfa by auto
   qed
   then show ?thesis by auto
