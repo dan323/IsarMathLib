@@ -2979,7 +2979,8 @@ lemma epsilon_cl_side1:
   and sig:"T\<subseteq>S2"
   shows "\<epsilon>-cl(S,t,\<Sigma>,T\<times>{1}) = T\<times>{1}"
 proof-
-  have TS:"T\<times>{1}\<in>Pow(S)" using sig unfolding S_def concat_eNFSA_states_def by auto
+  have TS:"T\<times>{1}\<in>Pow(concat_eNFSA_states(S1,S2))"
+    using sig unfolding concat_eNFSA_states_def by auto
   have eq:"\<epsilon>-cl(S,t,\<Sigma>,T\<times>{1}) = T\<times>{1} \<union> {x\<in>{\<langle>s02,1\<rangle>}. (T\<times>{1})\<inter>(F1\<times>1)\<noteq>0}"
     using concat_eNFSA_eps_closure[OF fin A1 A2 TS] unfolding S_def t_def by auto
   have "(T\<times>{1})\<inter>(F1\<times>1) = 0" by auto
