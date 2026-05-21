@@ -3132,7 +3132,7 @@ proof-
   have "?P(\<langle>v,Q\<rangle>)"
   proof(rule rtrancl_induct[of "\<langle>w,{\<langle>s01,0\<rangle>}\<rangle>" "\<langle>v,Q\<rangle>" ?r ?P])
     show "\<langle>\<langle>w,{\<langle>s01,0\<rangle>}\<rangle>,\<langle>v,Q\<rangle>\<rangle>\<in>?r^*" using run .
-    \<comment> \<open>base case: initial state set \<open>{\<langle>s01,0\<rangle>}\<close> has the form with q1=s01, Q2=\<emptyset>\<close>
+    \<comment> \<open>base case: initial state set \<open>{\<langle>s01,0\<rangle>}\<close> has the form with q1=s01, \<open>Q2=\<emptyset>\<close>\<close>
     show "?P(\<langle>w,{\<langle>s01,0\<rangle>}\<rangle>)"
       using rtrancl_refl[OF wfield] s01S1 by auto
   next
@@ -3155,7 +3155,7 @@ proof-
       by auto
     have Q2S2:"Q2\<subseteq>S2" using IHd(2) by auto
     have aS:"Last(yl)\<in>\<Sigma>" using last_type[OF yz(1)] .
-    \<comment> \<open>apply exec_step_form to get the new structured state\<close>
+    \<comment> \<open>apply \<open>exec_step_form\<close> to get the new structured state\<close>
     from exec_step_form[OF fin A1 A2 IHd(1) Q2S2 aS]
     obtain Q2n where Q2n:"Q2n\<in>Pow(S2)"
       "\<epsilon>-cl(S,t,\<Sigma>,\<Union>{t`\<langle>ss,Last(yl)\<rangle>. ss\<in>\<epsilon>-cl(S,t,\<Sigma>,{\<langle>q1,0\<rangle>}\<union>Q2\<times>{1})})
