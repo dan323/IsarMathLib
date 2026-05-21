@@ -2801,7 +2801,7 @@ qed
 text\<open>Once L1 is reached, the relation is equivalent to its DFSA\<close>
 
 text\<open>Step 1: We prove concat\_FSA\_apply\_L1\_step using the three sub-lemmas above.
-Note: the statement requires an additional hypothesis that the prefix s is a list over \<Sigma>.\<close>
+Note: the statement requires an additional hypothesis that the prefix s is a list over \<open>\<Sigma>\<close>.\<close>
 
 lemma concat_FSA_apply_L1_step:
   fixes S1 S2 s01 s02 t1 t2 F1 F2 \<Sigma>
