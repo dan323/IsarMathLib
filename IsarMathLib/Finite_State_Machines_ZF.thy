@@ -3068,7 +3068,7 @@ proof-
     then show "{\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1})\<times>{1} \<subseteq> ?U"
       by blast
   qed
-  \<comment> \<open>Q2_mid \<subseteq> S2\<close>
+  (* Q2_mid \<subseteq> S2*)
   let ?Q2mid = "{t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1}"
   have Q2midS2:"?Q2mid \<subseteq> S2"
   proof
@@ -3084,11 +3084,11 @@ proof-
       then have "x\<in>S2" using \<open>q1\<in>F1 \<and> x=_\<close> by auto }
     ultimately show "x\<in>S2" by auto
   qed
-  \<comment> \<open>U \<in> Pow(S): needed for the second epsilon-closure\<close>
+  (* U \<in> Pow(S): needed for the second epsilon-closure*)
   have US:"?U\<in>Pow(concat_eNFSA_states(S1,S2))"
     using q1'S1 Q2midS2
     unfolding Uform concat_eNFSA_states_def by auto
-  \<comment> \<open>second epsilon-closure\<close>
+  (* second epsilon-closure*)
   have ecl2:"\<epsilon>-cl(S,t,\<Sigma>,?U) = ?U \<union> {x\<in>{\<langle>s02,1\<rangle>}. ?U\<inter>(F1\<times>1)\<noteq>0}"
     using concat_eNFSA_eps_closure[OF fin A1 A2 US] unfolding S_def t_def by auto
   have Uint:"?U\<inter>(F1\<times>1) = {x\<in>{\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}. t1`\<langle>q1,ltr\<rangle>\<in>F1}"
