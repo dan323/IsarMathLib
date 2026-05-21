@@ -2992,20 +2992,20 @@ of the form $\{\langle q_1,0\rangle\} \cup Q_2\times\{1\}$, produces a state set
 same form, with the side-0 singleton updated by the DFA transition of $A_1$.\<close>
 
 lemma exec_step_form:
-  fixes S1 S2 s01 s02 t1 t2 F1 F2 \<Sigma>
+  fixes S1 S2 s01 s02 t1 t2 F1 F2 \<Sigma> q1 Q2 ltr
   defines "t \<equiv> concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
   defines "S \<equiv> concat_eNFSA_states(S1,S2)"
   assumes fin:"Finite(\<Sigma>)"
   and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
   and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
-  and q1S1:"q1\<in>S1" and Q2S2:"Q2\<subseteq>S2" and aS:"a\<in>\<Sigma>"
-  shows "\<exists>Q2'\<subseteq>S2. \<epsilon>-cl(S,t,\<Sigma>,\<Union>{t`\<langle>ss,a\<rangle>. ss\<in>\<epsilon>-cl(S,t,\<Sigma>,{\<langle>q1,0\<rangle>}\<union>Q2\<times>{1})})
-                  = {\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>} \<union> Q2'\<times>{1}"
+  and q1S1:"q1\<in>S1" and Q2S2:"Q2\<subseteq>S2" and ltrS:"ltr\<in>\<Sigma>"
+  shows "\<exists>Q2'\<subseteq>S2. \<epsilon>-cl(S,t,\<Sigma>,\<Union>{t`\<langle>ss,ltr\<rangle>. ss\<in>\<epsilon>-cl(S,t,\<Sigma>,{\<langle>q1,0\<rangle>}\<union>Q2\<times>{1})})
+                  = {\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>} \<union> Q2'\<times>{1}"
 proof-
   have t1T:"t1:S1\<times>\<Sigma>\<rightarrow>S1" using A1 unfolding DFSA_def[OF fin] by auto
   have t2T:"t2:S2\<times>\<Sigma>\<rightarrow>S2" using A2 unfolding DFSA_def[OF fin] by auto
   have s02S2:"s02\<in>S2" using A2 unfolding DFSA_def[OF fin] by auto
-  have q1'S1:"t1`\<langle>q1,a\<rangle>\<in>S1" using apply_type[OF t1T] q1S1 aS by auto
+  have q1'S1:"t1`\<langle>q1,ltr\<rangle>\<in>S1" using apply_type[OF t1T] q1S1 ltrS by auto
   have RS:"{\<langle>q1,0\<rangle>}\<union>Q2\<times>{1}\<in>Pow(concat_eNFSA_states(S1,S2))"
     using q1S1 Q2S2 unfolding concat_eNFSA_states_def by auto
   \<comment> \<open>epsilon-closure of the starting set\<close>
@@ -3021,64 +3021,64 @@ proof-
   qed
   \<comment> \<open>union of t-images over the epsilon-closure\<close>
   let ?cl = "{\<langle>q1,0\<rangle>}\<union>Q2\<times>{1}\<union>{x\<in>{\<langle>s02,1\<rangle>}. q1\<in>F1}"
-  let ?U = "\<Union>{t`\<langle>ss,a\<rangle>. ss\<in>?cl}"
-  have step0:"t`\<langle>\<langle>q1,0\<rangle>,a\<rangle> = {t1`\<langle>q1,a\<rangle>}\<times>{0}"
-    using concat_eNFSA_eps_comp0'[OF fin A1 A2 q1S1 aS] unfolding t_def by auto
-  have stepR:"\<And>r. r\<in>Q2 \<Longrightarrow> t`\<langle>\<langle>r,1\<rangle>,a\<rangle> = {t2`\<langle>r,a\<rangle>}\<times>{1}"
-    using Q2S2 aS concat_eNFSA_eps_comp1'[OF fin A1 A2 _ aS] unfolding t_def by auto
-  have stepS02:"t`\<langle>\<langle>s02,1\<rangle>,a\<rangle> = {t2`\<langle>s02,a\<rangle>}\<times>{1}"
-    using concat_eNFSA_eps_comp1'[OF fin A1 A2 s02S2 aS] unfolding t_def by auto
-  have Uform:"?U = {\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>} \<union>
-    ({t2`\<langle>r,a\<rangle>. r\<in>Q2} \<union> {x\<in>{t2`\<langle>s02,a\<rangle>}. q1\<in>F1})\<times>{1}"
+  let ?U = "\<Union>{t`\<langle>ss,ltr\<rangle>. ss\<in>?cl}"
+  have step0:"t`\<langle>\<langle>q1,0\<rangle>,ltr\<rangle> = {t1`\<langle>q1,ltr\<rangle>}\<times>{0}"
+    using concat_eNFSA_eps_comp0'[OF fin A1 A2 q1S1 ltrS] unfolding t_def by auto
+  have stepR:"\<And>r. r\<in>Q2 \<Longrightarrow> t`\<langle>\<langle>r,1\<rangle>,ltr\<rangle> = {t2`\<langle>r,ltr\<rangle>}\<times>{1}"
+    using Q2S2 ltrS concat_eNFSA_eps_comp1'[OF fin A1 A2 _ ltrS] unfolding t_def by auto
+  have stepS02:"t`\<langle>\<langle>s02,1\<rangle>,ltr\<rangle> = {t2`\<langle>s02,ltr\<rangle>}\<times>{1}"
+    using concat_eNFSA_eps_comp1'[OF fin A1 A2 s02S2 ltrS] unfolding t_def by auto
+  have Uform:"?U = {\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>} \<union>
+    ({t2`\<langle>r,ltr\<rangle>. r\<in>Q2} \<union> {x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1})\<times>{1}"
   proof(rule equalityI)
     { fix x assume "x\<in>?U"
-      then obtain ss where ss:"ss\<in>?cl" "x\<in>t`\<langle>ss,a\<rangle>" by auto
+      then obtain ss where ss:"ss\<in>?cl" "x\<in>t`\<langle>ss,ltr\<rangle>" by auto
       from ss(1) have "ss=\<langle>q1,0\<rangle> \<or> (\<exists>r\<in>Q2. ss=\<langle>r,1\<rangle>) \<or> (q1\<in>F1 \<and> ss=\<langle>s02,1\<rangle>)" by auto
       moreover { assume "ss=\<langle>q1,0\<rangle>"
-        with ss(2) step0 have "x=\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>" by auto
-        then have "x\<in>{\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>}\<union>_" by auto }
+        with ss(2) step0 have "x=\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>" by auto
+        then have "x\<in>{\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}\<union>_" by auto }
       moreover { assume "\<exists>r\<in>Q2. ss=\<langle>r,1\<rangle>"
         then obtain r where r:"r\<in>Q2" "ss=\<langle>r,1\<rangle>" by auto
-        with ss(2) stepR[OF r(1)] have "x=\<langle>t2`\<langle>r,a\<rangle>,1\<rangle>" by auto
-        with r(1) have "x\<in>_\<union>({t2`\<langle>r,a\<rangle>. r\<in>Q2}\<union>_)\<times>{1}" by auto }
+        with ss(2) stepR[OF r(1)] have "x=\<langle>t2`\<langle>r,ltr\<rangle>,1\<rangle>" by auto
+        with r(1) have "x\<in>_\<union>({t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>_)\<times>{1}" by auto }
       moreover { assume "q1\<in>F1 \<and> ss=\<langle>s02,1\<rangle>"
-        with ss(2) stepS02 have "x=\<langle>t2`\<langle>s02,a\<rangle>,1\<rangle>" by auto
-        then have "x\<in>_\<union>(_\<union>{x\<in>{t2`\<langle>s02,a\<rangle>}. q1\<in>F1})\<times>{1}"
+        with ss(2) stepS02 have "x=\<langle>t2`\<langle>s02,ltr\<rangle>,1\<rangle>" by auto
+        then have "x\<in>_\<union>(_\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1})\<times>{1}"
           using \<open>q1\<in>F1 \<and> ss=\<langle>s02,1\<rangle>\<close> by auto }
-      ultimately have "x\<in>{\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,a\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,a\<rangle>}. q1\<in>F1})\<times>{1}"
+      ultimately have "x\<in>{\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1})\<times>{1}"
         by auto }
-    then show "?U \<subseteq> {\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,a\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,a\<rangle>}. q1\<in>F1})\<times>{1}" by auto
+    then show "?U \<subseteq> {\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1})\<times>{1}" by auto
     { fix x assume
-        "x\<in>{\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,a\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,a\<rangle>}. q1\<in>F1})\<times>{1}"
-      then have "x=\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle> \<or>
-        (\<exists>r\<in>Q2. x=\<langle>t2`\<langle>r,a\<rangle>,1\<rangle>) \<or> (q1\<in>F1 \<and> x=\<langle>t2`\<langle>s02,a\<rangle>,1\<rangle>)" by auto
-      moreover { assume "x=\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>"
-        then have "x\<in>t`\<langle>\<langle>q1,0\<rangle>,a\<rangle>" using step0 by auto
+        "x\<in>{\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1})\<times>{1}"
+      then have "x=\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle> \<or>
+        (\<exists>r\<in>Q2. x=\<langle>t2`\<langle>r,ltr\<rangle>,1\<rangle>) \<or> (q1\<in>F1 \<and> x=\<langle>t2`\<langle>s02,ltr\<rangle>,1\<rangle>)" by auto
+      moreover { assume "x=\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>"
+        then have "x\<in>t`\<langle>\<langle>q1,0\<rangle>,ltr\<rangle>" using step0 by auto
         then have "x\<in>?U" by auto }
-      moreover { assume "\<exists>r\<in>Q2. x=\<langle>t2`\<langle>r,a\<rangle>,1\<rangle>"
-        then obtain r where r:"r\<in>Q2" "x=\<langle>t2`\<langle>r,a\<rangle>,1\<rangle>" by auto
-        then have "x\<in>t`\<langle>\<langle>r,1\<rangle>,a\<rangle>" using stepR[OF r(1)] by auto
+      moreover { assume "\<exists>r\<in>Q2. x=\<langle>t2`\<langle>r,ltr\<rangle>,1\<rangle>"
+        then obtain r where r:"r\<in>Q2" "x=\<langle>t2`\<langle>r,ltr\<rangle>,1\<rangle>" by auto
+        then have "x\<in>t`\<langle>\<langle>r,1\<rangle>,ltr\<rangle>" using stepR[OF r(1)] by auto
         with r(1) have "x\<in>?U" by auto }
-      moreover { assume "q1\<in>F1 \<and> x=\<langle>t2`\<langle>s02,a\<rangle>,1\<rangle>"
-        then have "x\<in>t`\<langle>\<langle>s02,1\<rangle>,a\<rangle>" using stepS02 by auto
+      moreover { assume "q1\<in>F1 \<and> x=\<langle>t2`\<langle>s02,ltr\<rangle>,1\<rangle>"
+        then have "x\<in>t`\<langle>\<langle>s02,1\<rangle>,ltr\<rangle>" using stepS02 by auto
         then have "x\<in>?U" using \<open>q1\<in>F1 \<and> x=_\<close> by auto }
       ultimately have "x\<in>?U" by auto }
-    then show "{\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,a\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,a\<rangle>}. q1\<in>F1})\<times>{1} \<subseteq> ?U"
+    then show "{\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}\<union>({t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1})\<times>{1} \<subseteq> ?U"
       by auto
   qed
   \<comment> \<open>Q2_mid ⊆ S2\<close>
-  let ?Q2mid = "{t2`\<langle>r,a\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,a\<rangle>}. q1\<in>F1}"
+  let ?Q2mid = "{t2`\<langle>r,ltr\<rangle>. r\<in>Q2}\<union>{x\<in>{t2`\<langle>s02,ltr\<rangle>}. q1\<in>F1}"
   have Q2midS2:"?Q2mid \<subseteq> S2"
   proof
     fix x assume "x\<in>?Q2mid"
-    then have "(\<exists>r\<in>Q2. x=t2`\<langle>r,a\<rangle>) \<or> (q1\<in>F1 \<and> x=t2`\<langle>s02,a\<rangle>)" by auto
-    moreover { assume "\<exists>r\<in>Q2. x=t2`\<langle>r,a\<rangle>"
-      then obtain r where r:"r\<in>Q2" "x=t2`\<langle>r,a\<rangle>" by auto
+    then have "(\<exists>r\<in>Q2. x=t2`\<langle>r,ltr\<rangle>) \<or> (q1\<in>F1 \<and> x=t2`\<langle>s02,ltr\<rangle>)" by auto
+    moreover { assume "\<exists>r\<in>Q2. x=t2`\<langle>r,ltr\<rangle>"
+      then obtain r where r:"r\<in>Q2" "x=t2`\<langle>r,ltr\<rangle>" by auto
       from Q2S2 r(1) have "r\<in>S2" by auto
-      with aS have "t2`\<langle>r,a\<rangle>\<in>S2" using apply_type[OF t2T] by auto
+      with ltrS have "t2`\<langle>r,ltr\<rangle>\<in>S2" using apply_type[OF t2T] by auto
       with r(2) have "x\<in>S2" by auto }
-    moreover { assume "q1\<in>F1 \<and> x=t2`\<langle>s02,a\<rangle>"
-      with aS have "t2`\<langle>s02,a\<rangle>\<in>S2" using apply_type[OF t2T] s02S2 by auto
+    moreover { assume "q1\<in>F1 \<and> x=t2`\<langle>s02,ltr\<rangle>"
+      with ltrS have "t2`\<langle>s02,ltr\<rangle>\<in>S2" using apply_type[OF t2T] s02S2 by auto
       then have "x\<in>S2" using \<open>q1\<in>F1 \<and> x=_\<close> by auto }
     ultimately show "x\<in>S2" by auto
   qed
@@ -3089,16 +3089,16 @@ proof-
   \<comment> \<open>second epsilon-closure\<close>
   have ecl2:"\<epsilon>-cl(S,t,\<Sigma>,?U) = ?U \<union> {x\<in>{\<langle>s02,1\<rangle>}. ?U\<inter>(F1\<times>1)\<noteq>0}"
     using concat_eNFSA_eps_closure[OF fin A1 A2 US] unfolding S_def t_def by auto
-  have Uint:"?U\<inter>(F1\<times>1) = {x\<in>{\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>}. t1`\<langle>q1,a\<rangle>\<in>F1}"
+  have Uint:"?U\<inter>(F1\<times>1) = {x\<in>{\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>}. t1`\<langle>q1,ltr\<rangle>\<in>F1}"
     unfolding Uform by auto
-  have "\<epsilon>-cl(S,t,\<Sigma>,?U) = {\<langle>t1`\<langle>q1,a\<rangle>,0\<rangle>} \<union>
-    (?Q2mid \<union> {x\<in>{s02}. t1`\<langle>q1,a\<rangle>\<in>F1})\<times>{1}"
+  have "\<epsilon>-cl(S,t,\<Sigma>,?U) = {\<langle>t1`\<langle>q1,ltr\<rangle>,0\<rangle>} \<union>
+    (?Q2mid \<union> {x\<in>{s02}. t1`\<langle>q1,ltr\<rangle>\<in>F1})\<times>{1}"
     using ecl2 Uint Uform by auto
-  moreover have "?Q2mid \<union> {x\<in>{s02}. t1`\<langle>q1,a\<rangle>\<in>F1} \<subseteq> S2"
+  moreover have "?Q2mid \<union> {x\<in>{s02}. t1`\<langle>q1,ltr\<rangle>\<in>F1} \<subseteq> S2"
     using Q2midS2 s02S2 by auto
   ultimately show ?thesis
     using ecl
-    by (intro bexI[of _ "?Q2mid\<union>{x\<in>{s02}. t1`\<langle>q1,a\<rangle>\<in>F1}"]) auto
+    by (intro bexI[of _ "?Q2mid\<union>{x\<in>{s02}. t1`\<langle>q1,ltr\<rangle>\<in>F1}"]) auto
 qed
 
 text\<open>If the concat $\varepsilon$-NFSA executes word $w$ (non-empty) from $\{\langle s_{01},0\rangle\}$
@@ -3106,7 +3106,7 @@ and reaches $\langle v,Q\rangle$, then $Q$ has the form $\{\langle q_1,0\rangle\
 with $q_1\in S_1$, $Q_2\subseteq S_2$, and $A_1$ tracks the word: $\langle\langle w,s_{01}\rangle,\langle v,q_1\rangle\rangle\in r_{D_1}^*$.\<close>
 
 lemma exec_state_form:
-  fixes S1 S2 s01 s02 t1 t2 F1 F2 \<Sigma>
+  fixes S1 S2 s01 s02 t1 t2 F1 F2 \<Sigma> w v Q
   defines "t \<equiv> concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
   defines "S \<equiv> concat_eNFSA_states(S1,S2)"
   assumes fin:"Finite(\<Sigma>)"
