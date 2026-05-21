@@ -2964,6 +2964,28 @@ proof-
   with k_def(1,3) u show ?thesis by auto
 qed
 
+text\<open>The $\varepsilon$-closure of a set of side-1 states stays within side 1:
+for $T \subseteq S_2$ we have $\varepsilon$-cl$(S,t,\Sigma,T\times\{1\}) = T\times\{1\}$.
+This holds because the $\varepsilon$-transition from every side-1 state is empty
+(by \<open>concat_eNFSA_eps_comp1\<close>), so the closure adds nothing.\<close>
+
+lemma epsilon_cl_side1:
+  fixes S1 S2 s01 s02 t1 t2 F1 F2 \<Sigma>
+  defines "t \<equiv> concat_eNFSA_trans(S1,s01,t1,F1,S2,s02,t2,F2,\<Sigma>)"
+  defines "S \<equiv> concat_eNFSA_states(S1,S2)"
+  assumes fin:"Finite(\<Sigma>)"
+  and A1:"(S1,s01,t1,F1){is an DFSA for alphabet}\<Sigma>"
+  and A2:"(S2,s02,t2,F2){is an DFSA for alphabet}\<Sigma>"
+  and sig:"T\<subseteq>S2"
+  shows "\<epsilon>-cl(S,t,\<Sigma>,T\<times>{1}) = T\<times>{1}"
+proof-
+  have TS:"T\<times>{1}\<in>Pow(S)" using sig unfolding S_def concat_eNFSA_states_def by auto
+  have eq:"\<epsilon>-cl(S,t,\<Sigma>,T\<times>{1}) = T\<times>{1} \<union> {x\<in>{\<langle>s02,1\<rangle>}. (T\<times>{1})\<inter>(F1\<times>1)\<noteq>0}"
+    using concat_eNFSA_eps_closure[OF fin A1 A2 TS] unfolding S_def t_def by auto
+  have "(T\<times>{1})\<inter>(F1\<times>1) = 0" by auto
+  with eq show ?thesis by auto
+qed
+
 text\<open>The language of the product \<open>\<epsilon>\<close>-NFSA equals the concatenation
 of the two component languages.\<close>
 
