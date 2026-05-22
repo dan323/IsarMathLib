@@ -494,6 +494,7 @@ proof-
   then show ?thesis using DFSA_dest(1) by auto
 qed
 
+
 text\<open>Example of Finite Automaton of binary lists
 starting with $0$ and ending with $1$\<close>
 
@@ -2796,6 +2797,135 @@ proof-
   have "Init(Append(Concat(p,Init(b)),b`(k))) = Concat(p,Init(b))"
     using init_append[OF nk Cib bk] by auto
   with key show ?thesis by auto
+qed
+
+text\<open>Running a word of the form Concat(v,j) to v in a DFSA is
+the same as running j from the same starting state.\<close>
+
+lemma (in DetFinStateAuto) dfa_run_suffix:
+  assumes vL:"v\<in>Lists(\<Sigma>)" and jNE:"j\<in>NELists(\<Sigma>)"
+    and run:"\<langle>\<langle>Concat(v,j),s\<rangle>,\<langle>v,q\<rangle>\<rangle>\<in>r\<^sub>D^*"
+  shows "\<langle>\<langle>j,s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>r\<^sub>D^*"
+proof-
+  from jNE obtain n where n:"n\<in>nat" "j:succ(n)\<rightarrow>\<Sigma>" unfolding NELists_def by auto
+  let ?P="\<lambda>k. \<forall>v\<in>Lists(\<Sigma>). \<forall>j. j:succ(k)\<rightarrow>\<Sigma> \<longrightarrow>
+      (\<forall>s q. \<langle>\<langle>Concat(v,j),s\<rangle>,\<langle>v,q\<rangle>\<rangle>\<in>r\<^sub>D^* \<longrightarrow> \<langle>\<langle>j,s\<rangle>,\<langle>0,q\<rangle>\<rangle>\<in>r\<^sub>D^*)"
+  \<comment> \<open>Base case: j is a one-element list\<close>
+  have base:"?P(0)"
+  proof(intro ballI allI impI)
+    fix v' j' s' q'
+    assume vL':"v'\<in>Lists(\<Sigma>)" and j1':"j':succ(0)\<rightarrow>\<Sigma>"
+      and run1':"\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle>\<in>r\<^sub>D^*"
+    from j1' nat_0I have jNE':"j'\<in>NELists(\<Sigma>)" unfolding NELists_def by auto
+    from j1' nat_0I have initj':"Init(j'):0\<rightarrow>\<Sigma>" using init_props(1)[of 0 j'] by auto
+    then have initj'0:"Init(j')=0" unfolding Pi_def function_def by auto
+    have lastj':"Last(j')\<in>\<Sigma>" using last_type[OF jNE'] by auto
+    have Cvj':"Concat(v',j')\<in>NELists(\<Sigma>)" using concat_is_NElist[OF vL' jNE'] by auto
+    \<comment> \<open>Extract first step: id case is impossible because domains differ\<close>
+    have "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle> \<in> id(field(r\<^sub>D)) \<union> (r\<^sub>D^* O r\<^sub>D)"
+      using rtrancl_rev[of r\<^sub>D] run1' by auto
+    then have "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle> \<in> r\<^sub>D^* O r\<^sub>D"
+    proof
+      assume id:"\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle>\<in>id(field(r\<^sub>D))"
+      then have ceq:"Concat(v',j')=v'" by auto
+      from vL' obtain m where m:"m\<in>nat" "v':m\<rightarrow>\<Sigma>" unfolding Lists_def by auto
+      have "Concat(v',j'):m#+succ(0)\<rightarrow>\<Sigma>" using concat_props(1)[OF m(1) nat_succI[OF nat_0I] m(2) j1'] by auto
+      with ceq m(2) have "m#+succ(0) = m" using domain_of_fun[of v' m "\<lambda>_. \<Sigma>"] domain_of_fun[of "Concat(v',j')" "m #+ 1" "\<lambda>_. \<Sigma>"] by auto
+      with m(1) have "succ(m) = m" using add_succ_right by auto
+      then have "m\<in>m" using succ_iff[of m m] by auto
+      then show ?thesis using mem_irrefl[of m] by auto
+    next
+      assume "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle> \<in> r\<^sub>D^* O r\<^sub>D" 
+      then show "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle> \<in> r\<^sub>D^* O r\<^sub>D" .
+    qed
+    then have "\<And>P. (\<And>y. \<langle>\<langle>Concat(v',j'),s'\<rangle>,y\<rangle>\<in>r\<^sub>D \<Longrightarrow> \<langle>y,\<langle>v',q'\<rangle>\<rangle>\<in>r\<^sub>D^* \<Longrightarrow> P) \<Longrightarrow> P"
+      using compE[of "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle>" "r\<^sub>D" "r\<^sub>D^*"] by auto
+    then obtain y where step:"\<langle>\<langle>Concat(v',j'),s'\<rangle>,y\<rangle>\<in>r\<^sub>D" "\<langle>y,\<langle>v',q'\<rangle>\<rangle>\<in>r\<^sub>D^*" .
+    from step(1) have yww:
+      "y=\<langle>Init(Concat(v',j')),t`\<langle>s',Last(Concat(v',j'))\<rangle>\<rangle>"
+      unfolding DFSAExecutionRelation_def[OF finite_alphabet DFSA] by auto
+    have lastEq:"Last(Concat(v',j'))=Last(j')" using concat_last_NElist[OF vL' jNE'] by auto
+    have initEq:"Init(Concat(v',j'))=Concat(v',Init(j'))"
+      using concat_init_NElist[OF vL' jNE'] by auto
+    from yww lastEq initEq initj'0 have yeq:
+      "y=\<langle>Concat(v',0),t`\<langle>s',Last(j')\<rangle>\<rangle>" by auto
+    have "Concat(v',0)=v'" using concat_0_left[OF vL'] by auto
+    with yeq have yeq2:"y=\<langle>v',t`\<langle>s',Last(j')\<rangle>\<rangle>" by auto
+    \<comment> \<open>Remaining run from v' forces q'=t(s',Last(j'))\<close>
+    from step(2) yeq2 have remrun:"\<langle>\<langle>v',t`\<langle>s',Last(j')\<rangle>\<rangle>,\<langle>v',q'\<rangle>\<rangle>\<in>r\<^sub>D^*" by auto
+    from remrun have "\<langle>v',t`\<langle>s',Last(j')\<rangle>\<rangle>\<in>field(r\<^sub>D)"
+      using rtrancl_field relation_field_times_field[OF relation_rtrancl[of r\<^sub>D]] by auto
+    then have rfld:"\<langle>\<langle>v',t`\<langle>s',Last(j')\<rangle>\<rangle>,\<langle>v',t`\<langle>s',Last(j')\<rangle>\<rangle>\<rangle>\<in>r\<^sub>D^*"
+      using rtrancl_refl by auto
+    from remrun rfld have q'eq:"q'=t`\<langle>s',Last(j')\<rangle>" using relation_deteministic by blast
+    \<comment> \<open>One step on j' gives the conclusion\<close>
+    have jstep:"\<langle>\<langle>j',s'\<rangle>,\<langle>Init(j'),t`\<langle>s',Last(j')\<rangle>\<rangle>\<rangle>\<in>r\<^sub>D"
+  using step(1) unfolding DFSAExecutionRelation_def[OF finite_alphabet DFSA]
+      using jNE' by auto
+    from jstep initj'0 q'eq show "\<langle>\<langle>j',s'\<rangle>,\<langle>0,q'\<rangle>\<rangle>\<in>r\<^sub>D^*"
+      using r_into_rtrancl by auto
+  qed
+  \<comment> \<open>Inductive step: Init(j) has type succ(k), apply IH\<close>
+  have step:"\<And>k. k\<in>nat \<Longrightarrow> ?P(k) \<Longrightarrow> ?P(succ(k))"
+  proof-
+    fix k assume kn:"k\<in>nat" and IH:"?P(k)"
+    show "?P(succ(k))"
+    proof(intro ballI allI impI)
+    fix v' j' s' q'
+    assume vL':"v'\<in>Lists(\<Sigma>)" and jk':"j':succ(succ(k))\<rightarrow>\<Sigma>"
+      and run':"\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle>\<in>r\<^sub>D^*"
+    from jk' nat_succI[OF kn] have jNE':"j'\<in>NELists(\<Sigma>)" unfolding NELists_def by auto
+    from jk' kn have initj':"Init(j'):succ(k)\<rightarrow>\<Sigma>" using init_props(1)[OF nat_succI[OF kn]] by auto
+    then have initjNE':"Init(j')\<in>NELists(\<Sigma>)" unfolding NELists_def using kn by auto
+    have lastj':"Last(j')\<in>\<Sigma>" using last_type[OF jNE'] by auto
+    have Cvj':"Concat(v',j')\<in>NELists(\<Sigma>)" using concat_is_NElist[OF vL' jNE'] by auto
+    \<comment> \<open>Extract first step\<close>
+    have "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle> \<in> id(field(r\<^sub>D)) \<union> (r\<^sub>D^* O r\<^sub>D)"
+      using rtrancl_rev[of r\<^sub>D] run' by auto
+    then have "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle> \<in> r\<^sub>D^* O r\<^sub>D"
+    proof
+      assume id:"\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle>\<in>id(field(r\<^sub>D))"
+      then have ceq:"Concat(v',j')=v'" by auto
+      from vL' obtain m where m:"m\<in>nat" "v':m\<rightarrow>\<Sigma>" unfolding Lists_def by auto
+      have "Concat(v',j'):m#+succ(succ(k))\<rightarrow>\<Sigma>" using concat_props(1)[OF m(1) _ m(2) jk'] nat_succI kn by auto
+      with ceq m(2) have "m#+succ(succ(k)) = m" using domain_of_fun[of v' m "\<lambda>_. \<Sigma>"] domain_of_fun[of "Concat(v',j')" "m #+ succ(succ(k))" "\<lambda>_. \<Sigma>"] by auto
+      with m(1) have "succ(m) = m" using add_succ_right by auto
+      then have "m\<in>m" using succ_iff[of m m] by auto
+      then show ?thesis using mem_irrefl[of m] by auto
+    next
+      assume "\<langle>\<langle>Concat(v',j'),s'\<rangle>,\<langle>v',q'\<rangle>\<rangle> \<in> r\<^sub>D^* O r\<^sub>D" 
+      then show ?thesis by assumption
+    qed
+    then obtain y where step':"\<langle>\<langle>Concat(v',j'),s'\<rangle>,y\<rangle>\<in>r\<^sub>D" "\<langle>y,\<langle>v',q'\<rangle>\<rangle>\<in>r\<^sub>D^*"
+      using compE by auto
+    from step'(1) obtain ww ss where yww:
+      "ww\<in>NELists(\<Sigma>)" "ss\<in>S" "y=\<langle>Init(ww),t`\<langle>ss,Last(ww)\<rangle>\<rangle>"
+      "\<langle>Concat(v',j'),s'\<rangle>=\<langle>ww,ss\<rangle>"
+      unfolding DFSAExecutionRelation_def[OF finite_alphabet DFSA] by auto
+    from yww(4) have wweq:"ww=Concat(v',j')" "ss=s'" by auto
+    have lastEq:"Last(Concat(v',j'))=Last(j')" using concat_last_NElist[OF vL' jNE'] by auto
+    have initEq:"Init(Concat(v',j'))=Concat(v',Init(j'))"
+      using concat_init_NElist[OF vL' jNE'] by auto
+    from yww(3) wweq lastEq initEq have yeq:
+      "y=\<langle>Concat(v',Init(j')),t`\<langle>s',Last(j')\<rangle>\<rangle>" by auto
+    from step'(2) yeq have remrun:
+      "\<langle>\<langle>Concat(v',Init(j')),t`\<langle>s',Last(j')\<rangle>\<rangle>,\<langle>v',q'\<rangle>\<rangle>\<in>r\<^sub>D^*" by auto
+    \<comment> \<open>Apply IH to Init(j') to get run from Init(j')\<close>
+    from IH initj' vL' have
+      "\<forall>s'' q''. \<langle>\<langle>Concat(v',Init(j')),s''\<rangle>,\<langle>v',q''\<rangle>\<rangle>\<in>r\<^sub>D^* \<longrightarrow>
+          \<langle>\<langle>Init(j'),s''\<rangle>,\<langle>0,q''\<rangle>\<rangle>\<in>r\<^sub>D^*" by auto
+    with remrun have IHresult:
+      "\<langle>\<langle>Init(j'),t`\<langle>s',Last(j')\<rangle>\<rangle>,\<langle>0,q'\<rangle>\<rangle>\<in>r\<^sub>D^*" by auto
+    \<comment> \<open>One step on j' then chain\<close>
+    have jstep:"\<langle>\<langle>j',s'\<rangle>,\<langle>Init(j'),t`\<langle>s',Last(j')\<rangle>\<rangle>\<rangle>\<in>r\<^sub>D"
+      unfolding DFSAExecutionRelation_def[OF finite_alphabet DFSA]
+      using jNE' yww(2) wweq(2) by auto
+    from jstep IHresult show "\<langle>\<langle>j',s'\<rangle>,\<langle>0,q'\<rangle>\<rangle>\<in>r\<^sub>D^*"
+      using rtrancl_into_trancl2 trancl_into_rtrancl by auto
+    qed
+  qed
+  from step have "?P(n)" using nat_induct[of _ ?P, OF n(1) base] by auto
+  with vL n(2) run show ?thesis by auto
 qed
 
 text\<open>Once L1 is reached, the relation is equivalent to its DFSA\<close>
