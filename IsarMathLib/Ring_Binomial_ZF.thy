@@ -41,32 +41,12 @@ text\<open>The binomial theorem asserts that for any two elements of a commutati
   of such multiplicities and powers of ring elements. We show the binomial theorem as 
   an application. \<close>
 
-text\<open>The next locale (context) extends the \<open>ring0\<close> locale with notation for powers, 
-  multiplicities and sums and products of finite lists of ring elements.\<close>
-
-locale ring3 = ring0 +
-
-  fixes listprod ("\<Prod> _" 70)
-  defines listprod_def [simp]: "\<Prod>s \<equiv> Fold(M,\<one>,s)"
-
-  fixes pow
-  defines pow_def [simp]: "pow(n,x) \<equiv> \<Prod>{\<langle>k,x\<rangle>. k\<in>n}"
 
 text\<open>A ring with addition forms a monoid, hence all propositions proven in the \<open>monoid1\<close> locale
-  (defined in the \<open>Monoid_ZF_1\<close> theory) can be used in the \<open>ring3\<close> locale, applied to the 
+  (defined in the \<open>Monoid_ZF_1\<close> theory) can be used in the \<open>ring0\<close> locale, applied to the 
   additive operation. \<close>
 
 sublocale ring0 < add_monoid: monoid1 R A ringa ringzero rlistsum rnat_mult 
-  using ringAssum 
-  unfolding IsAring_def IsAgroup_def monoid1_def monoid0_def 
-  by auto
-
-text\<open>A ring with multiplication forms a monoid, hence all propositions proven in the \<open>monoid1\<close> locale
-  (defined in the \<open>Monoid_ZF_1\<close> theory) can be used in the \<open>ring3\<close> locale, applied to the
-  multiplicative operation. 
-  (For some reason the sublocale below is not seen by Isabelle when we try to use it). \<close>
-
-sublocale ring3 < mul_monoid: monoid1 R M ringm ringone listprod pow
   using ringAssum 
   unfolding IsAring_def IsAgroup_def monoid1_def monoid0_def 
   by auto
@@ -82,28 +62,28 @@ text\<open>$0\cdot x = 0$ and $x^0=1$. It is a bit surprising that we do not nee
   that $x\in R$ (i.e. $x$ is an element of the ring). These properties are really proven in the \<open>Monoid_ZF_1\<close> 
   theory where there is no assumption that $x$ is an element of the monoid. \<close>
 
-lemma (in ring3) mult_pow_zero: shows "0\<nm>x = \<zero>" and "pow(0,x) = \<one>"
-  using monoid0_valid_in_ring0 monoid1.nat_mult_zero mul_monoid.nat_mult_zero by simp_all
+lemma (in ring0) mult_pow_zero: shows "0\<nm>x = \<zero>" and "pow(0,x) = \<one>"
+  using monoid0_valid_in_ring0 monoid1.nat_mult_zero mult_monoid.nat_mult_zero by simp_all
 
 text\<open>Natural multiple and power of a ring element is a ring element.\<close>
 
-lemma (in ring3) mult_pow_type: assumes "n\<in>nat" "x\<in>R"
+lemma (in ring0) mult_pow_type: assumes "n\<in>nat" "x\<in>R"
   shows "n\<nm>x \<in> R" and "pow(n,x) \<in> R"
-  using assms monoid0_valid_in_ring0 monoid1.nat_mult_type mul_monoid.nat_mult_type 
+  using assms monoid0_valid_in_ring0 monoid1.nat_mult_type mult_monoid.nat_mult_type 
   by simp_all
 
 text\<open>The usual properties of multiples and powers: $(n+1)x = nx+x$ and 
   $x^n+1=x^n x$. These are just versions of \<open>nat_mult_add_one\<close> from \<open>Monoid_ZF_1\<close>
-  writtent in the notation defined in the \<open>ring3\<close> locale.\<close>
+  writtent in the notation defined in the \<open>ring0\<close> locale.\<close>
 
-lemma (in ring3) nat_mult_pow_add_one: assumes  "n\<in>nat" "x\<in>R"
+lemma (in ring0) nat_mult_pow_add_one: assumes  "n\<in>nat" "x\<in>R"
   shows "(n #+ 1)\<nm>x = (n\<nm>x) \<ra> x" and "pow(n #+ 1,x) = pow(n,x)\<cdot>x"
-  using assms monoid0_valid_in_ring0 monoid1.nat_mult_add_one mul_monoid.nat_mult_add_one 
+  using assms monoid0_valid_in_ring0 monoid1.nat_mult_add_one mult_monoid.nat_mult_add_one 
   by simp_all
 
 text\<open>Associativity for the multiplication by natural number and the ring multiplication:\<close>
 
-lemma (in ring3) nat_mult_assoc: assumes "n\<in>nat" "x\<in>R" "y\<in>R"
+lemma (in ring0) nat_mult_assoc: assumes "n\<in>nat" "x\<in>R" "y\<in>R"
   shows "n\<nm>x\<cdot>y = n\<nm>(x\<cdot>y)"
 proof -
   from assms(1,3) have "n\<in>nat" and "0\<nm>x\<cdot>y = 0\<nm>(x\<cdot>y)"
@@ -117,23 +97,23 @@ qed
 
 text\<open>Addition of natural numbers is distributive with respect to natural multiple.
   This is essentially lemma \<open>nat_mult_add\<close> from \<open>Monoid_ZF_1.thy\<close>, just transferred
-  to the \<open>ring3\<close> locale.\<close>
+  to the \<open>ring0\<close> locale.\<close>
 
-lemma (in ring3) nat_add_mult_distrib: assumes "n\<in>nat" "m\<in>nat" "x\<in>R"
+lemma (in ring0) nat_add_mult_distrib: assumes "n\<in>nat" "m\<in>nat" "x\<in>R"
   shows "(n #+ m)\<nm>x = n\<nm>x \<ra> m\<nm>x"
   using assms monoid0_valid_in_ring0 monoid1.nat_mult_add by simp
 
 text\<open>Associativity for the multiplication by natural number and the ring multiplication
   extended to three elements of the ring:\<close>
 
-lemma (in ring3) nat_mult_assoc1: assumes "n\<in>nat" "x\<in>R" "y\<in>R" "z\<in>R" 
+lemma (in ring0) nat_mult_assoc1: assumes "n\<in>nat" "x\<in>R" "y\<in>R" "z\<in>R" 
   shows "n\<nm>x\<cdot>y\<cdot>z = n\<nm>(x\<cdot>y\<cdot>z)"
   using assms Ring_ZF_1_L4(3) nat_mult_assoc by simp
 
 text\<open>When we multiply an expression whose value belongs to a ring by a ring element 
   and we get an expression whose value belongs to a ring.\<close>
 
-lemma (in ring3) mult_elem_ring_type: 
+lemma (in ring0) mult_elem_ring_type: 
   assumes "n\<in>nat" "x\<in>R" and "\<forall>k\<in>n. q(k) \<in> R" 
   shows "\<forall>k\<in>n. q(k)\<cdot>x \<in> R" and "(\<Sum>{\<langle>k,q(k)\<cdot>x\<rangle>. k\<in>n}) \<in> R"
   using assms Ring_ZF_1_L4(3) monoid0_valid_in_ring0 monoid1.sum_in_mono by simp_all
@@ -141,7 +121,7 @@ lemma (in ring3) mult_elem_ring_type:
 text\<open>The sum of expressions whose values belong to a ring is an expression
   whose value belongs to a ring. \<close>
 
-lemma (in ring3) sum_expr_ring_type: 
+lemma (in ring0) sum_expr_ring_type: 
   assumes "n\<in>nat" "\<forall>k\<in>n. q(k) \<in> R" "\<forall>k\<in>n. p(k) \<in> R"
   shows "\<forall>k\<in>n. q(k)\<ra>p(k) \<in> R" and "(\<Sum>{\<langle>k,q(k)\<ra>p(k)\<rangle>. k\<in>n}) \<in> R"
   using assms Ring_ZF_1_L4(1) monoid0_valid_in_ring0 monoid1.sum_in_mono by simp_all
@@ -150,7 +130,7 @@ text\<open>Combining \<open>mult_elem_ring_type\<close> and \<open>sum_expr_ring
   a (kind of) linear combination of expressions whose values belong to a ring
   belongs to the ring. \<close>
 
-lemma (in ring3) lin_comb_expr_ring_type:
+lemma (in ring0) lin_comb_expr_ring_type:
   assumes "n\<in>nat" "x\<in>R"  "y\<in>R" "\<forall>k\<in>n. q(k) \<in> R" "\<forall>k\<in>n. p(k) \<in> R"
   shows "\<forall>k\<in>n. q(k)\<cdot>x\<ra>p(k)\<cdot>y \<in> R" and 
     "(\<Sum>{\<langle>k,q(k)\<cdot>x\<ra>p(k)\<cdot>y\<rangle>. k\<in>n}) \<in> R"
@@ -163,9 +143,9 @@ proof -
     using monoid0_valid_in_ring0 monoid1.sum_in_mono by simp
 qed
 
-text\<open>A \<open>ring3\<close> version of \<open>seq_sum_pull_one_elem\<close> from \<open>Monoid_ZF_1\<close>: \<close>
+text\<open>A \<open>ring0\<close> version of \<open>seq_sum_pull_one_elem\<close> from \<open>Monoid_ZF_1\<close>: \<close>
 
-lemma (in ring3) rng_seq_sum_pull_one_elem:
+lemma (in ring0) rng_seq_sum_pull_one_elem:
   assumes "j \<in> nat" "\<forall>k\<in>j #+ 1. q(k) \<in> R"
   shows
     "(\<Sum>{\<langle>k,q(k)\<rangle>. k\<in>j #+ 1}) = q(0)\<ra>(\<Sum>{\<langle>k,q(k #+ 1)\<rangle>. k\<in>j})"
@@ -176,7 +156,7 @@ text\<open>Distributive laws for finite sums in a ring:
   $(\sum_{k=0}^{n-1}q(k))\cdot x = \sum_{k=0}^{n-1}q(k)\cdot x$ and 
   $x\cdot (\sum_{k=0}^{n-1}q(k)) = \sum_{k=0}^{n-1}x\cdot q(k)$. \<close>
 
-theorem (in ring3) fin_sum_distrib: 
+theorem (in ring0) fin_sum_distrib: 
   assumes "x\<in>R"  "n\<in>nat" "\<forall>k\<in>n. q(k) \<in> R" 
   shows 
     "(\<Sum>{\<langle>k,q(k)\<rangle>. k\<in>n})\<cdot>x = \<Sum>{\<langle>k,q(k)\<cdot>x\<rangle>. k\<in>n}"
@@ -272,22 +252,22 @@ text\<open>In rings we have
   we do not need the assumption about commutativity of the operation as addition in rings
   is always commutative. \<close>
 
-lemma (in ring3) sum_ring_distrib: 
+lemma (in ring0) sum_ring_distrib: 
   assumes "n\<in>nat" and  "\<forall>k\<in>n. p(k) \<in> R" "\<forall>k\<in>n. q(k) \<in> R"
   shows
     "(\<Sum>{\<langle>k,p(k)\<ra>q(k)\<rangle>. k\<in>n}) = (\<Sum>{\<langle>k,p(k)\<rangle>. k\<in>n}) \<ra> (\<Sum>{\<langle>k,q(k)\<rangle>. k\<in>n})"
-  using assms Ring_ZF_1_L1(3) monoid0_valid_in_ring0 monoid1.sum_comm_distrib by simp
+  using assms Ring_ZF_1_L1(4) monoid0_valid_in_ring0 monoid1.sum_comm_distrib by simp
 
 text\<open>To shorten the notation in the proof of the binomial theorem we give a name to the
   binomial term ${n \choose k} x^{n-k} y^k$.\<close>
 
-definition (in ring3) BT where
+definition (in ring0) BT where
   "BT(n,k,x,y) \<equiv> Binom(n,k)\<nm>pow(n #- k,x)\<cdot>pow(k,y)"
 
 text\<open>If $n,k$ are natural numbers and $x,y$ are ring elements then the binomial term is 
   an element of the ring. \<close>
 
-lemma (in ring3) bt_type: assumes "n\<in>nat" "k\<in>nat" "x\<in>R" "y\<in>R" 
+lemma (in ring0) bt_type: assumes "n\<in>nat" "k\<in>nat" "x\<in>R" "y\<in>R" 
   shows "BT(n,k,x,y) \<in> R"
   using assms mult_pow_type binom_in_nat Ring_ZF_1_L4(3)
   unfolding BT_def by simp
@@ -295,14 +275,14 @@ lemma (in ring3) bt_type: assumes "n\<in>nat" "k\<in>nat" "x\<in>R" "y\<in>R"
 text\<open>The binomial term is $1$ when the $n=0$ and $k=0$. 
   Somehow we do not need the assumption that $x,y$ are ring elements. \<close>
 
-lemma (in ring3) bt_at_zero: shows "BT(0,0,x,y) = \<one>"
+lemma (in ring0) bt_at_zero: shows "BT(0,0,x,y) = \<one>"
   using binom_zero_zero mult_pow_zero(2) monoid0_valid_in_ring0 monoid1.nat_mult_one 
         Ring_ZF_1_L2(2) Ring_ZF_1_L3(5)
   unfolding BT_def by simp
 
 text\<open>The binomial term is $x^n$ when $k=0$. \<close>
 
-lemma (in ring3) bt_at_zero1: assumes "n\<in>nat" "x\<in>R"
+lemma (in ring0) bt_at_zero1: assumes "n\<in>nat" "x\<in>R"
   shows "BT(n,0,x,y) = pow(n,x)" 
   unfolding BT_def using assms mult_pow_zero(2) binom_left_boundary
     mult_pow_type(2) monoid0_valid_in_ring0 monoid1.nat_mult_one Ring_ZF_1_L3(5) 
@@ -310,13 +290,13 @@ lemma (in ring3) bt_at_zero1: assumes "n\<in>nat" "x\<in>R"
 
 text\<open>When $k=0$ multiplying the binomial term by $x$ is the same as adding one to $n$. \<close>
 
-lemma (in ring3) bt_at_zero2: assumes "n\<in>nat" "x\<in>R"
+lemma (in ring0) bt_at_zero2: assumes "n\<in>nat" "x\<in>R"
   shows "BT(n,0,x,y)\<cdot>x = BT(n #+ 1,0,x,y)"
   using assms bt_at_zero1 nat_mult_pow_add_one(2) by simp
 
 text\<open>The binomial term is $y^n$ when $k=n$.\<close>
 
-lemma (in ring3) bt_at_right: assumes "n\<in>nat" "y\<in>R"
+lemma (in ring0) bt_at_right: assumes "n\<in>nat" "y\<in>R"
   shows "BT(n,n,x,y) = pow(n,y)" 
   unfolding BT_def using assms binom_right_boundary mult_pow_zero(2)
     monoid0_valid_in_ring0 monoid1.nat_mult_one Ring_ZF_1_L2(2) mult_pow_type(2) Ring_ZF_1_L3(6)
@@ -324,13 +304,13 @@ lemma (in ring3) bt_at_right: assumes "n\<in>nat" "y\<in>R"
 
 text\<open>When $k=n$ multiplying the binomial term by $x$ is the same as adding one to $n$. \<close>
 
-lemma (in ring3) bt_at_right1: assumes "n\<in>nat" "y\<in>R"
+lemma (in ring0) bt_at_right1: assumes "n\<in>nat" "y\<in>R"
   shows "BT(n,n,x,y)\<cdot>y = BT(n #+ 1,n #+ 1,x,y)"
   using assms bt_at_right nat_mult_pow_add_one(2) by simp
 
 text\<open>A key identity for binomial terms needed for the proof of the binomial theorem:\<close>
 
-lemma (in ring3) bt_rec_identity: 
+lemma (in ring0) bt_rec_identity: 
   assumes "M {is commutative on} R" "j\<in>nat" "k\<in>j" "x\<in>R" "y\<in>R"
   shows 
     "BT(j,k #+ 1,x,y)\<cdot>x \<ra> BT(j,k,x,y)\<cdot>y = BT(j #+ 1,k #+ 1,x,y)"
@@ -379,7 +359,7 @@ qed
 text\<open>The binomial theorem: if $x,y$ are elements of a commutative ring, $n\in \mathbb{N}$
    then $(x+y)^n = \sum_{k=0}^{n} {n \choose k} x^{n-k} y^k$.\<close>
 
-theorem (in ring3) binomial_theorem: 
+theorem (in ring0) binomial_theorem: 
   assumes "M {is commutative on} R" "n\<in>nat" "x\<in>R" "y\<in>R"
   shows 
     "pow(n,x\<ra>y) = \<Sum>{\<langle>k,Binom(n,k)\<nm>pow(n #- k,x) \<cdot> pow(k,y)\<rangle>. k\<in>n #+ 1}"

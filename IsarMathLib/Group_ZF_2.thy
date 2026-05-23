@@ -821,15 +821,14 @@ lemma (in group0) endomor_eq: assumes "f \<in> End(G,P)" "g\<^sub>1\<in>G" "g\<^
   using assms homomor_eq unfolding End_def by auto
 
 text\<open>A function that maps a group $G$ into itself and satisfies 
-  $f(g_1\cdot g2) = f(g_1)\cdot f(g_2)$ is an endomorphism.\<close>
+  $f(g_1\cdot g_2) = f(g_1)\cdot f(g_2)$ is an endomorphism.\<close>
 
 lemma (in group0) eq_endomor: 
   assumes "f:G\<rightarrow>G" and "\<forall>g\<^sub>1\<in>G. \<forall>g\<^sub>2\<in>G. f`(g\<^sub>1\<cdot>g\<^sub>2)=f`(g\<^sub>1)\<cdot>f`(g\<^sub>2)"
   shows "f \<in> End(G,P)"
   using assms  unfolding End_def Homomor_def IsMorphism_def by simp
 
-text\<open>The set of endomorphisms forms a submonoid of the monoid of function
-from a set to that set under composition.\<close>
+text\<open>The value of the composition function on a pair of endomorphisms is an endomorphism.\<close>
 
 lemma (in group0) end_composition:
   assumes "f\<^sub>1\<in>End(G,P)" "f\<^sub>2\<in>End(G,P)"
@@ -852,6 +851,14 @@ text\<open>We will use some binary operations that are naturally defined on the 
 
 abbreviation InEnd("_ {in End} [_,_]")
   where "InEnd(F,G,P) \<equiv> restrict(F,End(G,P)\<times>End(G,P))"
+
+text\<open>The value of the composition operation restricted to endomorphisms
+  on a pair of endomorphisms is indeed the composition of the elements of the pair.\<close>
+
+lemma (in group0) inend_composition_val: 
+  assumes "f\<in>End(G,P)" "g\<in>End(G,P)" 
+  shows "InEnd(Composition(G),G,P)`\<langle>f,g\<rangle> = (f O g)"
+  using assms func_ZF_5_L2 unfolding End_def by simp  
 
 text\<open>Endomoprhisms of a group form a monoid with composition as the binary operation,
   and the identity map as the neutral element.\<close>

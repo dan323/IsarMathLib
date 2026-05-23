@@ -1,7 +1,7 @@
 (*   This file is a part of IsarMathLib - 
     a library of formalized mathematics for Isabelle/Isar.
 
-    Copyright (C) 2005, 2006  Slawomir Kolodynski
+    Copyright (C) 2005-2026  Slawomir Kolodynski
 
     This program is free software; Redistribution and use in source and binary forms, 
     with or without modification, are permitted provided that the following conditions are met:
@@ -76,7 +76,7 @@ locale field1 = ring1 +
   assumes inv_exists: "\<forall>a\<in>R. a\<noteq>\<zero> \<longrightarrow> (\<exists>b\<in>R. a\<cdot>b = \<one>)"
 
   fixes non_zero ("R\<^sub>0")
-  defines non_zero_def[simp]: "R\<^sub>0 \<equiv> R-{\<zero>}"
+  defines non_zero_def[simp]: "R\<^sub>0 \<equiv> R\<setminus>{\<zero>}"
 
   fixes inv ("_\<inverse> " [96] 97)
   defines inv_def[simp]: "a\<inverse> \<equiv> GroupInv(R\<^sub>0,restrict(M,R\<^sub>0\<times>R\<^sub>0))`(a)"
@@ -208,6 +208,25 @@ proof -
     by simp
   from I show  "a\<cdot>(a\<inverse>) = \<one>"  "(a\<inverse>)\<cdot>a = \<one>"
     using OrdField_ZF_1_L7 by auto
+qed
+
+text\<open>in an ordered field the set of positive elements forms a group under
+  multiplication restricted to it.\<close>
+
+lemma (in field1) pos_mul_group: 
+  shows "IsAgroup(R\<^sub>+,restrict(M,R\<^sub>+\<times>R\<^sub>+))"
+proof -
+  let ?M\<^sub>0 = "restrict(M,R\<^sub>0\<times>R\<^sub>0)"
+  from not_triv have "group0(R\<^sub>0,?M\<^sub>0)" "R\<^sub>+\<noteq>\<emptyset>" "R\<^sub>+\<subseteq>R\<^sub>0" 
+    "R\<^sub>+ {is closed under} ?M\<^sub>0" "\<forall>x\<in>R\<^sub>+. GroupInv(R\<^sub>0,?M\<^sub>0)`(x) \<in> R\<^sub>+"
+    using OrdField_ZF_1_L1B field0.Field_ZF_1_L4 
+      ordring_one_is_pos(1) ordring_pos_subset(2) OrdField_ZF_1_L5 
+      func_ZF_4_L5 OrdField_ZF_1_L8(1) by auto
+  then have "IsAgroup(R\<^sub>+,restrict(?M\<^sub>0,R\<^sub>+\<times>R\<^sub>+))" 
+    using group0.group0_3_T3 unfolding IsAsubgroup_def by blast
+  from \<open>R\<^sub>+\<subseteq>R\<^sub>0\<close> have "R\<^sub>+\<times>R\<^sub>+ \<subseteq> R\<^sub>0\<times>R\<^sub>0" by auto
+  with \<open>IsAgroup(R\<^sub>+,restrict(?M\<^sub>0,R\<^sub>+\<times>R\<^sub>+))\<close> show ?thesis
+    using restrict_restric_subset by simp
 qed
 
 text\<open>$\frac{1}{2}$ is a positive member of the field.\<close>

@@ -126,7 +126,7 @@ proof -
   let ?C\<^sub>E = "InEnd(?C\<^sub>G,G,P)"
   let ?F\<^sub>E = "InEnd(F,G,P)"
   { fix b c d assume AS: "b\<in>End(G,P)" "c\<in>End(G,P)" "d\<in>End(G,P)"
-    with assms(1) have ig1: "?C\<^sub>G `\<langle>b, F ` \<langle>c, d\<rangle>\<rangle> = b O (F`\<langle>c,d\<rangle>)" 
+    with assms(1) have ig1: "?C\<^sub>G`\<langle>b,F`\<langle>c, d\<rangle>\<rangle> = b O (F`\<langle>c,d\<rangle>)" 
       using monoid.Group_ZF_2_1_L0 func_ZF_5_L2 unfolding End_def 
       by auto
     with AS have ig2: "F`\<langle>?C\<^sub>G`\<langle>b,c\<rangle>,?C\<^sub>G `\<langle>b,d\<rangle>\<rangle> = F`\<langle>b O c,b O d\<rangle>" 
@@ -222,6 +222,8 @@ sublocale abelian_group < endo_ring: ring0
   "\<lambda>x. InEnd(Composition(G),G,P)`\<langle>x, x\<rangle>"
   "\<lambda>s. Fold(InEnd(P {lifted to function space over} G,G,P), TheNeutralElement(End(G, P), InEnd(P {lifted to function space over} G,G,P)),s)"
   "\<lambda>n x. Fold(InEnd(P {lifted to function space over} G,G,P), TheNeutralElement(End(G, P), InEnd(P {lifted to function space over} G,G,P)),{\<langle>k,x\<rangle>. k\<in>n})"
+  "\<lambda>s. Fold(InEnd(Composition(G),G,P), TheNeutralElement(End(G, P), InEnd(Composition(G),G,P)),s)"
+  "\<lambda>n x. Fold(InEnd(Composition(G),G,P), TheNeutralElement(End(G, P), InEnd(Composition(G),G,P)),{\<langle>k,x\<rangle>. k\<in>n})"
   using end_is_ring unfolding ring0_def by blast
 
 subsection\<open>First isomorphism theorem\<close>

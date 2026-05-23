@@ -48,7 +48,7 @@ text\<open>A ring homomorphism is a function between rings which has the
   in the second ring. \<close>
 
 definition
-  "ringHomomor(f,R,A,M,S,U,V) \<equiv> f:R\<rightarrow>S \<and> IsMorphism(R,A,U,f) \<and> IsMorphism(R,M,V,f) 
+  "IsRingHomomor(f,R,A,M,S,U,V) \<equiv> f:R\<rightarrow>S \<and> IsMorphism(R,A,U,f) \<and> IsMorphism(R,M,V,f) 
   \<and> f`(TheNeutralElement(R,M)) = TheNeutralElement(S,V)"
 
 text\<open>The next locale defines notation which we will use in this theory.
@@ -61,7 +61,7 @@ locale ring_homo =
   fixes R A M S U V f
   assumes origin: "IsAring(R,A,M)" 
     and target: "IsAring(S,U,V)"
-    and homomorphism: "ringHomomor(f,R,A,M,S,U,V)"
+    and homomorphism: "IsRingHomomor(f,R,A,M,S,U,V)"
 
   fixes ringa (infixl "\<ra>\<^sub>R" 90)
   defines ringa_def [simp]: "x\<ra>\<^sub>Ry \<equiv> A`\<langle>x,y\<rangle>"
@@ -117,6 +117,12 @@ locale ring_homo =
   fixes rnat_mult (infix "\<nm>" 95)
   defines nat_mult_def [simp]: "n\<nm>x \<equiv> \<Sum>{\<langle>k,x\<rangle>. k\<in>n}"
 
+  fixes listprod ("\<Prod> _" 70)
+  defines listprod_def [simp]: "\<Prod>s \<equiv> Fold(M,\<one>\<^sub>R,s)"
+
+  fixes pow
+  defines pow_def [simp]: "pow(n,x) \<equiv> \<Prod>{\<langle>k,x\<rangle>. k\<in>n}"
+
 
 text\<open>We will write \<open>I\<triangleleft>R\<^sub>o\<close> to denote that $I$ is an ideal
   of the ring $R$. Note that in this notation the \<open>R\<^sub>o\<close> part by itself has no meaning,
@@ -159,21 +165,23 @@ sublocale ring_homo < target_ring:ring0 S U V ringas ringminuss
   ringsubs ringms ringzeros ringones ringtwos ringsqs
   "\<lambda>s. Fold(U,\<zero>\<^sub>S,s)"
   "\<lambda>n x. Fold(U,\<zero>\<^sub>S,{\<langle>k,x\<rangle>. k\<in>n})"
+  "\<lambda>s. Fold(V,\<one>\<^sub>S,s)"
+  "\<lambda>n x. Fold(V,\<one>\<^sub>S,{\<langle>k,x\<rangle>. k\<in>n})"
   using target unfolding ring0_def by auto
 
 text\<open>A ring homomorphism is a homomorphism both with respect to
   addition and multiplication.\<close>
 
-lemma ringHomHom: assumes "ringHomomor(f,R,A,M,S,U,V)"
+lemma ringHomHom: assumes "IsRingHomomor(f,R,A,M,S,U,V)"
   shows "Homomor(f,R,A,S,U)" and "Homomor(f,R,M,S,V)"
-  using assms unfolding ringHomomor_def Homomor_def 
+  using assms unfolding IsRingHomomor_def Homomor_def 
   by simp_all
 
 text\<open>Since in the \<open>ring_homo\<close> locale $f$ is a ring homomorphism it implies
   that $f$ is a function from $R$ to $S$. \<close>
 
 lemma (in ring_homo) f_is_fun: shows "f:R\<rightarrow>S"
-  using homomorphism unfolding ringHomomor_def by simp
+  using homomorphism unfolding IsRingHomomor_def by simp
 
 text\<open>In the \<open>ring_homo\<close> context $A$ is the addition in the first (source) ring
    $M$ is the multiplication there and $U,V$ are the addition and multiplication resp.
@@ -206,7 +214,7 @@ lemma (in ring_homo) homomor_dest_mult:
   assumes "x\<in>R" "y\<in>R"
   shows "f`(x\<cdot>\<^sub>Ry) = (f`(x))\<cdot>\<^sub>S(f`(y))"
   using assms origin target homomorphism 
-  unfolding ringHomomor_def IsMorphism_def by simp
+  unfolding IsRingHomomor_def IsMorphism_def by simp
 
 text\<open> As a ring homomorphism $f$ preserves addition. \<close>
 
@@ -214,14 +222,14 @@ lemma (in ring_homo) homomor_dest_add:
   assumes "x\<in>R" "y\<in>R"
   shows "f`(x\<ra>\<^sub>Ry) = (f`(x))\<ra>\<^sub>S(f`(y))"
   using homomor_eq origin target homomorphism assms
-  unfolding IsAring_def ringHomomor_def IsMorphism_def
+  unfolding IsAring_def IsRingHomomor_def IsMorphism_def
   by simp
 
 text\<open>For $x\in R$ the value of $f$ is in $S$.\<close>
 
 lemma (in ring_homo) homomor_val: assumes "x\<in>R"
   shows "f`(x) \<in> S" 
-  using homomorphism assms apply_funtype unfolding ringHomomor_def 
+  using homomorphism assms apply_funtype unfolding IsRingHomomor_def 
   by blast
 
 text\<open>A ring homomorphism preserves taking negative of an element.\<close>
@@ -285,9 +293,9 @@ proof -
   moreover
   { fix x y assume "x \<in> f-``(J)" "y\<in>R"
     from homomorphism have "f:R\<rightarrow>S"
-      unfolding ringHomomor_def by simp
+      unfolding IsRingHomomor_def by simp
     with \<open>x \<in> f-``(J)\<close> have "x\<in>R" and "f`(x) \<in> J"
-      using func1_1_L15 unfolding ringHomomor_def
+      using func1_1_L15 unfolding IsRingHomomor_def
       by simp_all
     with assms \<open>y\<in>R\<close> \<open>f:R\<rightarrow>S\<close> have 
       "V`\<langle>f`(x),f`(y)\<rangle> \<in> J" and "V`\<langle>f`(y),f`(x)\<rangle>\<in>J"
@@ -322,7 +330,7 @@ proof -
       by simp
     with origin_ring.ringAssum target_ring.ringAssum homomorphism assms
       have False using target_ring.ideal_with_one
-        unfolding target_ring.primeIdeal_def ringHomomor_def by auto
+        unfolding target_ring.primeIdeal_def IsRingHomomor_def by auto
   } thus "f-``(J) \<noteq> R" by blast
 qed
 
@@ -451,6 +459,8 @@ sublocale ring2 < quotient_ring: ring0 quot qadd qmul
   "\<zero>\<^sub>I" "\<one>\<^sub>I" "\<two>\<^sub>I" "\<lambda>x. (x\<^sup>2\<^sup>I)"
   "\<lambda>s. Fold(A\<^sub>I, \<zero>\<^sub>I, s)"
   "\<lambda>n x.  Fold(A\<^sub>I, \<zero>\<^sub>I, {\<langle>k, x\<rangle> . k \<in> n})"
+  "\<lambda>s. Fold(M\<^sub>I, \<one>\<^sub>I, s)"
+  "\<lambda>n x.  Fold(M\<^sub>I, \<one>\<^sub>I, {\<langle>k, x\<rangle> . k \<in> n})"
   using quotientBy_is_ring idealAssum neutral_quotient 
     one_quotient two_quotient
   unfolding ring0_def  ideal_radd_def ideal_rmin_def
@@ -462,11 +472,11 @@ text\<open>The quotient map is a homomorphism of rings. This is probably one of 
   from 10 facts and 5 definitions. \<close>
 
 theorem (in ring2) quotient_fun_homomor:
-  shows "ringHomomor(f\<^sub>I,R,A,M,R\<^sub>I,A\<^sub>I,M\<^sub>I)"
+  shows "IsRingHomomor(f\<^sub>I,R,A,M,R\<^sub>I,A\<^sub>I,M\<^sub>I)"
   using ringAssum idealAssum ideal_normal_add_subgroup add_group.quotient_map 
       Ring_ZF_1_L4(3) EquivClass_1_L10 Ring_ZF_1_L2(2) Group_ZF_2_2_L1 
       ideal_equiv_rel quotientBy_mul_monoid(1) QuotientBy_def
-  unfolding IsAring_def Homomor_def IsMorphism_def ringHomomor_def
+  unfolding IsAring_def Homomor_def IsMorphism_def IsRingHomomor_def
   by simp
 
 text\<open>The quotient map is surjective\<close>

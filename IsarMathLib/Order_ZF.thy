@@ -29,7 +29,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 section \<open>Order relations - introduction\<close>
 
-theory Order_ZF imports Fol1
+theory Order_ZF imports Fol1 ZF1
 
 begin
 
@@ -100,7 +100,7 @@ definition
 
 text\<open>We define a linear order as a binary relation that is antisymmetric, 
   transitive and total. Note that this terminology is different than the
-  one used the standard Order.thy file.\<close>
+  one used the standard Isabelle's \<open>Order.thy\<close> file.\<close>
 
 definition
   "IsLinOrder(X,r) \<equiv> antisym(r) \<and> trans(r) \<and> (r {is total on} X)"
@@ -111,12 +111,12 @@ text\<open>A set is bounded above if there is that is an upper
   In addition, the empty set is defined as bounded.\<close>
 
 definition
-  "IsBoundedAbove(A,r) \<equiv> ( A=0 \<or> (\<exists>u. \<forall>x\<in>A. \<langle>x,u\<rangle> \<in> r))"
+  "IsBoundedAbove(A,r) \<equiv> \<exists>u. \<forall>x\<in>A. \<langle>x,u\<rangle> \<in> r"
 
 text\<open>We define sets bounded below analogously.\<close>
 
 definition
-  "IsBoundedBelow(A,r) \<equiv> (A=0 \<or> (\<exists>l. \<forall>x\<in>A. \<langle>l,x\<rangle> \<in> r))"
+  "IsBoundedBelow(A,r) \<equiv> \<exists>l. \<forall>x\<in>A. \<langle>l,x\<rangle> \<in> r"
 
 text\<open>A set is bounded if it is bounded below and above.\<close>
 
@@ -164,33 +164,32 @@ definition
 
 text\<open>The supremum of a set $A$ is defined as the minimum of the set of
   upper bounds, i.e. the set 
-  $\{u.\forall_{a\in A} \langle a,u\rangle \in r\}=\bigcap_{a\in A} r\{a\}$. 
-   Recall that in Isabelle/ZF
-  \<open>r-``(A)\<close> denotes the inverse image of the set $A$ by relation $r$
-  (i.e. \<open>r-``(A)\<close>=$\{ x: \langle x,y\rangle\in r$ for some $y\in A\}$).\<close>
+  $\{u.\forall_{a\in A} \langle a,u\rangle \in r\}=\bigcap_{a\in A} r\{a\}$.\<close>
 
 definition
   "Supremum(r,A) \<equiv> Minimum(r,\<Inter>a\<in>A. r``{a})"
 
-text\<open> The notion of "having a supremum" is the same as the set of upper bounds having a
+text\<open>The notion of "having a supremum" is the same as the set of upper bounds having a
   minimum, but having it a a separate notion does simplify notation in some cases.
   The definition is written in terms of 
   images of singletons $\{ x\}$ under relation. To understand this formulation note
   that the set of upper bounds of a set $A\subseteq X$ is 
   $\bigcap_{x\in A}\{ y\in X | \langle x,y\rangle \in r \}$, which is the same
   as $\bigcap_{x\in A} r(\{ x \})$, where $r(\{ x \})$ is the image of the singleton $\{ x\}$ under
-  relation $r$. \<close>
+  relation $r$.\<close>
 
 definition
   "HasAsupremum(r,A) \<equiv> HasAminimum(r,\<Inter>a\<in>A. r``{a})"
 
-text\<open> The notion of "having an infimum" is the same as the set of lower bounds having a
-  maximum. \<close>
+text\<open>The notion of "having an infimum" is the same as the set of lower bounds having a
+  maximum.\<close>
 
 definition
   "HasAnInfimum(r,A) \<equiv> HasAmaximum(r,\<Inter>a\<in>A. r-``{a})"
 
-text\<open>Infimum is defined analogously.\<close>
+text\<open>Infimum is defined analogously. Recall that in Isabelle/ZF
+  \<open>r-``(A)\<close> denotes the inverse image of the set $A$ by relation $r$
+  (i.e. \<open>r-``(A)\<close>=$\{ x: \langle x,y\rangle\in r$ for some $y\in A\}$)\<close>
 
 definition
   "Infimum(r,A) \<equiv> Maximum(r,\<Inter>a\<in>A. r-``{a})"
@@ -210,11 +209,35 @@ text\<open>Normally the "$\subseteq$" does not represent a relation, but it does
 definition 
   "InclusionOn(X) \<equiv> {p\<in>X\<times>X. fst(p) \<subseteq> snd(p)}"
 
-text\<open>Inclusion relation is a partial order on the powerset of $X$.\<close>
+text\<open>The way we define \<open>IsBoundedAbove\<close> and \<open>IsBoundedBelow\<close> predicates
+   the empty set is bounded above and below.\<close>
 
-lemma incl_is_partorder: shows "IsPartOrder(X,InclusionOn(X))"
-  unfolding InclusionOn_def IsPartOrder_def refl_def antisym_def trans_def
-  by auto
+lemma empty_bounded_above_below: 
+  shows "IsBoundedAbove(\<emptyset>,r)" "IsBoundedBelow(\<emptyset>,r)"
+  unfolding IsBoundedAbove_def IsBoundedBelow_def by simp_all
+
+text\<open>The most common way of applying the boundedness: if $r$ as a relation on $X$ 
+  and a set $A$ is not empty and bounded above then there exist $u\in X$ which is
+  an upper bound of $A$.\<close>
+
+lemma bounded_above: assumes "r\<subseteq>X\<times>X" "A\<noteq>\<emptyset>" "IsBoundedAbove(A,r)"
+  shows "\<exists>u\<in>X. \<forall>x\<in>A. \<langle>x,u\<rangle> \<in> r"
+  using assms unfolding IsBoundedAbove_def by blast
+
+text\<open>A dual for \<open>bounded_above\<close>:  if $r$ as a relation on $X$ 
+  and a set $A$ is not empty and bounded below then there exist $u\in X$ which is
+  an lower bound of $A$. \<close>
+
+lemma bounded_below: assumes "r\<subseteq>X\<times>X" "A\<noteq>\<emptyset>" "IsBoundedBelow(A,r)"
+  shows "\<exists>u\<in>X. \<forall>x\<in>A. \<langle>u,x\<rangle> \<in> r"
+  using assms unfolding IsBoundedBelow_def by blast
+
+text\<open>Inclusion relation is a partial order hence a preorder on the powerset of $X$.\<close>
+
+lemma incl_is_partorder: 
+  shows "IsPartOrder(X,InclusionOn(X))" and "IsPreorder(X,InclusionOn(X))"
+  unfolding InclusionOn_def IsPartOrder_def IsPreorder_def 
+    refl_def antisym_def trans_def by auto
 
 text\<open>If a relation down-directs a set, then a larger one does as well.\<close>
 

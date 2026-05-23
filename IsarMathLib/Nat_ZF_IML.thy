@@ -2,7 +2,7 @@
     This file is a part of IsarMathLib - 
     a library of formalized mathematics for Isabelle/Isar.
 
-    Copyright (C) 2005 - 2023  Slawomir Kolodynski
+    Copyright (C) 2005 - 2025  Slawomir Kolodynski
 
     This program is free software Redistribution and use in source and binary forms, 
     with or without modification, are permitted provided that the following conditions are met:
@@ -116,7 +116,7 @@ proof -
 qed
 
 text\<open>Various forms of saying that for natural numbers taking the successor 
-  is the same as adding one. \<close>
+  is the same as adding one, also a natural number is a subset of its successor. \<close>
 
 lemma succ_add_one: assumes "n\<in>nat" 
   shows 
@@ -137,6 +137,12 @@ proof -
   from assms \<open>n #+ 1 = succ(n)\<close> show "n \<subseteq> n #+ 1" using succ_explained
     by auto
 qed
+
+text\<open>If a property is true of $n=0$ and for all natural numbers $n+1$ then it is true for all
+  natural numbers.\<close>
+
+lemma zero_pos_all: assumes "\<phi>(0)" and "\<forall>m\<in>nat. \<phi>(m #+ 1)" "n\<in>nat"
+  shows "\<phi>(n)" using assms Nat_ZF_1_L3 succ_add_one(1) by auto
 
 text\<open>A more direct way of stating that empty set is an element of every non-zero natural number:\<close>
 
@@ -209,6 +215,26 @@ proof -
   ultimately show "i \<subseteq> j \<or> j \<subseteq> i" by auto
 qed
 
+text\<open>For natural numbers $i,j$ if $i\subseteq j$ then $i=j$ or $i\in j$.\<close>
+
+lemma nat_incl_mem_eq: assumes "i\<in>nat" "j\<in>nat" "i\<subseteq>j"
+  shows "i\<in>j \<or> i=j"
+proof - 
+  from assms(1,2) have "Ord(i)" and "Ord(j)" using nat_into_Ord by simp_all
+  with assms(3) show "i\<in>j \<or> i=j" using subset_imp_le le_iff
+    unfolding lt_def by auto
+qed
+
+text\<open>If two natural numbers are different then one of them is less than the other.\<close>
+
+lemma nat_mem_total: assumes "i \<in> nat"  "j \<in> nat" "i\<noteq>j"
+  shows "i < j \<or> j < i"
+proof -
+  from assms(1,2) have "Ord(i)" "Ord(j)" "i \<subseteq> j \<or> j \<subseteq> i"
+    using nat_into_Ord nat_incl_total by simp_all
+  with assms(3) show ?thesis using subset_imp_le le_iff by blast
+qed
+
 text\<open>The set of natural numbers is the union of all successors of natural
   numbers.\<close>
 
@@ -233,6 +259,11 @@ proof -
   from A1 have "succ(n) \<subseteq> (\<Union>n \<in> nat. succ(n))" by auto
   then show "succ(n) \<subseteq> nat" using nat_union_succ by simp
 qed
+
+text\<open>A natural number is a subset of the set natural numbers. Weird, but true.\<close>
+
+lemma nat_subset_nat: assumes "n\<in>nat" shows "n\<subseteq>nat"
+  using assms succ_explained succnat_subset_nat by auto
 
 text\<open>Element $k$ of a natural number $n$ is a natural number that is smaller than $n$.\<close>
 
@@ -262,14 +293,47 @@ lemma nat_mem_lt: assumes "n\<in>nat"
   shows "k<n \<longleftrightarrow> k\<in>n" and "k\<le>n \<longleftrightarrow> k \<in> succ(n)"
   using assms nat_into_Ord Ord_mem_iff_lt by auto
 
+text\<open>If $n$ is a natural number and $k < n$ then $k+1\leq n$.\<close>
+
+lemma nat_less_succ_leq: assumes "n\<in>nat" and "k < n"
+  shows "k #+ 1 \<le> n"
+proof -
+  from assms have "k #+ 1 \<in> succ(n)"
+    using succ_ineq1(2) nat_mem_lt(1) succ_add_one(1) by simp
+  with assms(1) show "k #+ 1 \<le> n" using nat_mem_lt(2) by auto
+qed
+  
+
 text\<open>If $n$ is a natural number and $k\leq n$, then k is a natural number.\<close>
 
 lemma leq_nat_is_nat: assumes "n\<in>nat" "k\<le>n" shows "k\<in>nat"
   using assms nat_mem_lt elem_nat_is_nat(2) by auto
+
+text\<open>For natural numbers $k\leq n$ is the same as $k\subseteq n$.\<close>
+
+lemma nat_leq_subset_iff: assumes "k\<in>nat" "n\<in>nat" 
+  shows "k\<le>n \<longleftrightarrow> k\<subseteq>n" using assms nat_into_Ord le_subset_iff by simp
   
 text\<open>The term $k \leq n$ is the same as $k < \textrm{succ}(n)$.  \<close>
 
 lemma leq_mem_succ: shows "k\<le>n \<longleftrightarrow> k < succ(n)" by simp
+
+text\<open>A natural number $n$ is smaller than $n+1$.\<close>
+
+lemma nat_less_add_one: assumes "n\<in>nat" 
+  shows "n < n #+ 1" and "n \<in> n #+ 1"
+  using assms nat_into_Ord le_refl_iff leq_mem_succ succ_add_one(1)
+  by simp_all
+
+text\<open>If $n$ and $k$ are natural numbers and $k + 1\in n$ then also $k < n$, hence $k\in n$.\<close>
+
+lemma succ_mem_mem: assumes "n\<in>nat" "k\<in>nat" "k #+ 1 \<in> n"
+  shows "k < n" and "k\<in>n"
+proof -
+  from assms(2) have "k\<le>k #+ 1" using leI nat_less_add_one(1) by simp
+  with assms show "k < n" using nat_mem_lt(1)  lt_trans1 by blast
+  with assms(1) show "k\<in>n" using nat_mem_lt(1) by simp
+qed
 
 text\<open>If the successor of a natural number $k$ is an element of the successor
   of $n$ then a similar relations holds for the numbers themselves.\<close>
@@ -284,14 +348,6 @@ text\<open>The set of natural numbers is the union of its elements.\<close>
 
 lemma nat_union_nat: shows "nat = \<Union> nat"
   using elem_nat_is_nat by blast
-
-text\<open>A natural number is a subset of the set of natural numbers.\<close>
-
-lemma nat_subset_nat: assumes A1: "n \<in> nat" shows "n \<subseteq> nat"
-proof -
-  from A1 have "n \<subseteq> \<Union> nat" by auto
-  then show "n \<subseteq> nat" using nat_union_nat by simp
-qed
 
 text\<open>Adding natural numbers does not decrease what we add to.\<close>
 
@@ -406,15 +462,15 @@ qed
 text\<open>For non-zero natural numbers $\textrm{pred}(n) = n-1$.\<close>
 
 lemma pred_minus_one: assumes "n\<in>nat" "n\<noteq>0" 
-  shows "n #- 1 = pred(n)"
+  shows "n #- 1 = pred(n)" and "n #- 1 \<in> n"
 proof -
   from assms obtain k where "n=succ(k)" 
     using Nat_ZF_1_L3 by blast
-  with assms show ?thesis
-    using pred_succ_eq eq_succ_imp_eq_m1 by simp
+  with assms show "n #- 1 = pred(n)" and "n #- 1 \<in> n"
+    using pred_succ_eq eq_succ_imp_eq_m1 pred_succ_mem by simp_all
 qed
 
-text\<open>For natural numbers if $j\in n$ then $j+1 \subseteq n$.\<close>
+text\<open>For natural numbers if $k\in n$ then $k+1 \subseteq n$.\<close>
 
 lemma mem_add_one_subset: assumes "n \<in> nat" "k\<in>n" shows "k #+ 1 \<subseteq> n"
 proof -
@@ -442,7 +498,7 @@ lemma nat_not0_succ: assumes "n\<in>nat" "n\<noteq>0"
   using assms Nat_ZF_1_L3 succ_add_one(1) by simp
   
 text\<open>A version of induction on natural numbers that uses the $n+1$ notation
-  instead of $\<open>succ(n)\<close>$.\<close>
+  instead of \<open>succ(n)\<close>.\<close>
 
 lemma ind_on_nat1: 
   assumes "n\<in>nat" and "P(0)" and "\<forall>k\<in>nat. P(k)\<longrightarrow>P(k #+ 1)"
@@ -463,6 +519,7 @@ proof -
   } thus "\<forall>k\<in>n #+ 1. P(k)" by simp
   with assms(1) show "P(n)" by simp
 qed
+
 
 subsection\<open>Simplification rules for addition and subtraction of natural numbers\<close>
 
@@ -490,7 +547,18 @@ proof -
   with \<open>n = m #+ 1\<close> show ?thesis using diff_cancel2 by simp
 qed
 
-text\<open>If $k$ is a natural number then $n+k = n + ((n+k) \#- n))$. \<close>
+text\<open>A special case of \<open>nat_subtr_simpl0\<close> when $k=0$:
+  if $n$ is a non-zero natural number then $(n-1)+1=n$.\<close>
+
+lemma nat_subtr_add1: assumes "n\<in>nat" "n\<noteq>0"
+  shows "(n #- 1) #+ 1 = n"
+proof -
+  from assms have "n #- (0 #+ 1) #+ 1 = n #- 0"
+    using empty_in_non_empty nat_subtr_simpl0 by blast
+  with assms(1) show "(n #- 1) #+ 1 = n" by simp
+qed
+
+text\<open>If $k$ is a natural number then $n+k = n + ((n+k) - n))$. \<close>
 
 lemma nat_subtr_simpl1: assumes "k\<in>nat" 
   shows  "n #+ ((n #+ k) #- n) = n #+ k"

@@ -149,21 +149,27 @@ proof -
     then show ?thesis by auto
 qed
 
-text\<open>The inverse image of the range is the domain.\<close>
+text\<open>The inverse image of the codomain is the domain.\<close>
 
 lemma func1_1_L4: assumes "f:X\<rightarrow>Y" shows "f-``(Y) = X"
   using assms func1_1_L3 func1_1_L2 vimage_iff by blast
 
-text\<open>The arguments belongs to the domain and values to the range.\<close>
+text\<open>The arguments belongs to the domain and values to the codomain.\<close>
 
 lemma func1_1_L5: 
-  assumes A1: "\<langle> x,y\<rangle> \<in> f" and A2: "f:X\<rightarrow>Y"  
+  assumes A1: "\<langle>x,y\<rangle> \<in> f" and A2: "f:X\<rightarrow>Y"  
   shows "x\<in>X \<and> y\<in>Y" 
 proof
   from A1 A2 show "x\<in>X" using apply_iff by simp
-  with A2 have "f`(x)\<in> Y" using apply_type by simp
+  with A2 have "f`(x)\<in>Y" using apply_type by simp
   with A1 A2 show "y\<in>Y" using apply_iff by simp
 qed
+
+text\<open>Range of a union is the same as union of ranges. The standard Isabelle/ZF library
+  proves analogous fact for domains (see \<open>domain_Union\<close> in the \<open>equalities\<close> theory). \<close>
+
+lemma range_Union: shows "range(\<Union>A) = (\<Union>x\<in>A. range(x))"
+  by blast
 
 text\<open>Function is a subset of cartesian product.\<close>
 
@@ -223,7 +229,7 @@ lemma func1_1_L5B:
   assumes  A1: "f:X\<rightarrow>Y" shows "range(f) \<subseteq> Y"
 proof
   fix y assume "y \<in> range(f)"
-  then obtain x where "\<langle> x,y\<rangle> \<in> f"
+  then obtain x where "\<langle>x,y\<rangle> \<in> f"
     using range_def converse_def domain_def by auto
   with A1 show "y\<in>Y" using func1_1_L5 by blast
 qed
@@ -580,6 +586,11 @@ text\<open>If the inverse image of a set is not empty, then the set is not empty
 
 lemma func1_1_L13: assumes A1:"f-``(A) \<noteq> \<emptyset>" shows "A\<noteq>\<emptyset>"
   using assms by auto
+
+text\<open>If a function is not empty (as a set of pairs) then its domain is not empty.\<close>
+
+lemma fun_nempty_domain: assumes "f:X\<rightarrow>Y" "p\<in>f" shows "X\<noteq>\<emptyset>"
+  using assms fun_is_set_of_pairs by auto
 
 text\<open>If the image of a set is not empty, then the set is not empty.
   Proof by contradiction.\<close>
@@ -1028,8 +1039,18 @@ text\<open>Standard Isabelle/ZF defines the notion \<open>restrict(f,A)\<close>
   of to mean a function (or relation) $f$ restricted to a set.
   This means that if $f$ is a function defined on $X$ and $A$
   is a subset of $X$ then \<open>restrict(f,A)\<close> is a function 
-  whith the same values as $f$, but whose domain is $A$.\<close>
- 
+  with the same values as $f$, but whose domain is $A$.\<close>
+
+text\<open>Restriction of a restriction to a subset is the same as the direct restriction to that
+  subset.\<close>
+
+lemma restrict_restric_subset: assumes "A\<subseteq>B" 
+  shows "restrict(restrict(f,B),A) = restrict(f,A)"
+proof -
+  from assms have "B\<inter>A = A" by auto
+  then show ?thesis using restrict_restrict by simp
+qed
+
 text\<open>What is the inverse image of a set under a restricted fuction?\<close>
 
 lemma func1_2_L1: assumes A1: "f:X\<rightarrow>Y" and A2: "B\<subseteq>X"
@@ -1066,13 +1087,58 @@ proof
   from A4 show "g \<subseteq> restrict(f, A)" using restrict_iff by auto
   show "restrict(f, A) \<subseteq> g"
   proof
-    fix z assume A5:"z \<in> restrict(f,A)"
-    then obtain x y where D1:"z\<in>f \<and> x\<in>A  \<and> z = \<langle>x,y\<rangle>"
+    fix z assume A5: "z \<in> restrict(f,A)"
+    then obtain x y where D1: "z\<in>f \<and> x\<in>A  \<and> z = \<langle>x,y\<rangle>"
       using restrict_iff by auto
     with A1 have "y = f`(x)" using apply_iff by auto
     with A1 A2 A3 A4 D1 have "y = g`(x)" using func1_2_L2 by simp
     with A2 D1 show "z\<in>g" using apply_Pair by simp
   qed
+qed
+
+text\<open>Another criterion for when one function is a restriction of another:
+  If a a function $f$ maps $X$ to $Y$ and function $g$ maps a subset
+  $A$ of $X$ to $Y$ and $g\subseteq f$ then $g$ is equal to $f$ restricted to $A$
+  (i.e. $g=f|_A$).\<close>
+
+lemma fun_restrict_eq: 
+  assumes "f:X\<rightarrow>Y" "g:A\<rightarrow>Z" "A\<subseteq>X" and "g\<subseteq>f"
+  shows "g = restrict(f,A)"
+proof -
+  from assms(2,4) have "g \<subseteq> f \<inter> A\<times>Z" using fun_subset_prod by blast
+  { fix p assume "p \<in> f \<inter> A\<times>Z"
+    then obtain x y where "p = \<langle>x,y\<rangle>" "x\<in>A" "y\<in>Z" "\<langle>x,y\<rangle> \<in> f" by auto
+    from assms(2,4) \<open>x\<in>A\<close> have "\<langle>x,g`(x)\<rangle> \<in> f"
+      using func1_1_L5A(1) by auto
+    with assms(1) \<open>\<langle>x,y\<rangle> \<in> f\<close> have "g`(x) = y" using pair_fun_member(2)
+      by blast
+    with assms(2) \<open>x\<in>A\<close> \<open>p = \<langle>x,y\<rangle>\<close> have "p\<in>g"
+      using func1_1_L5A(1) by auto
+  }
+  with \<open>g \<subseteq> f \<inter> A\<times>Z\<close> have "g = f \<inter> A\<times>Z" by auto
+  with assms(1,2,3) show "g = restrict(f,A)" using func1_2_L3
+    by simp
+qed
+
+text\<open>Yet another criterion for when one function is a restriction of another:
+  If the domain of a function $g$ is contained in the domain of function $f$
+  and the values of both functions agree on the domain of $g$, then $g$ is the restriction
+  of $f$ to the domain on $g$.\<close>
+
+lemma fun_restrict_eq_vals: 
+  assumes "f:X\<rightarrow>Y" "g:A\<rightarrow>Z" "A\<subseteq>X" and "\<forall>x\<in>A. g`(x) = f`(x)"
+  shows "g = restrict(f,A)"
+proof -
+  { fix p assume "p\<in>g"
+    with assms(2) have "p\<in>{\<langle>x,g`(x)\<rangle>. x\<in>A}"
+      using fun_is_set_of_pairs by simp
+    then obtain x where "x\<in>A" and "p = \<langle>x,g`(x)\<rangle>"
+      by auto
+    with assms(1,3,4) have "p\<in>f" using func1_1_L5A(1) 
+      by auto
+  } hence "g\<subseteq>f" by auto
+  with assms(1,2,3) show "g = restrict(f,A)" using fun_restrict_eq
+    by simp
 qed
 
 text\<open>Which function space a restricted function belongs to?\<close>
@@ -1148,6 +1214,49 @@ proof -
     by simp
   ultimately show "g O f = restrict(g,B) O f"
     by (rule func_eq)
+qed
+
+text\<open>A version of lemma \<open>comp_fun_apply\<close> from the standard Isabelle/ZF \<open>Perm\<close> theory
+  but for functions defined as a set of pairs using an expression.\<close>
+
+lemma comp_fun_expr_apply: assumes "\<forall>x\<in>X. a(x)\<in>Y" "x\<in>X"
+  shows "(g O {\<langle>x,a(x)\<rangle>. x\<in>X})`(x) = g`(a(x))"
+proof -
+  from assms(1) have "{\<langle>x,a(x)\<rangle>. x\<in>X}:X\<rightarrow>Y" using ZF_fun_from_total by simp
+  with assms(2) show ?thesis using comp_fun_apply ZF_fun_from_tot_val1
+    by simp
+qed
+
+text\<open>Value of a composition of functions defined by expressions is given by 
+  composition of the expressions.\<close>
+
+lemma comp_fun_expr_val: 
+  assumes "\<forall>x\<in>X. a(x) \<in> Y" "x\<in>X"
+  shows "({\<langle>y,b(y)\<rangle>. y\<in>Y} O {\<langle>x,a(x)\<rangle>. x\<in>X})`(x) = b(a(x))"
+proof -
+  let ?f = "{\<langle>x,a(x)\<rangle>. x\<in>X}"
+  let ?g = "{\<langle>y,b(y)\<rangle>. y\<in>Y}"
+  from assms have "(?g O ?f)`(x) = ?g`(a(x))"
+    by (rule comp_fun_expr_apply)
+  with assms show ?thesis using ZF_fun_from_tot_val2 by simp
+qed
+
+text\<open>Composition of function defined by expressions is a function defined by
+  composition of the expressions.\<close>
+
+lemma comp_fun_expr: assumes "\<forall>x\<in>X. a(x)\<in>Y" "\<forall>y\<in>Y. b(y)\<in>Z"
+  shows "{\<langle>y,b(y)\<rangle>. y\<in>Y} O {\<langle>x,a(x)\<rangle>. x\<in>X} = {\<langle>x,b(a(x))\<rangle>. x\<in>X}"
+proof -
+  let ?f = "{\<langle>x,a(x)\<rangle>. x\<in>X}"
+  let ?g = "{\<langle>y,b(y)\<rangle>. y\<in>Y}"
+  let ?h = "{\<langle>x,b(a(x))\<rangle>. x\<in>X}"
+  from assms have "?f:X\<rightarrow>Y" and "?g:Y\<rightarrow>Z"
+    using ZF_fun_from_total by simp_all
+  then have "?g O ?f:X\<rightarrow>Z" using comp_fun_subset by simp
+  moreover from assms have "?h:X\<rightarrow>Z" using ZF_fun_from_total by simp
+  moreover from assms(1) have "\<forall>x\<in>X. (?g O ?f)`(x) = ?h`(x)"
+    using comp_fun_expr_val ZF_fun_from_tot_val1 by simp
+  ultimately show "?g O ?f = ?h" by (rule func_eq)
 qed
 
 text\<open>A way to look at restriction. Contributed by Victor Porton.\<close>
@@ -1527,6 +1636,16 @@ proof -
   from assms have "f \<in> surj(A,range(f))" using inj_def fun_is_surj
     by auto
   with assms show ?thesis using inj_inj_range bij_def by simp
+qed
+
+text\<open>An injection is a bijection between the domain and its image.\<close>
+
+lemma inj_bij_image: assumes "f \<in> inj(A,B)"
+  shows "f \<in> bij(A,f``(A))"
+proof -
+  from assms have "f:A\<rightarrow>B" unfolding inj_def by simp
+  with assms show ?thesis using inj_bij_range range_image_domain 
+    by simp
 qed
   
 text\<open>A lemma about extending a surjection by one point.\<close>

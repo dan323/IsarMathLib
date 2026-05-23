@@ -1,4 +1,4 @@
-(* 
+ (* 
     This file is a part of IsarMathLib - 
     a library of formalized mathematics written for Isabelle/Isar.
 
@@ -55,6 +55,17 @@ text\<open>A set cannot be a member of itself. This is exactly lemma \<open>mem_
   from Isabelle/ZF \<open>upair.thy\<close>, we put it here for easy reference. \<close>
 
 lemma mem_self: shows "x\<notin>x" by (rule mem_not_refl)
+
+text\<open>If we remove an element and put it back we get the set back.\<close>
+
+lemma rem_add_eq: assumes "a\<in>A" shows "(A\<setminus>{a}) \<union> {a} = A"
+  using assms by auto
+
+text\<open>Applying a transformation to equal values yields equal results..
+  It is surprising but we do have to use this as a rule in rare cases.\<close>
+
+lemma same_constr: assumes "x=y" shows "P(x) = P(y)"
+  using assms by simp
 
 text\<open>If one collection is contained in another, then we can say the same
   about their unions.\<close>
@@ -478,12 +489,43 @@ proof
     by blast
 qed 
 
+text\<open>Composition of reflexive relations is reflexive.\<close>
+
+lemma refl_comp_refl: 
+  assumes "U \<subseteq> X\<times>X" "id(X) \<subseteq> U" "V \<subseteq> X\<times>X" "id(X) \<subseteq> V"
+  shows "id(X) \<subseteq> U O V" using assms by blast
+
 text\<open>Square of a reflexive relation contains the relation.
   Recall that in ZF the identity function on $X$ is the same as the diagonal
-  of $X\times X$, i.e. $id(X) = \{\langle x,x\rangle : x\in X\}$. \<close>
+  of $X\times X$, i.e. $id(X) = \{\langle x,x\rangle : x\in X\}$ 
+  (see also lemma \<open>id_diagonal\<close> in \<open>func_ZF\<close> theory). \<close>
 
 lemma refl_square_greater: assumes "r \<subseteq> X\<times>X" "id(X) \<subseteq> r"
-  shows "r \<subseteq> r O r" using assms by auto
+  shows "r \<subseteq> r O r" using assms by blast
+
+text\<open>The cube of a reflexive relation contains the relation.\<close>
+
+lemma refl_cube_greater: assumes "r \<subseteq> X\<times>X" "id(X) \<subseteq> r"
+  shows "r \<subseteq> r O r O r" using assms by blast 
+
+text\<open>The cube of a reflexive relation contains the square of the relation.\<close>
+
+lemma refl_cube_greater_square: assumes "r \<subseteq> X\<times>X" "id(X) \<subseteq> r"
+  shows "r O r \<subseteq> r O r O r" using assms by blast
+
+text\<open>Composition of two reflexive relations is reflexive and greater than each of them.
+  In particular this implies that if $V\subseteq X\times X$ is a reflexive relation
+  then repeatedly composing it with itself forms a sequence of reflexive 
+  relations that is increasing in the inclusion order. 
+  It's not proven here, but we may prove that one day.\<close>
+
+lemma refl_comp_greater_inter: 
+  assumes "U \<subseteq> X\<times>X" "id(X) \<subseteq> U" "V \<subseteq> X\<times>X" "id(X) \<subseteq> V"
+  shows "id(X) \<subseteq> U O V" and "U\<inter>V \<subseteq> U O V" 
+proof -
+  from assms show "U\<inter>V \<subseteq> U O V" by auto
+  with assms(2,4) show "id(X) \<subseteq> U O V" by blast
+qed
 
 text\<open>A reflexive relation is contained in the union of products of its singleton images. \<close>
 
@@ -530,10 +572,10 @@ lemma set_mem_eq: assumes "x\<in>A" "A=B" shows "x\<in>B" using assms by simp
 text\<open>Given some family $\mathcal{A}$ of subsets of $X$ we can define the family of supersets of
   $\mathcal{A}$. \<close>
 
-definition
-  "Supersets(X,\<A>) \<equiv> {B\<in>Pow(X). \<exists>A\<in>\<A>. A\<subseteq>B}"
+definition "Supersets(X,\<A>) \<equiv> {B\<in>Pow(X). \<exists>A\<in>\<A>. A\<subseteq>B}"
 
-text\<open>The family itself is in its supersets. \<close>
+text\<open>If $A$ is a member of a collection of sets $\mathcal{A}$ then it is one of
+  supersets of $\mathcal{A}$.\<close>
 
 lemma superset_gen: assumes "A\<subseteq>X" "A\<in>\<A>" shows "A \<in> Supersets(X,\<A>)"
   using assms unfolding Supersets_def by auto 
