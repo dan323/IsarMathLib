@@ -3504,7 +3504,7 @@ proof-
   have wfieldD1:"\<langle>w,s01\<rangle>\<in>field(?rD1)"
     using wNE s01S1 DetFinStateAuto.reduce_field(2)
     unfolding DetFinStateAuto_def using A1 fin by blast
-  \<comment> \<open>Enriched predicate: tracks A1 state and for every A2 state records case_a/case_b.\<close>
+  \<comment> \<open>Enriched predicate: tracks A1 state and for every A2 state records \<open>case_a/case_b\<close>.\<close>
   let ?case_a = "\<lambda>q2' v'. \<exists>yl_k\<in>NELists(\<Sigma>). \<exists>f1\<in>F1.
       \<langle>\<langle>w,s01\<rangle>,\<langle>yl_k,f1\<rangle>\<rangle>\<in>?rD1^* \<and> \<langle>\<langle>yl_k,s02\<rangle>,\<langle>v',q2'\<rangle>\<rangle>\<in>?rD2^*"
   let ?case_b = "\<lambda>q2' v'. q2'=s02 \<and> (\<exists>f1\<in>F1. \<langle>\<langle>w,s01\<rangle>,\<langle>v',f1\<rangle>\<rangle>\<in>?rD1^*)"
