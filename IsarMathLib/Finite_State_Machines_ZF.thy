@@ -3880,7 +3880,12 @@ proof-
                 assume "jl\<noteq>0"
                 from jl_L obtain m where m:"m\<in>nat" "jl:m\<rightarrow>\<Sigma>"
                   unfolding Lists_def by auto
-                from m(1) \<open>jl\<noteq>0\<close> obtain p where p:"p\<in>nat" "m=succ(p)"
+                  {
+                    assume "m=0"
+                    with m(2) have "jl=0" by auto
+                    with \<open>jl\<noteq>0\<close> have False by auto
+                  }
+                with m(1) obtain p where p:"p\<in>nat" "m=succ(p)"
                   using Nat_ZF_1_L3 by auto
                 with m(2) have jlNE:"jl\<in>NELists(\<Sigma>)"
                   unfolding NELists_def using p(1) by auto
